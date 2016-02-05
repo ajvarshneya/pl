@@ -4,7 +4,6 @@
 %options flex
 %%
 
-
 \s+										{/* white space */}		/* White space */
 \"((?:[^\\\n]|\\.)*?)\"					{return 'string';}		/* Quoted strings */
 "<-"									{return 'larrow';}		/* Multi char operators */
@@ -65,59 +64,19 @@ exprs
 	;
 
 expr
-	: regular
-	;
+	: string 		{
+						if($1.indexOf('\0') != -1)	{
+							console.log("ERROR: " + @1.first_line + ": " + "Lexer: String contains ASCII 0.");
+						} else {
+							console.log(@1.first_line);
+					 		console.log('string');
+							console.log($1.substring(1, $1.length-1));
+						}
+					}
 
-regular
-	: at 			{console.log(@1.first_line);
-					 console.log('at');}
-
-	| case 			{console.log(@1.first_line);
-					 console.log('case');}
-
-	| class			{console.log(@1.first_line);
-					 console.log('class');}
-
-	| colon			{console.log(@1.first_line);
-					 console.log('colon');}
-
-	| comma			{console.log(@1.first_line);
-					 console.log('comma');}
-
-	| divide		{console.log(@1.first_line);
-					 console.log('divide');}
-
-	| dot			{console.log(@1.first_line);
-					 console.log('dot');}
-
-	| else			{console.log(@1.first_line);
-					 console.log('else');}
-
-	| equals		{console.log(@1.first_line);
-					 console.log('equals');}
-
-	| esac			{console.log(@1.first_line);
-					 console.log('esac');}
-
-	| false			{console.log(@1.first_line);
-					 console.log('false');}
-
-	| fi			{console.log(@1.first_line);
-					 console.log('fi');}
-
-	| identifier	{console.log(@1.first_line);
-					 console.log('identifier');
-					 console.log($1);}
-
-	| if			{console.log(@1.first_line);
-					 console.log('if');}
-
-	| in			{console.log(@1.first_line);
-					 console.log('in');}
-
-	| inherits		{console.log(@1.first_line);
-					 console.log('inherits');}
-
+	| operator 
+	| keyword 
+	| boolean
 	| integer		{
 						if($1 < 2147483647) {
 							console.log(@1.first_line);
@@ -128,90 +87,60 @@ regular
 						}
 					}
 
-
-	| isvoid		{console.log(@1.first_line);
-					 console.log('isvoid');}
-
-	| larrow		{console.log(@1.first_line);
-					 console.log('larrow');}
-
-	| lbrace		{console.log(@1.first_line);
-					 console.log('lbrace');}
-
-	| le			{console.log(@1.first_line);
-					 console.log('le');}
-
-	| let			{console.log(@1.first_line);
-					 console.log('let');}
-
-	| loop			{console.log(@1.first_line);
-					 console.log('loop');}
-
-	| lparen		{console.log(@1.first_line);
-					 console.log('lparen');}
-
-	| lt			{console.log(@1.first_line);
-					 console.log('lt');}
-
-	| minus			{console.log(@1.first_line);
-					 console.log('minus');}
-
-	| new			{console.log(@1.first_line);
-					 console.log('new');}
-
-	| not			{console.log(@1.first_line);
-					 console.log('not');}
-
-	| of			{console.log(@1.first_line);
-					 console.log('of');}
-
-	| plus			{console.log(@1.first_line);
-					 console.log('plus');}
-
-	| pool			{console.log(@1.first_line);
-					 console.log('pool');}
-
-	| rarrow		{console.log(@1.first_line);
-					 console.log('rarrow');}
-
-	| rbrace		{console.log(@1.first_line);
-					 console.log('rbrace');}
-
-	| rparen		{console.log(@1.first_line);
-					 console.log('rparen');}
-
-	| semi			{console.log(@1.first_line);
-					 console.log('semi');}
-
-	| string		{
-						if($1.indexOf('\0') != -1)	{
-							console.log("ERROR: " + @1.first_line + ": " + "Lexer: String contains ASCII 0.");
-						} else {
-							console.log(@1.first_line);
-					 		console.log('string');
-							console.log($1.substring(1, $1.length-1));
-						}
-					}
-
-	| then			{console.log(@1.first_line);
-					 console.log('then');}
-
-	| tilde			{console.log(@1.first_line);
-					 console.log('tilde');}
-
-	| times			{console.log(@1.first_line);
-					 console.log('times');}
-
-	| true			{console.log(@1.first_line);
-					 console.log('true');}
-
 	| type			{console.log(@1.first_line);
 					 console.log('type');
 					 console.log($1);}
 
-	| while			{console.log(@1.first_line);
-					 console.log('while');}
+	| identifier	{console.log(@1.first_line);
+					 console.log('identifier');
+					 console.log($1);}
+	;
 
+operator
+	: larrow		{console.log(@1.first_line); console.log('larrow');}
+	| le			{console.log(@1.first_line); console.log('le');}
+	| rarrow		{console.log(@1.first_line); console.log('rarrow');}
+	| at 			{console.log(@1.first_line); console.log('at');}
+	| colon			{console.log(@1.first_line); console.log('colon');}
+	| comma			{console.log(@1.first_line); console.log('comma');}
+	| divide		{console.log(@1.first_line); console.log('divide');}
+	| dot			{console.log(@1.first_line); console.log('dot');}
+	| lbrace		{console.log(@1.first_line); console.log('lbrace');}
+	| lparen		{console.log(@1.first_line); console.log('lparen');}
+	| lt			{console.log(@1.first_line); console.log('lt');}
+	| minus			{console.log(@1.first_line); console.log('minus');}
+	| plus			{console.log(@1.first_line); console.log('plus');}
+	| equals		{console.log(@1.first_line); console.log('equals');}
+	| rbrace		{console.log(@1.first_line); console.log('rbrace');}
+	| rparen		{console.log(@1.first_line); console.log('rparen');}
+	| semi			{console.log(@1.first_line); console.log('semi');}
+	| tilde			{console.log(@1.first_line); console.log('tilde');}
+	| times			{console.log(@1.first_line); console.log('times');}
+	;
+
+keyword
+	: inherits		{console.log(@1.first_line); console.log('inherits');}
+	| isvoid		{console.log(@1.first_line); console.log('isvoid');}
+	| class			{console.log(@1.first_line); console.log('class');}
+	| while			{console.log(@1.first_line); console.log('while');}
+	| case 			{console.log(@1.first_line); console.log('case');}
+	| else			{console.log(@1.first_line); console.log('else');}
+	| esac			{console.log(@1.first_line); console.log('esac');}
+	| loop			{console.log(@1.first_line); console.log('loop');}
+	| pool			{console.log(@1.first_line); console.log('pool');}
+	| then			{console.log(@1.first_line); console.log('then');}
+	| let			{console.log(@1.first_line); console.log('let');}
+	| new			{console.log(@1.first_line); console.log('new');}
+	| not			{console.log(@1.first_line); console.log('not');}
+	| fi			{console.log(@1.first_line); console.log('fi');}
+	| if			{console.log(@1.first_line); console.log('if');}
+	| in			{console.log(@1.first_line); console.log('in');}
+	| of			{console.log(@1.first_line); console.log('of');}
+	;
+
+boolean
+	: true			{console.log(@1.first_line); console.log('true');}
+	| false			{console.log(@1.first_line); console.log('false');}
 	;
 
 

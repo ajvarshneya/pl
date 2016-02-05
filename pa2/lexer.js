@@ -72,166 +72,18 @@
   }
 */
 var lexer = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,5],$V1=[1,6],$V2=[1,7],$V3=[1,8],$V4=[1,9],$V5=[1,10],$V6=[1,11],$V7=[1,12],$V8=[1,13],$V9=[1,14],$Va=[1,15],$Vb=[1,16],$Vc=[1,17],$Vd=[1,18],$Ve=[1,19],$Vf=[1,20],$Vg=[1,21],$Vh=[1,22],$Vi=[1,23],$Vj=[1,24],$Vk=[1,25],$Vl=[1,26],$Vm=[1,27],$Vn=[1,28],$Vo=[1,29],$Vp=[1,30],$Vq=[1,31],$Vr=[1,32],$Vs=[1,33],$Vt=[1,34],$Vu=[1,35],$Vv=[1,36],$Vw=[1,37],$Vx=[1,38],$Vy=[1,39],$Vz=[1,40],$VA=[1,41],$VB=[1,42],$VC=[1,43],$VD=[1,44],$VE=[1,45],$VF=[1,46],$VG=[5,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,4],$V1=[1,8],$V2=[1,9],$V3=[1,10],$V4=[1,11],$V5=[1,12],$V6=[1,13],$V7=[1,14],$V8=[1,15],$V9=[1,16],$Va=[1,17],$Vb=[1,18],$Vc=[1,19],$Vd=[1,20],$Ve=[1,21],$Vf=[1,22],$Vg=[1,23],$Vh=[1,24],$Vi=[1,25],$Vj=[1,26],$Vk=[1,27],$Vl=[1,28],$Vm=[1,29],$Vn=[1,30],$Vo=[1,31],$Vp=[1,32],$Vq=[1,33],$Vr=[1,34],$Vs=[1,35],$Vt=[1,36],$Vu=[1,37],$Vv=[1,38],$Vw=[1,39],$Vx=[1,40],$Vy=[1,41],$Vz=[1,42],$VA=[1,43],$VB=[1,44],$VC=[1,45],$VD=[1,46],$VE=[1,47],$VF=[1,48],$VG=[5,7,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"expressions":3,"exprs":4,"EOF":5,"expr":6,"regular":7,"at":8,"case":9,"class":10,"colon":11,"comma":12,"divide":13,"dot":14,"else":15,"equals":16,"esac":17,"false":18,"fi":19,"identifier":20,"if":21,"in":22,"inherits":23,"integer":24,"isvoid":25,"larrow":26,"lbrace":27,"le":28,"let":29,"loop":30,"lparen":31,"lt":32,"minus":33,"new":34,"not":35,"of":36,"plus":37,"pool":38,"rarrow":39,"rbrace":40,"rparen":41,"semi":42,"string":43,"then":44,"tilde":45,"times":46,"true":47,"type":48,"while":49,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",8:"at",9:"case",10:"class",11:"colon",12:"comma",13:"divide",14:"dot",15:"else",16:"equals",17:"esac",18:"false",19:"fi",20:"identifier",21:"if",22:"in",23:"inherits",24:"integer",25:"isvoid",26:"larrow",27:"lbrace",28:"le",29:"let",30:"loop",31:"lparen",32:"lt",33:"minus",34:"new",35:"not",36:"of",37:"plus",38:"pool",39:"rarrow",40:"rbrace",41:"rparen",42:"semi",43:"string",44:"then",45:"tilde",46:"times",47:"true",48:"type",49:"while"},
-productions_: [0,[3,2],[4,2],[4,1],[6,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1],[7,1]],
+symbols_: {"error":2,"expressions":3,"exprs":4,"EOF":5,"expr":6,"string":7,"operator":8,"keyword":9,"boolean":10,"integer":11,"type":12,"identifier":13,"larrow":14,"le":15,"rarrow":16,"at":17,"colon":18,"comma":19,"divide":20,"dot":21,"lbrace":22,"lparen":23,"lt":24,"minus":25,"plus":26,"equals":27,"rbrace":28,"rparen":29,"semi":30,"tilde":31,"times":32,"inherits":33,"isvoid":34,"class":35,"while":36,"case":37,"else":38,"esac":39,"loop":40,"pool":41,"then":42,"let":43,"new":44,"not":45,"fi":46,"if":47,"in":48,"of":49,"true":50,"false":51,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",7:"string",11:"integer",12:"type",13:"identifier",14:"larrow",15:"le",16:"rarrow",17:"at",18:"colon",19:"comma",20:"divide",21:"dot",22:"lbrace",23:"lparen",24:"lt",25:"minus",26:"plus",27:"equals",28:"rbrace",29:"rparen",30:"semi",31:"tilde",32:"times",33:"inherits",34:"isvoid",35:"class",36:"while",37:"case",38:"else",39:"esac",40:"loop",41:"pool",42:"then",43:"let",44:"new",45:"not",46:"fi",47:"if",48:"in",49:"of",50:"true",51:"false"},
+productions_: [0,[3,2],[4,2],[4,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[6,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[8,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[9,1],[10,1],[10,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
 switch (yystate) {
-case 5:
-console.log(_$[$0].first_line);
-					 console.log('at');
-break;
-case 6:
-console.log(_$[$0].first_line);
-					 console.log('case');
-break;
-case 7:
-console.log(_$[$0].first_line);
-					 console.log('class');
-break;
-case 8:
-console.log(_$[$0].first_line);
-					 console.log('colon');
-break;
-case 9:
-console.log(_$[$0].first_line);
-					 console.log('comma');
-break;
-case 10:
-console.log(_$[$0].first_line);
-					 console.log('divide');
-break;
-case 11:
-console.log(_$[$0].first_line);
-					 console.log('dot');
-break;
-case 12:
-console.log(_$[$0].first_line);
-					 console.log('else');
-break;
-case 13:
-console.log(_$[$0].first_line);
-					 console.log('equals');
-break;
-case 14:
-console.log(_$[$0].first_line);
-					 console.log('esac');
-break;
-case 15:
-console.log(_$[$0].first_line);
-					 console.log('false');
-break;
-case 16:
-console.log(_$[$0].first_line);
-					 console.log('fi');
-break;
-case 17:
-console.log(_$[$0].first_line);
-					 console.log('identifier');
-					 console.log($$[$0]);
-break;
-case 18:
-console.log(_$[$0].first_line);
-					 console.log('if');
-break;
-case 19:
-console.log(_$[$0].first_line);
-					 console.log('in');
-break;
-case 20:
-console.log(_$[$0].first_line);
-					 console.log('inherits');
-break;
-case 21:
-
-						if($$[$0] < 2147483647) {
-							console.log(_$[$0].first_line);
-							console.log('integer');
-							console.log($$[$0]);
-						} else {
-							console.log("ERROR:" + _$[$0].first_line + ": " + "Lexer: Integer out of bounds.")
-						}
-					
-break;
-case 22:
-console.log(_$[$0].first_line);
-					 console.log('isvoid');
-break;
-case 23:
-console.log(_$[$0].first_line);
-					 console.log('larrow');
-break;
-case 24:
-console.log(_$[$0].first_line);
-					 console.log('lbrace');
-break;
-case 25:
-console.log(_$[$0].first_line);
-					 console.log('le');
-break;
-case 26:
-console.log(_$[$0].first_line);
-					 console.log('let');
-break;
-case 27:
-console.log(_$[$0].first_line);
-					 console.log('loop');
-break;
-case 28:
-console.log(_$[$0].first_line);
-					 console.log('lparen');
-break;
-case 29:
-console.log(_$[$0].first_line);
-					 console.log('lt');
-break;
-case 30:
-console.log(_$[$0].first_line);
-					 console.log('minus');
-break;
-case 31:
-console.log(_$[$0].first_line);
-					 console.log('new');
-break;
-case 32:
-console.log(_$[$0].first_line);
-					 console.log('not');
-break;
-case 33:
-console.log(_$[$0].first_line);
-					 console.log('of');
-break;
-case 34:
-console.log(_$[$0].first_line);
-					 console.log('plus');
-break;
-case 35:
-console.log(_$[$0].first_line);
-					 console.log('pool');
-break;
-case 36:
-console.log(_$[$0].first_line);
-					 console.log('rarrow');
-break;
-case 37:
-console.log(_$[$0].first_line);
-					 console.log('rbrace');
-break;
-case 38:
-console.log(_$[$0].first_line);
-					 console.log('rparen');
-break;
-case 39:
-console.log(_$[$0].first_line);
-					 console.log('semi');
-break;
-case 40:
+case 4:
 
 						if($$[$0].indexOf('\0') != -1)	{
 							console.log("ERROR: " + _$[$0].first_line + ": " + "Lexer: String contains ASCII 0.");
@@ -242,35 +94,145 @@ case 40:
 						}
 					
 break;
-case 41:
-console.log(_$[$0].first_line);
-					 console.log('then');
+case 8:
+
+						if($$[$0] < 2147483647) {
+							console.log(_$[$0].first_line);
+							console.log('integer');
+							console.log($$[$0]);
+						} else {
+							console.log("ERROR:" + _$[$0].first_line + ": " + "Lexer: Integer out of bounds.")
+						}
+					
 break;
-case 42:
-console.log(_$[$0].first_line);
-					 console.log('tilde');
-break;
-case 43:
-console.log(_$[$0].first_line);
-					 console.log('times');
-break;
-case 44:
-console.log(_$[$0].first_line);
-					 console.log('true');
-break;
-case 45:
+case 9:
 console.log(_$[$0].first_line);
 					 console.log('type');
 					 console.log($$[$0]);
 break;
-case 46:
+case 10:
 console.log(_$[$0].first_line);
-					 console.log('while');
+					 console.log('identifier');
+					 console.log($$[$0]);
+break;
+case 11:
+console.log(_$[$0].first_line); console.log('larrow');
+break;
+case 12:
+console.log(_$[$0].first_line); console.log('le');
+break;
+case 13:
+console.log(_$[$0].first_line); console.log('rarrow');
+break;
+case 14:
+console.log(_$[$0].first_line); console.log('at');
+break;
+case 15:
+console.log(_$[$0].first_line); console.log('colon');
+break;
+case 16:
+console.log(_$[$0].first_line); console.log('comma');
+break;
+case 17:
+console.log(_$[$0].first_line); console.log('divide');
+break;
+case 18:
+console.log(_$[$0].first_line); console.log('dot');
+break;
+case 19:
+console.log(_$[$0].first_line); console.log('lbrace');
+break;
+case 20:
+console.log(_$[$0].first_line); console.log('lparen');
+break;
+case 21:
+console.log(_$[$0].first_line); console.log('lt');
+break;
+case 22:
+console.log(_$[$0].first_line); console.log('minus');
+break;
+case 23:
+console.log(_$[$0].first_line); console.log('plus');
+break;
+case 24:
+console.log(_$[$0].first_line); console.log('equals');
+break;
+case 25:
+console.log(_$[$0].first_line); console.log('rbrace');
+break;
+case 26:
+console.log(_$[$0].first_line); console.log('rparen');
+break;
+case 27:
+console.log(_$[$0].first_line); console.log('semi');
+break;
+case 28:
+console.log(_$[$0].first_line); console.log('tilde');
+break;
+case 29:
+console.log(_$[$0].first_line); console.log('times');
+break;
+case 30:
+console.log(_$[$0].first_line); console.log('inherits');
+break;
+case 31:
+console.log(_$[$0].first_line); console.log('isvoid');
+break;
+case 32:
+console.log(_$[$0].first_line); console.log('class');
+break;
+case 33:
+console.log(_$[$0].first_line); console.log('while');
+break;
+case 34:
+console.log(_$[$0].first_line); console.log('case');
+break;
+case 35:
+console.log(_$[$0].first_line); console.log('else');
+break;
+case 36:
+console.log(_$[$0].first_line); console.log('esac');
+break;
+case 37:
+console.log(_$[$0].first_line); console.log('loop');
+break;
+case 38:
+console.log(_$[$0].first_line); console.log('pool');
+break;
+case 39:
+console.log(_$[$0].first_line); console.log('then');
+break;
+case 40:
+console.log(_$[$0].first_line); console.log('let');
+break;
+case 41:
+console.log(_$[$0].first_line); console.log('new');
+break;
+case 42:
+console.log(_$[$0].first_line); console.log('not');
+break;
+case 43:
+console.log(_$[$0].first_line); console.log('fi');
+break;
+case 44:
+console.log(_$[$0].first_line); console.log('if');
+break;
+case 45:
+console.log(_$[$0].first_line); console.log('in');
+break;
+case 46:
+console.log(_$[$0].first_line); console.log('of');
+break;
+case 47:
+console.log(_$[$0].first_line); console.log('true');
+break;
+case 48:
+console.log(_$[$0].first_line); console.log('false');
 break;
 }
 },
-table: [{3:1,4:2,6:3,7:4,8:$V0,9:$V1,10:$V2,11:$V3,12:$V4,13:$V5,14:$V6,15:$V7,16:$V8,17:$V9,18:$Va,19:$Vb,20:$Vc,21:$Vd,22:$Ve,23:$Vf,24:$Vg,25:$Vh,26:$Vi,27:$Vj,28:$Vk,29:$Vl,30:$Vm,31:$Vn,32:$Vo,33:$Vp,34:$Vq,35:$Vr,36:$Vs,37:$Vt,38:$Vu,39:$Vv,40:$Vw,41:$Vx,42:$Vy,43:$Vz,44:$VA,45:$VB,46:$VC,47:$VD,48:$VE,49:$VF},{1:[3]},{5:[1,47],6:48,7:4,8:$V0,9:$V1,10:$V2,11:$V3,12:$V4,13:$V5,14:$V6,15:$V7,16:$V8,17:$V9,18:$Va,19:$Vb,20:$Vc,21:$Vd,22:$Ve,23:$Vf,24:$Vg,25:$Vh,26:$Vi,27:$Vj,28:$Vk,29:$Vl,30:$Vm,31:$Vn,32:$Vo,33:$Vp,34:$Vq,35:$Vr,36:$Vs,37:$Vt,38:$Vu,39:$Vv,40:$Vw,41:$Vx,42:$Vy,43:$Vz,44:$VA,45:$VB,46:$VC,47:$VD,48:$VE,49:$VF},o($VG,[2,3]),o($VG,[2,4]),o($VG,[2,5]),o($VG,[2,6]),o($VG,[2,7]),o($VG,[2,8]),o($VG,[2,9]),o($VG,[2,10]),o($VG,[2,11]),o($VG,[2,12]),o($VG,[2,13]),o($VG,[2,14]),o($VG,[2,15]),o($VG,[2,16]),o($VG,[2,17]),o($VG,[2,18]),o($VG,[2,19]),o($VG,[2,20]),o($VG,[2,21]),o($VG,[2,22]),o($VG,[2,23]),o($VG,[2,24]),o($VG,[2,25]),o($VG,[2,26]),o($VG,[2,27]),o($VG,[2,28]),o($VG,[2,29]),o($VG,[2,30]),o($VG,[2,31]),o($VG,[2,32]),o($VG,[2,33]),o($VG,[2,34]),o($VG,[2,35]),o($VG,[2,36]),o($VG,[2,37]),o($VG,[2,38]),o($VG,[2,39]),o($VG,[2,40]),o($VG,[2,41]),o($VG,[2,42]),o($VG,[2,43]),o($VG,[2,44]),o($VG,[2,45]),o($VG,[2,46]),{1:[2,1]},o($VG,[2,2])],
-defaultActions: {47:[2,1]},
+table: [{3:1,4:2,6:3,7:$V0,8:5,9:6,10:7,11:$V1,12:$V2,13:$V3,14:$V4,15:$V5,16:$V6,17:$V7,18:$V8,19:$V9,20:$Va,21:$Vb,22:$Vc,23:$Vd,24:$Ve,25:$Vf,26:$Vg,27:$Vh,28:$Vi,29:$Vj,30:$Vk,31:$Vl,32:$Vm,33:$Vn,34:$Vo,35:$Vp,36:$Vq,37:$Vr,38:$Vs,39:$Vt,40:$Vu,41:$Vv,42:$Vw,43:$Vx,44:$Vy,45:$Vz,46:$VA,47:$VB,48:$VC,49:$VD,50:$VE,51:$VF},{1:[3]},{5:[1,49],6:50,7:$V0,8:5,9:6,10:7,11:$V1,12:$V2,13:$V3,14:$V4,15:$V5,16:$V6,17:$V7,18:$V8,19:$V9,20:$Va,21:$Vb,22:$Vc,23:$Vd,24:$Ve,25:$Vf,26:$Vg,27:$Vh,28:$Vi,29:$Vj,30:$Vk,31:$Vl,32:$Vm,33:$Vn,34:$Vo,35:$Vp,36:$Vq,37:$Vr,38:$Vs,39:$Vt,40:$Vu,41:$Vv,42:$Vw,43:$Vx,44:$Vy,45:$Vz,46:$VA,47:$VB,48:$VC,49:$VD,50:$VE,51:$VF},o($VG,[2,3]),o($VG,[2,4]),o($VG,[2,5]),o($VG,[2,6]),o($VG,[2,7]),o($VG,[2,8]),o($VG,[2,9]),o($VG,[2,10]),o($VG,[2,11]),o($VG,[2,12]),o($VG,[2,13]),o($VG,[2,14]),o($VG,[2,15]),o($VG,[2,16]),o($VG,[2,17]),o($VG,[2,18]),o($VG,[2,19]),o($VG,[2,20]),o($VG,[2,21]),o($VG,[2,22]),o($VG,[2,23]),o($VG,[2,24]),o($VG,[2,25]),o($VG,[2,26]),o($VG,[2,27]),o($VG,[2,28]),o($VG,[2,29]),o($VG,[2,30]),o($VG,[2,31]),o($VG,[2,32]),o($VG,[2,33]),o($VG,[2,34]),o($VG,[2,35]),o($VG,[2,36]),o($VG,[2,37]),o($VG,[2,38]),o($VG,[2,39]),o($VG,[2,40]),o($VG,[2,41]),o($VG,[2,42]),o($VG,[2,43]),o($VG,[2,44]),o($VG,[2,45]),o($VG,[2,46]),o($VG,[2,47]),o($VG,[2,48]),{1:[2,1]},o($VG,[2,2])],
+defaultActions: {49:[2,1]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -751,89 +713,89 @@ var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
 case 0:/* white space */
 break;
-case 1:return 43;
+case 1:return 7;
 break;
-case 2:return 26;
+case 2:return 14;
 break;
-case 3:return 28;
+case 3:return 15;
 break;
-case 4:return 39;
+case 4:return 16;
 break;
-case 5:return 8;
+case 5:return 17;
 break;
-case 6:return 11;
+case 6:return 18;
 break;
-case 7:return 12;
+case 7:return 19;
 break;
-case 8:return 13;
+case 8:return 20;
 break;
-case 9:return 14;
+case 9:return 21;
 break;
-case 10:return 27;
+case 10:return 22;
 break;
-case 11:return 31;
+case 11:return 23;
 break;
-case 12:return 32;
+case 12:return 24;
 break;
-case 13:return 33;
+case 13:return 25;
 break;
-case 14:return 37;
+case 14:return 26;
 break;
-case 15:return 16;
+case 15:return 27;
 break;
-case 16:return 40;
+case 16:return 28;
 break;
-case 17:return 41;
+case 17:return 29;
 break;
-case 18:return 42;
+case 18:return 30;
 break;
-case 19:return 45;
+case 19:return 31;
 break;
-case 20:return 46;
+case 20:return 32;
 break;
-case 21:return 23;
+case 21:return 33;
 break;
-case 22:return 25;
+case 22:return 34;
 break;
-case 23:return 10;
+case 23:return 35;
 break;
-case 24:return 49;
+case 24:return 36;
 break;
-case 25:return 9;
+case 25:return 37;
 break;
-case 26:return 15;
+case 26:return 38;
 break;
-case 27:return 17;
+case 27:return 39;
 break;
-case 28:return 30;
+case 28:return 40;
 break;
-case 29:return 38;
+case 29:return 41;
 break;
-case 30:return 44;
+case 30:return 42;
 break;
-case 31:return 29;
+case 31:return 43;
 break;
-case 32:return 34;
+case 32:return 44;
 break;
-case 33:return 35;
+case 33:return 45;
 break;
-case 34:return 19;
+case 34:return 46;
 break;
-case 35:return 21;
+case 35:return 47;
 break;
-case 36:return 22;
+case 36:return 48;
 break;
-case 37:return 36;
+case 37:return 49;
 break;
-case 38:return 47;
+case 38:return 50;
 break;
-case 39:return 18;
+case 39:return 51;
 break;
-case 40:return 24;
+case 40:return 11;
 break;
-case 41:return 48;
+case 41:return 12;
 break;
-case 42:return 20;
+case 42:return 13;
 break;
 case 43:return 5;
 break;
