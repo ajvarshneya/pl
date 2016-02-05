@@ -4,6 +4,7 @@
 %options flex
 %%
 
+
 \s+										{/* white space */}		/* White space */
 \"((?:[^\\\n]|\\.)*?)\"					{return 'string';}		/* Quoted strings */
 "<-"									{return 'larrow';}		/* Multi char operators */
@@ -74,9 +75,6 @@ expr
 						}
 					}
 
-	| operator 
-	| keyword 
-	| boolean
 	| integer		{
 						if($1 < 2147483647) {
 							console.log(@1.first_line);
@@ -94,6 +92,10 @@ expr
 	| identifier	{console.log(@1.first_line);
 					 console.log('identifier');
 					 console.log($1);}
+
+	| operator 
+	| keyword 
+	| boolean
 	;
 
 operator
