@@ -1,0 +1,16 @@
+1
+integer
+2147483645
+ERROR: line_number:2Lexer: Integer out of bounds.
+3
+identifier
+also
+ERROR: line_number:4Lexer: String contains ASCII 0.
+ERROR: line_number:5Lexer: String contains ASCII 0.
+ERROR: line_number:5Lexer: String contains ASCII 0.
+ERROR: line_number:6Lexer: String contains ASCII 0.
+6
+identifier
+no
+ERROR: line_number:7Lexer: String contains ASCII 0.
+ERROR: line_number:8Lexer: String contains ASCII 0.
