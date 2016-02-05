@@ -155,7 +155,7 @@ case 21:
 							console.log('integer');
 							console.log($$[$0]);
 						} else {
-							console.log("ERROR: line_number:" + _$[$0].first_line + "Lexer: Integer out of bounds.")
+							console.log("ERROR:" + _$[$0].first_line + ": " + "Lexer: Integer out of bounds.")
 						}
 					
 break;
@@ -233,8 +233,8 @@ console.log(_$[$0].first_line);
 break;
 case 40:
 
-						if($$[$0].indexOf('\0') == -1)	{
-							console.log("ERROR: line_number:" + _$[$0].first_line + "Lexer: String contains ASCII 0.");
+						if($$[$0].indexOf('\0') != -1)	{
+							console.log("ERROR: " + _$[$0].first_line + ": " + "Lexer: String contains ASCII 0.");
 						} else {
 							console.log(_$[$0].first_line);
 					 		console.log('string');
@@ -745,7 +745,7 @@ pushState:function pushState(condition) {
 stateStackSize:function stateStackSize() {
         return this.conditionStack.length;
     },
-options: {},
+options: {"flex":true},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
@@ -837,10 +837,12 @@ case 42:return 20;
 break;
 case 43:return 5;
 break;
+case 44:console.log(yy_.yytext);
+break;
 }
 },
-rules: [/^(?:\s+)/,/^(?:"((?:[^\\\n]|\\.)*?)")/,/^(?:<-)/,/^(?:<=)/,/^(?:=>)/,/^(?:@)/,/^(?::)/,/^(?:,)/,/^(?:\/)/,/^(?:\.)/,/^(?:\{)/,/^(?:\()/,/^(?:<)/,/^(?:-)/,/^(?:\+)/,/^(?:=)/,/^(?:\})/,/^(?:\))/,/^(?:;)/,/^(?:~)/,/^(?:\*)/,/^(?:([iI][nN][hH][eE][rR][iI][tT][sS]))/,/^(?:([iI][sS][vV][oO][iI][dD]))/,/^(?:([cC][lL][aA][sS][sS]))/,/^(?:([wW][hH][iI][lL][eE]))/,/^(?:([cC][aA][sS][eE]))/,/^(?:([eE][lL][sS][eE]))/,/^(?:([eE][sS][aA][cC]))/,/^(?:([lL][oO][oO][pP]))/,/^(?:([pP][oO][oO][lL]))/,/^(?:([tT][hH][eE][nN]))/,/^(?:([lL][eE][tT]))/,/^(?:([nN][eE][wW]))/,/^(?:([nN][oO][tT]))/,/^(?:([fF][iI]))/,/^(?:([iI][iF]))/,/^(?:([iI][nN]))/,/^(?:([oO][fF]))/,/^(?:(t[rR][uU][eE]))/,/^(?:(f[aA][lL][sS][eE]))/,/^(?:[0-9]+)/,/^(?:[A-Z]([0-9a-zA-Z_])*)/,/^(?:[a-z]([0-9a-zA-Z_])*)/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43],"inclusive":true}}
+rules: [/^(?:\s+)/,/^(?:"((?:[^\\\n]|\\.)*?)")/,/^(?:<-)/,/^(?:<=)/,/^(?:=>)/,/^(?:@)/,/^(?::)/,/^(?:,)/,/^(?:\/)/,/^(?:\.)/,/^(?:\{)/,/^(?:\()/,/^(?:<)/,/^(?:-)/,/^(?:\+)/,/^(?:=)/,/^(?:\})/,/^(?:\))/,/^(?:;)/,/^(?:~)/,/^(?:\*)/,/^(?:([iI][nN][hH][eE][rR][iI][tT][sS]))/,/^(?:([iI][sS][vV][oO][iI][dD]))/,/^(?:([cC][lL][aA][sS][sS]))/,/^(?:([wW][hH][iI][lL][eE]))/,/^(?:([cC][aA][sS][eE]))/,/^(?:([eE][lL][sS][eE]))/,/^(?:([eE][sS][aA][cC]))/,/^(?:([lL][oO][oO][pP]))/,/^(?:([pP][oO][oO][lL]))/,/^(?:([tT][hH][eE][nN]))/,/^(?:([lL][eE][tT]))/,/^(?:([nN][eE][wW]))/,/^(?:([nN][oO][tT]))/,/^(?:([fF][iI]))/,/^(?:([iI][iF]))/,/^(?:([iI][nN]))/,/^(?:([oO][fF]))/,/^(?:(t[rR][uU][eE]))/,/^(?:(f[aA][lL][sS][eE]))/,/^(?:[0-9]+)/,/^(?:([A-Z]+[a-zA-Z0-9_]*))/,/^(?:([a-z]+[a-zA-Z0-9_]*))/,/^(?:$)/,/^(?:.)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44],"inclusive":true}}
 });
 return lexer;
 })();

@@ -1,16 +1,46 @@
 1
 integer
 2147483645
-ERROR: line_number:2Lexer: Integer out of bounds.
+ERROR:2: Lexer: Integer out of bounds.
 3
 identifier
 also
-ERROR: line_number:4Lexer: String contains ASCII 0.
-ERROR: line_number:5Lexer: String contains ASCII 0.
-ERROR: line_number:5Lexer: String contains ASCII 0.
-ERROR: line_number:6Lexer: String contains ASCII 0.
+4
+string
+Hello
+5
+minus
+5
+minus
+5
+identifier
+wat
 6
+string
+yes
+6
+string
+no
+7
+string
+yes \" 
+7
 identifier
 no
-ERROR: line_number:7Lexer: String contains ASCII 0.
-ERROR: line_number:8Lexer: String contains ASCII 0.
+8
+string
+yes \" what \" no
+9
+string
+hello
+10
+while
+11
+identifier
+in_string
+11
+lparen
+11
+rparen
+11
+semi

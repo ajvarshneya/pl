@@ -2,7 +2,11 @@
 203498203948
 also
 "Hello"
+-- wat
 "yes" "no"
 "yes \" "no
 "yes \" what \" no"
-"hello\u0000"
+"hello"
+while
+in_string();
+plz?

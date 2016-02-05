@@ -1,9 +1,9 @@
 /* lexical grammar */
 
-%options flex
-
 %lex
+%options flex
 %%
+
 
 \s+										{/* white space */}		/* White space */
 \"((?:[^\\\n]|\\.)*?)\"					{return 'string';}		/* Quoted strings */
@@ -46,8 +46,8 @@
 (t[rR][uU][eE])							{return 'true';}		/* Booleans */
 (f[aA][lL][sS][eE])						{return 'false';}
 [0-9]+									{return 'integer';}		/* Integers */
-[A-Z]([0-9a-zA-Z_])*					{return 'type';}		/* Types */
-[a-z]([0-9a-zA-Z_])*					{return 'identifier';}	/* Identifiers */
+([A-Z]+[a-zA-Z0-9_]*)					{return 'type';}		/* Types */
+([a-z]+[a-zA-Z0-9_]*)					{return 'identifier';}	/* Identifiers */
 <<EOF>>									{return 'EOF';}			/* EOF */
 
 /lex
@@ -124,7 +124,7 @@ regular
 							console.log('integer');
 							console.log($1);
 						} else {
-							console.log("ERROR: line_number:" + @1.first_line + "Lexer: Integer out of bounds.")
+							console.log("ERROR:" + @1.first_line + ": " + "Lexer: Integer out of bounds.")
 						}
 					}
 
@@ -184,8 +184,8 @@ regular
 					 console.log('semi');}
 
 	| string		{
-						if($1.indexOf('\0') == -1)	{
-							console.log("ERROR: line_number:" + @1.first_line + "Lexer: String contains ASCII 0.");
+						if($1.indexOf('\0') != -1)	{
+							console.log("ERROR: " + @1.first_line + ": " + "Lexer: String contains ASCII 0.");
 						} else {
 							console.log(@1.first_line);
 					 		console.log('string');
@@ -216,3 +216,4 @@ regular
 
 
 /*TODO*/
+/* Test NULL error from string */
