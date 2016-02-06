@@ -1,13 +1,11 @@
-alskdjalsdjk
-2147483645
---203498203948
-also
-while
-in_string();
-plz
-asldkjasd
-laksjdalksdjlaksjd
-alskdjalskjdalskjd
+
+"yes " " maybe"
+(* multiline comment (* another line
+ and nested " what " *) *)
+
+-- alskdjalskdj
+
+"laksjdlaksjd?"
 
 inherits
 isvoid
@@ -28,3 +26,29 @@ in
 of
 true
 false
+
+<-
+<=
+=>
+@
+:
+,
+/
+.
+{
+(
+<
+-
++
+=
+}
+)
+;
+~
+*
+
+
+(*
+ *  This file shows how to implement a list data type for lists of integers.
+ *  It makes use of INHERITANCE and DYNAMIC DISPATCH.
+ *)

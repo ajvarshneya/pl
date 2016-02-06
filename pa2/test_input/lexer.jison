@@ -1,28 +1,37 @@
 /* lexical grammar */
 
+%{
+	var nesting = 0;	
+%}
+
 %lex
 %x string
+%x string-escape
 %x ml-comment
 %x ml-comment-star
 %x sl-comment
 %options flex
 %%
 
-\s+										{/* white space */}				/* White space */
+\"((?:[^\\\n]|\\.)*?)\"					{return 'string';}	
 
-\"((?:[^\\\n]|\\.)*?)\"					{return 'string';}				
-
-"(*"									{this.begin("ml-comment");}		/* multi line comment */
-<ml-comment>[*]							{this.begin("ml-comment-star");}
+\(\*									{this.begin("ml-comment"); nesting++;}
+<ml-comment>\(\*						{nesting++;}
+<ml-comment>[*]+\)						{								/* any number of * followed by ) */
+											nesting--;
+											if (nesting == 0){
+												this.popState();
+											}
+										}
+<ml-comment>[*]+[^)]					{}						/* any number of * not followed by ) */
+<ml-comment>[^*]						{}						/* any number of char that are not * */
 <ml-comment><<EOF>>						{return "EOF_IN_COMMENT";}
-<ml-comment>[^*]*						{}
-<ml-comment-star>[)]					{this.popState(); this.popState();}
-<ml-comment-star>[^)]					{this.popState();}			
+
 
 "--"									{this.begin("sl-comment");}		/* single line comment */
 <sl-comment>[\n]						{this.popState();}
-<sl-comment><<EOF>>						{return "EOF_IN_COMMENT";}
 <sl-comment>[^\n]						{}		
+<sl-comment><<EOF>>						{return "EOF_IN_COMMENT";}
 
 ([iI][nN][hH][eE][rR][iI][tT][sS])		{return 'inherits';}			/* Keywords */
 ([iI][sS][vV][oO][iI][dD])				{return 'isvoid';}
@@ -70,6 +79,8 @@
 ([A-Z]+[a-zA-Z0-9_]*)					{return 'type';}				/* Types */
 
 ([a-z]+[a-zA-Z0-9_]*)					{return 'identifier';}			/* Identifiers */
+
+\s+										{/* white space */}
 
 <<EOF>>									{return 'EOF';}					/* EOF */
 
@@ -174,9 +185,12 @@ boolean
 	;
 
 error
-	: NEWLINE_IN_STRING		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: newline in string.");}
-	| NULL_IN_STRING		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: null character in string.");}
-	| EOF_IN_COMMENT		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: EOF in comment.");}
+	: NEWLINE_IN_STRING		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: newline in string."); 
+							process.exit(0);}
+	| NULL_IN_STRING		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: null character in string."); 
+							process.exit(0);}
+	| EOF_IN_COMMENT		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: EOF in comment."); 
+							process.exit(0);}
 	;
 
 /*TODO*/
