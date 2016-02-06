@@ -22,7 +22,7 @@
 "--"									{this.begin("sl-comment");}		/* single line comment */
 <sl-comment>[\n]						{this.popState();}
 <sl-comment><<EOF>>						{return "EOF_IN_COMMENT";}
-<sl-comment>.*							{}		
+<sl-comment>[^\n]						{}		
 
 ([iI][nN][hH][eE][rR][iI][tT][sS])		{return 'inherits';}			/* Keywords */
 ([iI][sS][vV][oO][iI][dD])				{return 'isvoid';}
