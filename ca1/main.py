@@ -409,6 +409,8 @@ def make_bbs(insts):
 
 	return blocks
 
+def liveness(block):
+	
 
 def main():
 	filename = sys.argv[1]
@@ -423,8 +425,13 @@ def main():
 
 	# Eliminate dead code
 	
-	# 1. Compute liveness for each basic block
-	for block in blocks:
+	changed = True
+	while (changed):
+		changed = False
+
+		# 1. Compute liveness for each basic block
+		for block in blocks:
+
 
 
 

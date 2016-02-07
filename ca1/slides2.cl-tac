@@ -1,25 +1,25 @@
-label main 0
-t$2 <- call in int
+label main_0
+t$2 <- call in_int
 t$7 <- int 1
 t$8 <- int 3
 t$3 <- + t$7 t$8
 t$10 <- < t$7 t$2
 t$18 <- not t$10
-bt t$18 main 4
-bt t$10 main 3
+bt t$18 main_4
+bt t$10 main_3
 
-label main 3
+label main_3
 t$14 <- t$3
 t$15 <- int 6
 t$13 <- + t$14 t$15
-t$9 <- call out int t$13
-jmp main 5
+t$9 <- call out_int t$13
+jmp main_5
 
-label main 4
+label main_4
 t$16 <- t$1
-t$9 <- call out int t$16
-jmp main 5
+t$9 <- call out_int t$16
+jmp main_5
 
-label main 5
-t$0 <- call out int t$2
+label main_5
+t$0 <- call out_int t$2
 return t$0
