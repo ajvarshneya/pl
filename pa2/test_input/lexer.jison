@@ -5,84 +5,85 @@
 %}
 
 %lex
-%x string
-%x string-escape
 %x ml-comment
 %x ml-comment-star
 %x sl-comment
 %options flex
 %%
 
-\"((?:[^\\\n]|\\.)*?)\"					{return 'string';}	
-
-\(\*									{this.begin("ml-comment"); nesting++;}
-<ml-comment>\(\*						{nesting++;}
-<ml-comment>[*]+\)						{								/* any number of * followed by ) */
+\(\*									{this.begin("ml-comment"); nesting++;} 	/* open comment */
+<ml-comment>\(\*						{nesting++;}							/* nested open comment */
+<ml-comment>[*]+\)						{										/* dec nesting if some number of * is followed by a ) */
 											nesting--;
-											if (nesting == 0){
+											if (nesting == 0) 
+											{
 												this.popState();
 											}
 										}
-<ml-comment>[*]+[^)]					{}						/* any number of * not followed by ) */
-<ml-comment>[^*]						{}						/* any number of char that are not * */
-<ml-comment><<EOF>>						{return "EOF_IN_COMMENT";}
+<ml-comment><<EOF>>						{
+											process.stdout.write("ERROR: " + yylloc.first_line + ": " + "Lexer: EOF in (* comment *)\n"); 
+											process.exit(1);
+										}
+<ml-comment>\s+							{}
+<ml-comment>.							{}
 
 
-"--"									{this.begin("sl-comment");}		/* single line comment */
-<sl-comment>[\n]						{this.popState();}
-<sl-comment>[^\n]						{}		
-<sl-comment><<EOF>>						{return "EOF_IN_COMMENT";}
+\-\-.*									{}
 
-([iI][nN][hH][eE][rR][iI][tT][sS])		{return 'inherits';}			/* Keywords */
-([iI][sS][vV][oO][iI][dD])				{return 'isvoid';}
-([cC][lL][aA][sS][sS])					{return 'class';}
-([wW][hH][iI][lL][eE])					{return 'while';}
-([cC][aA][sS][eE])						{return 'case';}
-([eE][lL][sS][eE])						{return 'else';}
-([eE][sS][aA][cC])						{return 'esac';}
-([lL][oO][oO][pP])						{return 'loop';}
-([pP][oO][oO][lL])						{return 'pool';}
-([tT][hH][eE][nN])						{return 'then';}
-([lL][eE][tT])							{return 'let';}
-([nN][eE][wW])							{return 'new';}
-([nN][oO][tT])							{return 'not';}
-([fF][iI])								{return 'fi';}
-([iI][fF])								{return 'if';}
-([iI][nN])								{return 'in';}
-([oO][fF])								{return 'of';}
-(t[rR][uU][eE])							{return 'true';}				/* Booleans */
-(f[aA][lL][sS][eE])						{return 'false';}
+\"([^\\\n]|(\\.))*?\"					{return 'STRING';}				/* string */
 
-"<-"									{return 'larrow';}				/* Multi char operators */
-"<="									{return 'le';}
-"=>"									{return 'rarrow';}
+([iI][nN][hH][eE][rR][iI][tT][sS])		{return 'INHERITS';}			/* Keywords */
+([iI][sS][vV][oO][iI][dD])				{return 'ISVOID';}
+([cC][lL][aA][sS][sS])					{return 'CLASS';}
+([wW][hH][iI][lL][eE])					{return 'WHILE';}
+([cC][aA][sS][eE])						{return 'CASE';}
+([eE][lL][sS][eE])						{return 'ELSE';}
+([eE][sS][aA][cC])						{return 'ESAC';}
+([lL][oO][oO][pP])						{return 'LOOP';}
+([pP][oO][oO][lL])						{return 'POOL';}
+([tT][hH][eE][nN])						{return 'THEN';}
+([lL][eE][tT])							{return 'LET';}
+([nN][eE][wW])							{return 'NEW';}
+([nN][oO][tT])							{return 'NOT';}
+([fF][iI])								{return 'FI';}
+([iI][fF])								{return 'IF';}
+([iI][nN])								{return 'IN';}
+([oO][fF])								{return 'OF';}
+(t[rR][uU][eE])							{return 'TRUE';}				/* Booleans */
+(f[aA][lL][sS][eE])						{return 'FALSE';}
 
-"@"										{return 'at';}					/* Single char operators */
-":"										{return 'colon';}
-","										{return 'comma';}
-"/"										{return 'divide';}
-"."										{return 'dot';}
-"{"										{return 'lbrace';}
-"("										{return 'lparen';}
-"<"										{return 'lt';}
-"-"										{return 'minus';}
-"+"										{return 'plus';}
-"="										{return 'equals';}
-"}"										{return 'rbrace';}
-")"										{return 'rparen';}
-";"										{return 'semi';}
-"~"										{return 'tilde';}
-"*"										{return 'times';}
+"<-"									{return 'LARROW';}				/* Multi char operators */
+"<="									{return 'LE';}
+"=>"									{return 'RARROW';}
 
-[0-9]+									{return 'integer';}				/* Integers */
+"@"										{return 'AT';}					/* Single char operators */
+":"										{return 'COLON';}
+","										{return 'COMMA';}
+"/"										{return 'DIVIDE';}
+"."										{return 'DOT';}
+"{"										{return 'LBRACE';}
+"("										{return 'LPAREN';}
+"<"										{return 'LT';}
+"-"										{return 'MINUS';}
+"+"										{return 'PLUS';}
+"="										{return 'EQUALS';}
+"}"										{return 'RBRACE';}
+")"										{return 'RPAREN';}
+";"										{return 'SEMI';}
+"~"										{return 'TILDE';}
+"*"										{return 'TIMES';}
 
-([A-Z]+[a-zA-Z0-9_]*)					{return 'type';}				/* Types */
+[0-9]+									{return 'INTEGER';}				/* Integers */
 
-([a-z]+[a-zA-Z0-9_]*)					{return 'identifier';}			/* Identifiers */
+([A-Z]+[a-zA-Z0-9_]*)					{return 'TYPE';}				/* Types */
+
+([a-z]+[a-zA-Z0-9_]*)					{return 'IDENTIFIER';}			/* Identifiers */
 
 \s+										{/* white space */}
 
 <<EOF>>									{return 'EOF';}					/* EOF */
+
+.										{return 'ERROR_INVALID_CHAR'}
 
 /lex
 
@@ -91,6 +92,7 @@
 
 expressions
 	: exprs EOF
+	| EOF
 	;
 
 exprs
@@ -99,99 +101,113 @@ exprs
 	;
 
 expr
-	: string 		{
-						if($1.indexOf('\0') != -1)	{
-							console.error("ERROR: " + @1.first_line + ": " + "Lexer: String contains ASCII 0.");
-							process.exit(0);
-						} else {
+	: STRING 		{
+						var hasNull = false;
+
+						for (i = 0; i < yytext.length; i++) {
+							if (yytext.charCodeAt(i) == 0) {
+								hasNull = true;
+							}
+						}
+
+						var length = yytext.length - 2;
+
+						if (hasNull) {
+							process.stdout.write("ERROR: " + @1.first_line + ": " + "Lexer: string cannot contain null character \n");
+							process.exit(1);
+						} else if (length <= 1024) {
 							console.log(@1.first_line);
 					 		console.log('string');
-							console.log($1.substring(1, $1.length-1));
+							console.log(yytext.substring(1, yytext.length - 1));
+						} else {
+							process.stdout.write("ERROR: " + @1.first_line + ": " + "Lexer: string constant is too long (" + length + " > 1024)\n");
+							process.exit(1);
 						}
 					}
 
-	| comment		{}
+	| COMMENT		{}
 
-	| integer		{
-						if($1 < 2147483647) {
+	| INTEGER		{
+						var num = parseInt(yytext);
+						if(yytext <= 2147483647) {
 							console.log(@1.first_line);
 							console.log('integer');
-							console.log($1);
+							console.log(num);
 						} else {
-							console.error("ERROR: " + @1.first_line + ": " + "Lexer: Integer out of bounds.");
+							process.stdout.write("ERROR: " + @1.first_line + ": " + "Lexer: not a non-negative 32-bit signed integer:" + num + "\n");
 							process.exit(0);
 						}
 					}
 
-	| type			{console.log(@1.first_line);
+	| TYPE			{console.log(@1.first_line);
 					 console.log('type');
-					 console.log($1);}
+					 console.log(yytext);}
 
-	| identifier	{console.log(@1.first_line);
+	| IDENTIFIER	{console.log(@1.first_line);
 					 console.log('identifier');
-					 console.log($1);}
+					 console.log(yytext);}
 
-	| operator 
-	| keyword 
-	| boolean
-	| error
+	| OPERATOR 
+	| KEYWORD
+	| BOOLEAN
+	| ERROR
 	;
 
-operator
-	: larrow		{console.log(@1.first_line); console.log('larrow');}
-	| le			{console.log(@1.first_line); console.log('le');}
-	| rarrow		{console.log(@1.first_line); console.log('rarrow');}
-	| at 			{console.log(@1.first_line); console.log('at');}
-	| colon			{console.log(@1.first_line); console.log('colon');}
-	| comma			{console.log(@1.first_line); console.log('comma');}
-	| divide		{console.log(@1.first_line); console.log('divide');}
-	| dot			{console.log(@1.first_line); console.log('dot');}
-	| lbrace		{console.log(@1.first_line); console.log('lbrace');}
-	| lparen		{console.log(@1.first_line); console.log('lparen');}
-	| lt			{console.log(@1.first_line); console.log('lt');}
-	| minus			{console.log(@1.first_line); console.log('minus');}
-	| plus			{console.log(@1.first_line); console.log('plus');}
-	| equals		{console.log(@1.first_line); console.log('equals');}
-	| rbrace		{console.log(@1.first_line); console.log('rbrace');}
-	| rparen		{console.log(@1.first_line); console.log('rparen');}
-	| semi			{console.log(@1.first_line); console.log('semi');}
-	| tilde			{console.log(@1.first_line); console.log('tilde');}
-	| times			{console.log(@1.first_line); console.log('times');}
+OPERATOR
+	: LARROW		{console.log(@1.first_line); console.log('larrow');}
+	| LE			{console.log(@1.first_line); console.log('le');}
+	| RARROW		{console.log(@1.first_line); console.log('rarrow');}
+	| AT 			{console.log(@1.first_line); console.log('at');}
+	| COLON			{console.log(@1.first_line); console.log('colon');}
+	| COMMA			{console.log(@1.first_line); console.log('comma');}
+	| DIVIDE		{console.log(@1.first_line); console.log('divide');}
+	| DOT			{console.log(@1.first_line); console.log('dot');}
+	| LBRACE		{console.log(@1.first_line); console.log('lbrace');}
+	| LPAREN		{console.log(@1.first_line); console.log('lparen');}
+	| LT			{console.log(@1.first_line); console.log('lt');}
+	| MINUS			{console.log(@1.first_line); console.log('minus');}
+	| PLUS			{console.log(@1.first_line); console.log('plus');}
+	| EQUALS		{console.log(@1.first_line); console.log('equals');}
+	| RBRACE		{console.log(@1.first_line); console.log('rbrace');}
+	| RPAREN		{console.log(@1.first_line); console.log('rparen');}
+	| SEMI			{console.log(@1.first_line); console.log('semi');}
+	| TILDE			{console.log(@1.first_line); console.log('tilde');}
+	| TIMES			{console.log(@1.first_line); console.log('times');}
 	;
 
-keyword
-	: inherits		{console.log(@1.first_line); console.log('inherits');}
-	| isvoid		{console.log(@1.first_line); console.log('isvoid');}
-	| class			{console.log(@1.first_line); console.log('class');}
-	| while			{console.log(@1.first_line); console.log('while');}
-	| case 			{console.log(@1.first_line); console.log('case');}
-	| else			{console.log(@1.first_line); console.log('else');}
-	| esac			{console.log(@1.first_line); console.log('esac');}
-	| loop			{console.log(@1.first_line); console.log('loop');}
-	| pool			{console.log(@1.first_line); console.log('pool');}
-	| then			{console.log(@1.first_line); console.log('then');}
-	| let			{console.log(@1.first_line); console.log('let');}
-	| new			{console.log(@1.first_line); console.log('new');}
-	| not			{console.log(@1.first_line); console.log('not');}
-	| fi			{console.log(@1.first_line); console.log('fi');}
-	| if			{console.log(@1.first_line); console.log('if');}
-	| in			{console.log(@1.first_line); console.log('in');}
-	| of			{console.log(@1.first_line); console.log('of');}
+KEYWORD
+	: INHERITS		{console.log(@1.first_line); console.log('inherits');}
+	| ISVOID		{console.log(@1.first_line); console.log('isvoid');}
+	| CLASS			{console.log(@1.first_line); console.log('class');}
+	| WHILE			{console.log(@1.first_line); console.log('while');}
+	| CASE			{console.log(@1.first_line); console.log('case');}
+	| ELSE			{console.log(@1.first_line); console.log('else');}
+	| ESAC			{console.log(@1.first_line); console.log('esac');}
+	| LOOP			{console.log(@1.first_line); console.log('loop');}
+	| POOL			{console.log(@1.first_line); console.log('pool');}
+	| THEN			{console.log(@1.first_line); console.log('then');}
+	| LET			{console.log(@1.first_line); console.log('let');}
+	| NEW			{console.log(@1.first_line); console.log('new');}
+	| NOT			{console.log(@1.first_line); console.log('not');}
+	| FI			{console.log(@1.first_line); console.log('fi');}
+	| IF			{console.log(@1.first_line); console.log('if');}
+	| IN			{console.log(@1.first_line); console.log('in');}
+	| OF			{console.log(@1.first_line); console.log('of');}
 	;
 
-boolean
-	: true			{console.log(@1.first_line); console.log('true');}
-	| false			{console.log(@1.first_line); console.log('false');}
+BOOLEAN
+	: TRUE			{console.log(@1.first_line); console.log('true');}
+	| FALSE			{console.log(@1.first_line); console.log('false');}
 	;
 
-error
-	: NEWLINE_IN_STRING		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: newline in string."); 
-							process.exit(0);}
-	| NULL_IN_STRING		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: null character in string."); 
-							process.exit(0);}
-	| EOF_IN_COMMENT		{console.error("ERROR: " + @1.first_line + ": " + "Lexer: EOF in comment."); 
-							process.exit(0);}
+ERROR
+	: ERROR_INVALID_CHAR	{
+								process.stdout.write("ERROR: " + @1.first_line + ": " + "Lexer: invalid character:" + yytext + "\n"); 
+								process.exit(1);	
+							}
 	;
+
+
 
 /*TODO*/
 /* Test NULL error from string */

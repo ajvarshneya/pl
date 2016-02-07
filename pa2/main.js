@@ -18,16 +18,24 @@ console.log = function(str) {
   write_file.write(str + '\n');
 };
 
-function exec (input) {
+function lex (input) {
      require("./lexer").parse(input);
 }
 
-raw = ""
-rl.on('line', function(line) {
-	raw += line;
-	raw += '\n';
+fs.readFile(filename, 'utf8', function (err, data) {
+	if (err) {
+		console.log(err);
+	}
+
+	lex(data);
 });
 
-rl.on('close', function() {
-	exec(raw);
-});
+// raw = ""
+// rl.on('line', function(line) {
+// 	raw += line;
+// 	raw += '\n';
+// });
+
+// rl.on('close', function() {
+// 	exec(raw);
+// });
