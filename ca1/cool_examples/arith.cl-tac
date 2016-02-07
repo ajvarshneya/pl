@@ -1,0 +1,4 @@
+comment start
+label A_value_0
+t$0 <- var
+return t$0

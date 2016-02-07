@@ -1,0 +1,168 @@
+comment start
+label A2I_c2i_0
+t$2 <- char
+t$3 <- string
+0
+t$1 <- = t$2 t$3
+t$32 <- not t$1
+bt t$32 A2I_c2i_2
+bt t$1 A2I_c2i_1
+comment then branch
+label A2I_c2i_1
+t$0 <- int 0
+jmp A2I_c2i_3
+comment else branch
+label A2I_c2i_2
+t$5 <- char
+t$6 <- string
+1
+t$4 <- = t$5 t$6
+t$33 <- not t$4
+bt t$33 A2I_c2i_5
+bt t$4 A2I_c2i_4
+comment if-join
+label A2I_c2i_3
+return t$0
+comment then branch
+label A2I_c2i_4
+t$0 <- int 1
+jmp A2I_c2i_6
+comment else branch
+label A2I_c2i_5
+t$8 <- char
+t$9 <- string
+2
+t$7 <- = t$8 t$9
+t$34 <- not t$7
+bt t$34 A2I_c2i_8
+bt t$7 A2I_c2i_7
+comment if-join
+label A2I_c2i_6
+jmp A2I_c2i_3
+comment then branch
+label A2I_c2i_7
+t$0 <- int 2
+jmp A2I_c2i_9
+comment else branch
+label A2I_c2i_8
+t$11 <- char
+t$12 <- string
+3
+t$10 <- = t$11 t$12
+t$35 <- not t$10
+bt t$35 A2I_c2i_11
+bt t$10 A2I_c2i_10
+comment if-join
+label A2I_c2i_9
+jmp A2I_c2i_6
+comment then branch
+label A2I_c2i_10
+t$0 <- int 3
+jmp A2I_c2i_12
+comment else branch
+label A2I_c2i_11
+t$14 <- char
+t$15 <- string
+4
+t$13 <- = t$14 t$15
+t$36 <- not t$13
+bt t$36 A2I_c2i_14
+bt t$13 A2I_c2i_13
+comment if-join
+label A2I_c2i_12
+jmp A2I_c2i_9
+comment then branch
+label A2I_c2i_13
+t$0 <- int 4
+jmp A2I_c2i_15
+comment else branch
+label A2I_c2i_14
+t$17 <- char
+t$18 <- string
+5
+t$16 <- = t$17 t$18
+t$37 <- not t$16
+bt t$37 A2I_c2i_17
+bt t$16 A2I_c2i_16
+comment if-join
+label A2I_c2i_15
+jmp A2I_c2i_12
+comment then branch
+label A2I_c2i_16
+t$0 <- int 5
+jmp A2I_c2i_18
+comment else branch
+label A2I_c2i_17
+t$20 <- char
+t$21 <- string
+6
+t$19 <- = t$20 t$21
+t$38 <- not t$19
+bt t$38 A2I_c2i_20
+bt t$19 A2I_c2i_19
+comment if-join
+label A2I_c2i_18
+jmp A2I_c2i_15
+comment then branch
+label A2I_c2i_19
+t$0 <- int 6
+jmp A2I_c2i_21
+comment else branch
+label A2I_c2i_20
+t$23 <- char
+t$24 <- string
+7
+t$22 <- = t$23 t$24
+t$39 <- not t$22
+bt t$39 A2I_c2i_23
+bt t$22 A2I_c2i_22
+comment if-join
+label A2I_c2i_21
+jmp A2I_c2i_18
+comment then branch
+label A2I_c2i_22
+t$0 <- int 7
+jmp A2I_c2i_24
+comment else branch
+label A2I_c2i_23
+t$26 <- char
+t$27 <- string
+8
+t$25 <- = t$26 t$27
+t$40 <- not t$25
+bt t$40 A2I_c2i_26
+bt t$25 A2I_c2i_25
+comment if-join
+label A2I_c2i_24
+jmp A2I_c2i_21
+comment then branch
+label A2I_c2i_25
+t$0 <- int 8
+jmp A2I_c2i_27
+comment else branch
+label A2I_c2i_26
+t$29 <- char
+t$30 <- string
+9
+t$28 <- = t$29 t$30
+t$41 <- not t$28
+bt t$41 A2I_c2i_29
+bt t$28 A2I_c2i_28
+comment if-join
+label A2I_c2i_27
+jmp A2I_c2i_24
+comment then branch
+label A2I_c2i_28
+t$0 <- int 9
+jmp A2I_c2i_30
+comment else branch
+label A2I_c2i_29
+jmp A2I_c2i_31
+comment if-join
+label A2I_c2i_30
+jmp A2I_c2i_27
+comment fcall-pre to abort
+label A2I_c2i_31
+t$31 <- call abort
+t$0 <- int 0
+jmp A2I_c2i_30

@@ -1,0 +1,25 @@
+label main 0
+t$2 <- call in int
+t$7 <- int 1
+t$8 <- int 3
+t$3 <- + t$7 t$8
+t$10 <- < t$7 t$2
+t$18 <- not t$10
+bt t$18 main 4
+bt t$10 main 3
+
+label main 3
+t$14 <- t$3
+t$15 <- int 6
+t$13 <- + t$14 t$15
+t$9 <- call out int t$13
+jmp main 5
+
+label main 4
+t$16 <- t$1
+t$9 <- call out int t$16
+jmp main 5
+
+label main 5
+t$0 <- call out int t$2
+return t$0
