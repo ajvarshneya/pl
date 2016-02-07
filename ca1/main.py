@@ -32,11 +32,7 @@ class TACPlus(object):
 		self.op2 = op2
 
 	def __str__(self):
-		return 	str(self.assignee) +
-				' <- + ' +
-				str(self.op1) +
-				' ' +
-				str(self.op2)
+		return 	(str(self.assignee) + ' <- + ' + str(self.op1) + ' ' + str(self.op2))
 
 
 class TACMinus(object):
@@ -46,11 +42,7 @@ class TACMinus(object):
 		self.op2 = op2
 
 	def __str__(self):
-		return 	str(self.assignee) +
-				' <- - ' +
-				str(self.op1) +
-				' ' +
-				str(self.op2)
+		return 	str(self.assignee) + ' <- - ' + str(self.op1) + ' ' + str(self.op2)
 
 
 class TACMultiply(object):
@@ -60,11 +52,7 @@ class TACMultiply(object):
 		self.op2 = op2
 
 	def __str__(self):
-		return 	str(self.assignee) +
-				' <- * ' +
-				str(self.op1) +
-				' ' +
-				str(self.op2)
+		return 	str(self.assignee) + ' <- * ' + str(self.op1) + ' ' + str(self.op2)
 
 
 class TACDivide(object):
@@ -74,11 +62,7 @@ class TACDivide(object):
 		self.op2 = op2
 
 	def __str__(self):
-		return 	str(self.assignee) +
-				' <- / ' +
-				str(self.op1) +
-				' ' +
-				str(self.op2)
+		return 	str(self.assignee) + ' <- / ' + str(self.op1) + ' ' + str(self.op2)
 
 
 class TACLT(object):
@@ -88,11 +72,7 @@ class TACLT(object):
 		self.op2 = op2
 
 	def __str__(self):
-		return 	str(self.assignee) +
-				' <- < ' +
-				str(self.op1) +
-				' ' +
-				str(self.op2)
+		return 	str(self.assignee) + ' <- < ' + str(self.op1) + ' ' + str(self.op2)
 
 
 class TACLEQ(object):
@@ -102,11 +82,7 @@ class TACLEQ(object):
 		self.op2 = op2
 
 	def __str__(self):
-		return 	str(self.assignee) +
-				' <- <= ' +
-				str(self.op1) +
-				' ' +
-				str(self.op2)
+		return 	str(self.assignee) + ' <- <= ' + str(self.op1) + ' ' + str(self.op2)
 
 
 class TACEqual(object):
@@ -116,11 +92,7 @@ class TACEqual(object):
 		self.op2 = op2
 
 	def __str__(self):
-		return 	str(self.assignee) +
-				' <- = ' +
-				str(self.op1) +
-				' ' +
-				str(self.op2)
+		return 	str(self.assignee) + ' <- = ' + str(self.op1) + ' ' + str(self.op2)
 
 
 class TACBasicBlock(object):
@@ -143,24 +115,13 @@ class TACBasicBlock(object):
 			s += 'Children : ' + str([child.label for child in self.children]) + '\n'
 		return s
 
-
-def make_bbs(insts):
-	blocks = []
-	blocked_insts = []
-
-	# Create list of instruction lists
-	for inst in insts:
-		if isInstance(inst, TACLabel):
-			blocked_insts += [[]]
-		blocked_insts[-1] += [instruction]
-
-	block_dict = {}
-
-	# Create dictionary of labels mapping to blocks
-	for block in blocked_insts:
-		new_block = TACBasicBlock(block)
-		blocks += [new_block]
-		block_dict[new_block.label] = new_block
+def read_tac(filename):
+	f = open(filename)
+	tac = []
+	for line in f:
+		tac.append(line.rstrip('\n').rstrip('\r'))
+	f.close()
+	return tac
 
 
 def make_inst_list(tac):
@@ -219,22 +180,47 @@ def make_inst_list(tac):
 				op2 = inst[4]
 				inst_list.append(TACEqual(assignee, op1, op2))
 
+def make_bbs(insts):
+	blocks = []
+	block_insts = []
 
-def read_tac(filename):
-	f = open(filename)
-	tac = []
-	for line in f:
-		tac.append(line.rstrip('\n').rstrip('\r'))
-	f.close()
-	return tac
+	# Create list of instruction lists
+	for inst in insts:
+		if isInstance(inst, TACLabel):
+			block_insts += [[]]
+		block_insts[-1] += [instruction]
 
+	block_dict = {}
+
+	# Create dictionary of labels mapping to blocks
+	for block_inst in block_insts:
+		new_block = TACBasicBlock(block_inst)
+
+		# Add to list of blocks we can iterate over to generate relationships
+		blocks += [new_block]
+		block_dict[new_block.label] = new_block
+
+	# Populate parents/children lists of each block
+	for block in blocks:
+		# Get children
+		for child_label in block.child_labels:
+			child = block_dict[child_label]
+			block.children += [child]
+		# Set parent of children
+		for child in block.children:
+			child.parents += [block]
+
+	return blocks
 
 def main():
 	filename = sys.argv[1]
 
 	tac = read_tac(filename)
 	insts = make_inst_list(tac)
-	bbs = make_bbs(insts)
+	blocks = make_bbs(insts)
+
+	for block in blocks:
+		print str(block)
 
 
 if __name__ == '__main__':
