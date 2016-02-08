@@ -429,6 +429,7 @@ def kill_dead_code(block):
  		if hasattr(inst, 'assignee'):
  			if (inst.assignee in live_set) or hasattr(inst, 'call'):
   				live_set.discard(inst.assignee)
+  				
 		 		if hasattr(inst, 'op1'):
 		 			live_set.add(inst.op1)
 		 		if hasattr(inst, 'op2'):
@@ -449,6 +450,11 @@ def percolate(block):
 	live_set = copy.copy(block.live_out)
 
  	for inst in reversed(block.insts):
+
+ 		# Branch/return cases, add to live set
+ 		if isinstance(inst, TACBt) or isinstance(inst, TACReturn):
+ 			live_set.add(inst.val)
+
  		# Remove assignee from live set
  		if hasattr(inst, 'assignee'):
  			live_set.discard(inst.assignee)
