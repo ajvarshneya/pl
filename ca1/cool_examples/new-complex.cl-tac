@@ -1,0 +1,8 @@
+comment start
+label Complex_init_0
+x <- a
+t$1 <- x
+y <- b
+t$2 <- y
+t$0 <- self
+return t$0

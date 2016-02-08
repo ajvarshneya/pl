@@ -1,0 +1,53 @@
+label Main_main_0
+t$2 <- bool false
+jmp Main_main_1
+label Main_main_1
+t$4 <- t$2
+t$3 <- not t$4
+t$16 <- not t$3
+bt t$16 Main_main_2
+bt t$3 Main_main_3
+label Main_main_2
+t$1 <- default Object
+t$13 <- cycle
+t$12 <- not t$13
+t$17 <- not t$12
+bt t$17 Main_main_14
+bt t$12 Main_main_13
+label Main_main_3
+t$6 <- call in_string
+t$8 <- t$6
+t$9 <- string
+
+t$7 <- = t$8 t$9
+t$18 <- not t$7
+bt t$18 Main_main_7
+bt t$7 Main_main_6
+label Main_main_6
+t$2 <- bool true
+t$5 <- t$2
+jmp Main_main_8
+label Main_main_7
+jmp Main_main_9
+label Main_main_8
+jmp Main_main_1
+label Main_main_9
+t$10 <- call in_string
+t$11 <- t$10
+t$5 <- call out_string t$11
+jmp Main_main_8
+label Main_main_13
+t$14 <- int 1
+jmp Main_main_16
+label Main_main_14
+t$15 <- string
+
+jmp Main_main_18
+label Main_main_15
+return t$0
+label Main_main_16
+t$0 <- call out_int t$14
+jmp Main_main_15
+label Main_main_18
+t$0 <- call out_string t$15
+jmp Main_main_15

@@ -105,7 +105,7 @@ class TACString(object):
 		self.val = val
 
 	def __str__(self):
-		return str(self.assignee) + ' <- string ' + str(self.val)
+		return str(self.assignee) + ' <- string ' + '\n' + str(self.val)
 
 
 class TACNot(object):
@@ -357,7 +357,7 @@ def make_inst_list(tac):
 
 			elif inst[2] == 'isvoid': # Void check instruction
 				op1 = inst[3]
-				inst_list.append(TACDefault(assignee, op1))
+				inst_list.append(TACIsVoid(assignee, op1))
 
 			elif inst[2] == 'call': # Call instructions
 				if inst[3] == 'out_int':
@@ -414,7 +414,7 @@ def make_bbs(insts):
 	return blocks 
 
 
-# Percolate live_out set up the block
+# metal function names
 def kill_dead_code(block):
 	removal = False
 	live_set = copy.copy(block.live_out)

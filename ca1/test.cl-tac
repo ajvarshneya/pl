@@ -1,0 +1,7 @@
+label Main_method2_0
+t$1 <- default Int
+t$2 <- num1
+t$3 <- num2
+t$1 <- + t$2 t$3
+t$0 <- t$1
+return t$0

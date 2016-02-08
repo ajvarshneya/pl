@@ -1,0 +1,6 @@
+comment start
+label CellularAutomaton_init_0
+population_map <- map
+t$1 <- population_map
+t$0 <- self
+return t$0
