@@ -58,17 +58,161 @@ precedence = (
     ('right', 'LARROW'),
 )
 
-# Grammar rules
+class AST(object):
+    def __init__(self, classes):
+        self.classes = classes
+
+    def __str__(self):
+        s = ""
+        for ast_class in classes:
+            s += str(ast_class)
+        return s
+
+class ASTClass(object):
+    def __init__(self, inherits, name, name_line, superclass, superclass_line, features):
+        self.inherits = inherits 
+        self.name = name 
+        self.name_line = name_line 
+        self.superclass = superclass 
+        self.superclass_line = superclass_line 
+        self.features = features
+
+    def __str__(self):
+        # name:identifier \n
+        s = ""
+        s += str(self.name) + "\n"
+        s += str(self.name_line) + "\n"
+        if (self.inherits == "inherits"):
+            # inherits \n superclass:identifier \n
+            s += "inherits" + "\n"
+            s += str(self.superclass) + "\n"
+            s += str(self.superclass_line) + "\n"
+
+        if (self.inherits == "no_inherits"):
+            # no_inherits \n
+            s += "no_inherits" + "\n"
+
+        # features-list \n
+        for feature in self.features:
+            s += str(feature) + "\n"
+
+        return s
+
+class ASTFeature(object):
+    def __init__(self, kind, name, name_line, formals, typ, typ_line, expr):
+        self.kind = kind 
+        self.name = name 
+        self.name_line = name_line 
+        self.formals = formals 
+        self.typ = typ 
+        self.typ_line = typ_line 
+        self.expr = expr
+
+    def __str__(self):
+        s = ""
+        if (self.kind == "method_formals"):
+            # method \n name:identifier \n formals-list \n type:identifier \n expr:exp
+            s += "method" + "\n"
+            s += str(self.name) 
+            s += str(self.name_line)
+            for formal in self.formals:
+                s += str(self.formals)
+        if (feature[0] == "method"):
+            # method \n name:identifier \n type:identifier \n body:exp
+            s += "method"
+        if (feature[0] == "attribute_init"):
+            # attribute_init \n name:identifier \n type:identifier \n init:exp
+
+        if (feature[0] == "attribute_no_init"):
+            # attribute_no_init \n name:identifier \n type:identifier
+
+            s += str(self.name) + "\n"
+            s += str(self.name_line) + "\n"
+        if (self.kind == "method_formals"):
+            s += str(self.formals) + "\n"
+        s += str(self.typ) + "\n"
+        s += str(self.typ_line) + "\n"
+        if (self.kind == "method"):
+            s += str(self.body)
+        if (self.kind == "attribite_init"):
+            s += str(self.expr) + "\n"
+        return s
+
+class ASTFormal(object):
+    def __init__(self):
+
+class ASTExpression(object):
+    def __init__(self):
+
+class ASTAssign(ASTExpression)
+    def __init__(self):
+
+class ASTAssign(ASTExpression):
+    def __init__(self):
+
+class ASTDynamicDispatch(ASTExpression):
+    def __init__(self):
+
+class ASTStaticDispatch(ASTExpression):
+    def __init__(self):
+
+class ASTSelfDispatch(ASTExpression):
+    def __init__(self):
+
+class ASTIf(ASTExpression):
+    def __init__(self):
+
+class ASTWhile(ASTExpression):
+    def __init__(self):
+
+class ASTBlock(ASTExpression):
+    def __init__(self):
+
+class ASTNew(ASTExpression):
+    def __init__(self):
+
+class ASTIsVoid(ASTExpression):
+    def __init__(self):
+
+class ASTBinOp(ASTExpression):
+    def __init__(self):
+
+class ASTBoolOp(ASTExpression):
+    def __init__(self):
+
+class ASTNot(ASTExpression):
+    def __init__(self):
+
+class ASTNegate(ASTExpression):
+    def __init__(self):
+
+class ASTInteger(ASTExpression):
+    def __init__(self):
+
+class ASTString(ASTExpression):
+    def __init__(self):
+
+class ASTBoolean(ASTExpression):
+    def __init__(self):
+
+class ASTIdentifier(ASTExpression):
+    def __init__(self):
+
+class ASTLet(ASTExpression):
+    def __init__(self):
+
+class ASTCase(ASTExpression):
+    def __init__(self):
 
 ### PROGRAM ###
 
 # program ::= [class;]+
 def p_program(p):
     'program : classes'
-    p[0] = p[1]
-
+    p[0] = Program(p[1])
 
 ### CLASS ###
+# params: inherits, name, name_line, superclass, superclass_line, features
 
 # [class;]+
 def p_classes(p):
@@ -83,12 +227,12 @@ def p_classes_base(p):
 # class ::= class TYPE inherits TYPE { [feature;]* }
 def p_class_inherits(p):
     'class : CLASS TYPE INHERITS TYPE LBRACE features RBRACE'
-    p[0] = ('inherits', p.lineno(2), p[2], p.lineno(4), p[4], p[6])
+    p[0] = ASTClass('inherits', p[2], p.lineno(2), p[4], p.lineno(4), p[6])
 
 # class ::= class TYPE { [feature;]* }
 def p_class_no_inherits(p):
     'class : CLASS TYPE LBRACE features RBRACE'
-    p[0] = ('no_inherits', p.lineno(1), p[2], p[4])
+    p[0] = ASTClass('no_inherits', p[2], p.lineno(1), None, [], p[4])
 
 # features ::= [feature;]*
 def p_features(p):
@@ -102,26 +246,27 @@ def p_features_base(p):
 
 
 ### FEATURE ###
+# params: kind, name, name_line, formals, typ, typ_line, body, expr
 
 # feature ::= ID( [formal [, formal]*] ) : TYPE { expr }
 def p_feature_method_formals(p):
     'feature : IDENTIFIER LPAREN formals RPAREN COLON TYPE LBRACE expr RBRACE'
-    p[0] = ('method_formals', p.lineno(1), p[1], p[3], p.lineno(6), p[6], p[8])
+    p[0] = Feature('method_formals', p.lineno(1), p[1], p[3], p.lineno(6), p[6], p[8])
 
 # feature ::= ID() : TYPE { expr }
 def p_feature_method(p):
     'feature : IDENTIFIER LPAREN RPAREN COLON TYPE LBRACE expr RBRACE'
-    p[0] = ('method', p.lineno(1), p[1], p.lineno(5), p[5], p[7])
+    p[0] = Feature('method', p.lineno(1), p[1], p.lineno(5), p[5], p[7])
 
 # feature ::= ID : TYPE [ <- expr ]
 def p_feature_init(p):
     'feature : formal LARROW expr'
-    p[0] = ('attribute_init', p[1], p[3])
+    p[0] = Feature('attribute_init', p[1], p[3])
 
 # feature ::= ID : TYPE
 def p_feature(p):
     'feature : formal'
-    p[0] = ('attribute_no_init', p[1]) # (node_type, lineno, ())
+    p[0] = Feature('attribute_no_init', p[1]) # (node_type, lineno, ())
 
 # formals ::= [formal [, formal]*]
 def p_formals(p):
@@ -341,193 +486,6 @@ def p_expr_false(p):
 def p_error(p):
     print "Syntax error in input!"    
 
-
-# ### PRINTING FUNCTIONS ###
-def print_identifier(lineno, value):
-    print lineno
-    print value
-
-def print_dispatch(expression):
-
-
-def print_expression(expression):
-    print expression[1] # line number
-    if (expression[0] == 'assign'):
-        # assign \n var:identifier rhs:exp
-        print 'assign'
-        print_identifier(expression[1], expression[2])
-        print_expression(expression[3])
-    if (expression[0] == 'dynamic_dispatch'):
-        # dynamic_dispatch \n e:exp method:identifier args:exp-list
-        print 'dynamic_dispatch'
-        print_expression(expression[2])
-        print_dispatch(expression[3])
-    if (expression[0] == 'static_dispatch'):
-        # static_dispatch \n e:exp type:identifier method:identifier args:exp-list
-        
-#     'expr : expr AT TYPE DOT dispatch'
-#     p[0] = ('static_dispatch', p.lineno(1), p[1], p.lineno(3), p[3], p[5])
-
-    if (expression[0] == 'self_dispatch'):
-    # self_dispatch \n method:identifier args:exp-list
-
-    if (expression[0] == 'if'):
-    # if \n predicate:exp then:exp else:exp
-    if (expression[0] == 'while'):
-    # while \n predicate:exp body:exp
-    if (expression[0] == 'block'):
-    # block \n body:exp-list
-    if (expression[0] == 'new'):
-    # new \n class:identifier
-    if (expression[0] == 'isvoid'):
-    # isvoid \n e:exp
-
-    if (expression[0] == 'plus'):
-        # plus \n x:exp y:exp
-
-    if (expression[0] == 'minus'):
-        # minus \n x:exp y:exp
-
-    if (expression[0] == 'times'):
-        # times \n x:exp y:exp
-
-    if (expression[0] == 'divide'):
-        # divide \n x:exp y:exp
-
-    if (expression[0] == 'lt'):
-        # lt \n x:exp y:exp
-
-    if (expression[0] == 'le'):
-        # le \n x:exp y:exp
-
-    if (expression[0] == 'eq'):
-        # eq \n x:exp y:exp
-
-    if (expression[0] == 'not'):
-        # not \n x:exp
-
-    if (expression[0] == 'negate'):
-        # negate \n x:exp
-
-    if (expression[0] == 'integer'):
-        # integer \n the_integer_constant \n
-
-    if (expression[0] == 'string'):
-        # string \n the_string_constant \n
-
-    if (expression[0] == 'identifier'):
-        # identifier \n variable:identifier (note that this is not the same as the integer and string cases above)
-
-    if (expression[0] == 'true'):
-        # true \n
-
-    if (expression[0] == 'false'):
-        # false \n
-
-    if (expression[0] == 'assign'):
-
-
-# # expr ::= expr[@TYPE].ID( [expr [, expr]*] )
-# def p_expr_static_dispatch(p):
-
-# # expr ::= expr.ID( [expr [, expr]*] )
-# def p_expr_dynamic_dispatch(p):
-
-# # expr ::= ID( [expr [, expr]*] )
-# def p_expr_dispatch(p):
-#     'expr : dispatch'
-#     p[0] = p[1]
-
-# # dispatch ::= ID( expr [, expr]* )
-# def p_dispatch_params(p):
-#     'dispatch : IDENTIFIER LPAREN exprs RPAREN'
-#     p[0] = ('self_dispatch', p.lineno(1), p[1], p[3])
-
-# # dispatch ::= ID()
-# def p_dispatch(p):
-#     'dispatch : IDENTIFIER LPAREN RPAREN'
-#     p[0] = ('self_dispatch', p.lineno(1), p[1], p[3])
-
-
-def print_expressions(expressions):
-    print len(expressions)
-    for expression in expressions:
-        print_expression(expression)
-
-def print_formal(formal):
-    # name:identifier \n 
-    print_identifier(formal[1], formal[2])
-    print_identifier(formal[3], formal[4])
-
-def print_formals(formals):
-    print len(formals)
-    for formal in formals:
-        print_formal(formal)
-
-def print_feature(feature):
-    if (feature[0] == 'method_formals'):
-        # method \n name:identifier \n formals-list \n type:identifier \n body:exp
-        print 'method'
-        print_identifier(feature[1], feature[2])
-        print_formals(feature[3])
-        print_identifier(feature[4], feature[5])
-        print_expression(feature[8])
-    if (feature[0] == 'method'):
-        # method \n name:identifier \n type:identifier \n body:exp
-        print 'method'
-        print_identifier(feature[1], feature[2])
-        print_identifier(feature[3], feature[4])
-        print_expression(feature[7])
-    if (feature[0] == 'attribute_init'):
-        # attribute_init \n name:identifier \n type:identifier \n init:exp
-        print 'attribute_init'
-        print_formal(feature[1])
-        print_expression(feature[2])
-    if (feature[0] == 'attribute_no_init'):
-        # attribute_no_init \n name:identifier \n type:identifier
-        print 'attribute_no_init'
-        print_formal(feature[1])
-
-def print_features(features):
-    print len(features)
-    for feature in features:
-        print_feature(feature)
-
-def print_class(mclass):
-    # name:identifier \n 
-    print_identifier(mclass[1], mclass[2]) # class
-    if mclass[0] == 'inherits':
-        # inherits \n superclass:identifier \n features-list
-        print 'inherits'
-        print_identifier(mclass[3], mclass[4]) # superclass
-        print_features(mclass[5])
-    if mclass[0] == 'no_inherits':
-        # no_inherits \n features-list
-        print 'no_inherits'
-        print_features(mclass[3])
-
-def print_classes(classes):
-    print len(classes)
-    for mclass in classes:
-        print_class(mclass)
-
-def print_ast(ast):
-    print_classes(ast)
-
-
-
-#     pass
-
-# def print_let():
-#     # (Output the line number, as usual.) Output let \n. Then output the binding list. To output a binding, do either:
-#     #     let_binding_no_init \n variable:identifier type:identifier
-#     #     let_binding_init \n variable:identifier type:identifier value:exp
-#     #     Finally, output the expression that is the body of the let.
-#     pass
-
-# def print_case():
-#     # (Output the line number, as usual.) Output case \n. Then output the case expression. Then output the case-elements list. To output a case-element, output the variable as an identifier, then the type as an identifier, then the case-element-body as an exp.
-#     pass
 
 # Produces Token objects from input
 class Lexer(object):
