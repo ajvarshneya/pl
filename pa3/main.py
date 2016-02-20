@@ -64,6 +64,7 @@ class AST(object):
 
     def __str__(self):
         s = ""
+        s += len(self.classes) + "\n"
         for ast_class in classes:
             s += str(ast_class)
         return s
@@ -78,23 +79,25 @@ class ASTClass(object):
         self.features = features
 
     def __str__(self):
-        # name:identifier \n
+        # name:identifier
         s = ""
-        s += str(self.name) + "\n"
         s += str(self.name_line) + "\n"
+        s += str(self.name) + "\n"
         if (self.inherits == "inherits"):
-            # inherits \n superclass:identifier \n
+            # inherits \n superclass:identifier
             s += "inherits" + "\n"
-            s += str(self.superclass) + "\n"
             s += str(self.superclass_line) + "\n"
+            s += str(self.superclass) + "\n"
 
         if (self.inherits == "no_inherits"):
             # no_inherits \n
             s += "no_inherits" + "\n"
 
         # features-list \n
-        for feature in self.features:
-            s += str(feature) + "\n"
+        if self.features:
+            s += len(self.features) + "\n"
+            for feature in self.features:
+                s += str(feature)
 
         return s
 
@@ -113,59 +116,216 @@ class ASTFeature(object):
         if (self.kind == "method_formals"):
             # method \n name:identifier \n formals-list \n type:identifier \n expr:exp
             s += "method" + "\n"
-            s += str(self.name) 
-            s += str(self.name_line)
-            for formal in self.formals:
-                s += str(self.formals)
+            s += str(self.name_line) + "\n"
+            s += str(self.name) + "\n"
+            if formals:
+                s += len(self.formals) + "\n"
+                for formal in self.formals:
+                    s += str(self.formals)
+            s += str(self.typ_line) + "\n"
+            s += str(self.typ) + "\n"
+            s += str(self.expr)
         if (feature[0] == "method"):
             # method \n name:identifier \n type:identifier \n body:exp
             s += "method"
+            s += str(self.name_line) + "\n"
+            s += str(self.name) + "\n"
+            s += str(self.typ_line) + "\n"
+            s += str(self.typ) + "\n"
+            s += str(self.expr)
         if (feature[0] == "attribute_init"):
             # attribute_init \n name:identifier \n type:identifier \n init:exp
-
+            s += "attribute_init"
+            s += str(self.name_line) + "\n"
+            s += str(self.name) + "\n"
+            s += str(self.typ_line) + "\n"
+            s += str(self.typ) + "\n"
+            s += str(self.expr)
         if (feature[0] == "attribute_no_init"):
             # attribute_no_init \n name:identifier \n type:identifier
-
-            s += str(self.name) + "\n"
+            s += "attribute_no_init"
             s += str(self.name_line) + "\n"
-        if (self.kind == "method_formals"):
-            s += str(self.formals) + "\n"
-        s += str(self.typ) + "\n"
-        s += str(self.typ_line) + "\n"
-        if (self.kind == "method"):
-            s += str(self.body)
-        if (self.kind == "attribite_init"):
-            s += str(self.expr) + "\n"
+            s += str(self.name) + "\n"
+            s += str(self.typ_line) + "\n"
+            s += str(self.typ) + "\n"
         return s
 
 class ASTFormal(object):
-    def __init__(self):
+    def __init__(self, name, name_line, typ, typ_line):
+       self.name = name 
+       self.name_line = name_line 
+       self.typ = typ 
+       self.typ_line = typ_line 
+    def __str__(self):
+        # name:identifier \n type:identifier
+        s = ""
+        s += str(self.name_line) + "\n"
+        s += str(self.name) + "\n"
+        s += str(self.typ_line) + "\n"
+        s += str(self.typ) + "\n"
+        return s
 
 class ASTExpression(object):
-    def __init__(self):
-
-class ASTAssign(ASTExpression)
-    def __init__(self):
+    pass
 
 class ASTAssign(ASTExpression):
-    def __init__(self):
+    def __init__(self, lineno, var, var_line, rhs):
+        self.lineno = lineno
+        self.var = var
+        self.var_line = var_line
+        self.rhs = rhs
+
+    def __str__(self):
+        # assign \n var:identifier rhs:exp
+        s = ""
+        s += str(self.lineno) + "\n"
+        s += "assign" + "\n"
+        s += str(self.var_line) + "\n"
+        s += str(self.var) + "\n"
+        s += str(self.rhs)
+        return s
 
 class ASTDynamicDispatch(ASTExpression):
-    def __init__(self):
+    def __init__(self, lineno, expr, method, method_line, args):
+        self.lineno = lineno
+        self.expr = expr
+        self.method = method
+        self.method_line = method_line
+        self.args = args
+
+    def __str__(self):
+        # dynamic_dispatch \n e:exp method:identifier args:exp-list
+        s = ""
+        s += str(self.lineno) + "\n"
+        s += "dynamic_dispatch" + "\n"
+        s += str(self.expr)
+        s += str(self.method_line) + "\n"
+        s += str(self.method) + "\n"
+        if self.args:
+            s += len(self.args):
+            for arg in self.args:
+                s += str(arg)
+        return s
+
 
 class ASTStaticDispatch(ASTExpression):
-    def __init__(self):
+    def __init__(self, lineno, expr, typ, typ_line, method, method_line, args):
+        self.lineno = lineno
+        self.expr = expr
+        self.typ = typ
+        self.typ_line = typ_line
+        self.method = method
+        self.method_line = method_line
+        self.args = args
+
+    def __str__(self):
+        # static_dispatch \n e:exp type:identifier method:identifier args:exp-list
+        s = ""
+        s += str(self.lineno) + "\n"
+        s += "static_dispatch" + "\n"
+        s += str(self.expr)
+        s += str(self.typ_line) + "\n"
+        s += str(self.typ) + "\n"
+        s += str(self.method_line) + "\n"
+        s += str(self.method) + "\n"
+        if self.args:
+            s += len(self.args):
+            for arg in self.args:
+                s += str(arg)
+        return s
 
 class ASTSelfDispatch(ASTExpression):
-    def __init__(self):
+    def __init__(self, lineno, method, method_line, args):
+        self.lineno = lineno
+        self.method = method
+        self.method_line = method_line
+        self.args = args
+
+    def __str__(self):
+        # self_dispatch \n method:identifier args:exp-list
+        s = ""
+        s += str(self.lineno) + "\n"
+        s += "self_dispatch" + "\n"
+        s += str(self.method_line) + "\n"
+        s += str(self.method) + "\n"
+        if self.args:
+            s += len(self.args):
+            for arg in self.args:
+                s += str(arg)
+        return s
 
 class ASTIf(ASTExpression):
-    def __init__(self):
+    def __init__(self, lineno, predicate, then, els):
+       self.lineno = lineno
+       self.predicate = predicate
+       self.then = then
+       self.els = els
+
+    def __str__(self):
+        # if \n predicate:exp then:exp else:exp
+        s = ""
+        s += str(self.lineno) + "\n"
+        s += "if" + "\n"
+        s += str(self.predicate)
+        s += str(self.then)
+        s += str(self.els)
+        return s
 
 class ASTWhile(ASTExpression):
-    def __init__(self):
+    def __init__(self, lineno, predicate, body):
+       self.lineno = lineno
+       self.predicate = predicate
+       self.body = body
+
+    def __str__(self):
+        # while \n predicate:exp body:exp
+        s = ""
+        s += str(self.lineno) + "\n"
+        s += "while" + "\n"
+        s += str(self.predicate)
+        s += str(self.body)
+        return s
 
 class ASTBlock(ASTExpression):
+    def __init__(self, lineno, body):
+       self.lineno = lineno
+       self.predicate = predicate
+       self.body = body
+
+    def __str__(self):
+        # block \n body:exp-list
+        s = ""
+        s += str(self.lineno) + "\n"
+        s += "block" + "\n"
+        if self.body:
+            s += len(self.body)
+            for expr in self.body:
+                s += str(expr)
+        return s
+
+class ASTBinding(object):
+    def __init__(self, kind, formal, expr):
+        self.kind = kind
+        self.formal = formal
+        self.expr = expr
+
+    def __str__(self):
+        # block \n body:exp-list
+        s = ""
+        if self.kind == 'binding_init':
+
+        s += str(self.lineno) + "\n"
+        s += "block" + "\n"
+        if self.body:
+            s += len(self.body)
+            for expr in self.body:
+                s += str(expr)
+        return s
+
+class ASTLet(ASTExpression):
+    def __init__(self):
+
+class ASTCase(ASTExpression):
     def __init__(self):
 
 class ASTNew(ASTExpression):
@@ -198,12 +358,6 @@ class ASTBoolean(ASTExpression):
 class ASTIdentifier(ASTExpression):
     def __init__(self):
 
-class ASTLet(ASTExpression):
-    def __init__(self):
-
-class ASTCase(ASTExpression):
-    def __init__(self):
-
 ### PROGRAM ###
 
 # program ::= [class;]+
@@ -232,7 +386,7 @@ def p_class_inherits(p):
 # class ::= class TYPE { [feature;]* }
 def p_class_no_inherits(p):
     'class : CLASS TYPE LBRACE features RBRACE'
-    p[0] = ASTClass('no_inherits', p[2], p.lineno(1), None, [], p[4])
+    p[0] = ASTClass('no_inherits', p[2], p.lineno(1), None, None, p[4])
 
 # features ::= [feature;]*
 def p_features(p):
@@ -246,27 +400,27 @@ def p_features_base(p):
 
 
 ### FEATURE ###
-# params: kind, name, name_line, formals, typ, typ_line, body, expr
+# params: kind, name, name_line, formals, typ, typ_line, expr/body
 
 # feature ::= ID( [formal [, formal]*] ) : TYPE { expr }
 def p_feature_method_formals(p):
     'feature : IDENTIFIER LPAREN formals RPAREN COLON TYPE LBRACE expr RBRACE'
-    p[0] = Feature('method_formals', p.lineno(1), p[1], p[3], p.lineno(6), p[6], p[8])
+    p[0] = ASTFeature('method_formals', p[1], p.lineno(1), p[3], p[6], p.lineno(6), p[8])
 
 # feature ::= ID() : TYPE { expr }
 def p_feature_method(p):
     'feature : IDENTIFIER LPAREN RPAREN COLON TYPE LBRACE expr RBRACE'
-    p[0] = Feature('method', p.lineno(1), p[1], p.lineno(5), p[5], p[7])
+    p[0] = ASTFeature('method', p[1], p.lineno(1), None, p[5], p.lineno(5),  p[7])
 
 # feature ::= ID : TYPE [ <- expr ]
 def p_feature_init(p):
-    'feature : formal LARROW expr'
-    p[0] = Feature('attribute_init', p[1], p[3])
+    'feature : IDENTIFIER COLON TYPE LARROW expr'
+    p[0] = ASTFeature('attribute_init', p[1], p.lineno(1), None, p[3], p.lineno(3), p[5])
 
 # feature ::= ID : TYPE
 def p_feature(p):
-    'feature : formal'
-    p[0] = Feature('attribute_no_init', p[1]) # (node_type, lineno, ())
+    'feature : IDENTIFIER COLON TYPE'
+    p[0] = ASTFeature('attribute_no_init', p[1], p.lineno(1), None, p[3], p.lineno(3), None)
 
 # formals ::= [formal [, formal]*]
 def p_formals(p):
@@ -284,7 +438,7 @@ def p_formals_base(p):
 # formal ::= ID : TYPE
 def p_formal(p):
     'formal : IDENTIFIER COLON TYPE'
-    p[0] = ('formal', p.lineno(1), p[1], p.lineno(3), p[3])
+    p[0] = ASTFormal(p[1], p.lineno(1), p[3], p.lineno(3))
 
 
 ### EXPRESSIONS ###
@@ -292,32 +446,43 @@ def p_formal(p):
 # expr ::= ID <- expr
 def p_expr_assign(p):
     'expr : IDENTIFIER LARROW expr'
-    p[0] = ('assign', p.lineno(1), p[1], p[3])
+    p[0] = ASTAssign(p.lineno(1), p[1], p.lineno(1), p[3])
 
-# expr ::= expr[@TYPE].ID( [expr [, expr]*] )
-def p_expr_static_dispatch(p):
-    'expr : expr AT TYPE DOT dispatch'
-    p[0] = ('static_dispatch', p.lineno(1), p[1], p.lineno(3), p[3], p[5])
+
+# DISPATCH #
+
+# params: expr, method, method_line, args
+# expr ::= expr.ID( [expr [, expr]*] )
+def p_expr_dynamic_dispatch(p):
+    'expr : expr DOT IDENTIFIER LPAREN exprs RPAREN'
+    p[0] = ASTDynamicDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5])
 
 # expr ::= expr.ID( [expr [, expr]*] )
 def p_expr_dynamic_dispatch(p):
-    'expr : expr DOT dispatch'
-    p[0] = ('dynamic_dispatch', p.lineno(1), p[1], p[3])
+    'expr : expr DOT IDENTIFIER LPAREN RPAREN'
+    p[0] = ASTDynamicDispatch(p.lineno(1), p[1], p[3], p.lineno(3), None)
+
+# params: expr, typ, typ_line, method, method_line, args
+# expr ::= expr[@TYPE].ID( [expr [, expr]*] )
+def p_expr_static_dispatch(p):
+    'expr : expr AT TYPE DOT IDENTIFIER LPAREN exprs RPAREN'
+    p[0] = ASTStaticDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5], p.lineno(5), p[7])
+
+# expr ::= expr[@TYPE].ID( [expr [, expr]*] )
+def p_expr_static_dispatch(p):
+    'expr : expr AT TYPE DOT IDENTIFIER LPAREN RPAREN'
+    p[0] = ASTStaticDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5], p.lineno(5), None)
+
+# params: method, method_line, args
+# expr ::= ID( [expr [, expr]*] )
+def p_expr_dispatch(p):
+    'expr : IDENTIFIER LPAREN exprs RPAREN'
+    p[0] = ASTSelfDispatch(p.lineno(1), p[1], p.lineno(1), p[3])
 
 # expr ::= ID( [expr [, expr]*] )
 def p_expr_dispatch(p):
-    'expr : dispatch'
-    p[0] = p[1]
-
-# dispatch ::= ID( expr [, expr]* )
-def p_dispatch_params(p):
-    'dispatch : IDENTIFIER LPAREN exprs RPAREN'
-    p[0] = ('self_dispatch', p.lineno(1), p[1], p[3])
-
-# dispatch ::= ID()
-def p_dispatch(p):
-    'dispatch : IDENTIFIER LPAREN RPAREN'
-    p[0] = ('self_dispatch', p.lineno(1), p[1], p[3])
+    'expr : IDENTIFIER LPAREN RPAREN'
+    p[0] = ASTSelfDispatch(p.lineno(1), p[1], p.lineno(1), None)
 
 # exprs ::= expr [, expr]*
 def p_exprs(p):
@@ -329,20 +494,25 @@ def p_exprs_base(p):
     'exprs : expr'
     p[0] = [p[1]]
 
+# IF/WHILE/BLOCKS #
+
+# params: lineno, predicate, then, els
 # expr ::= if expr then expr else expr fi
 def p_expr_if(p):
     'expr : IF expr THEN expr ELSE expr FI'
-    p[0] = ('if-then-else', p.lineno(1), p[2], p[4], p[6])
+    p[0] = ASTIf(p.lineno(1), p[2], p[4], p[6])
 
+# params: lineno, predicate, body
 # expr ::= while expr loop expr pool
 def p_expr_while(p):
     'expr : WHILE expr LOOP expr POOL'
-    p[0] = ('while', p.lineno(1), p[2], p[4])
+    p[0] = ASTWhile(p.lineno(1), p[2], p[4])
 
+# params: lineno, body
 # expr ::= { [expr;]+ }
-def p_expr_semis(p):
+def p_block(p):
     'expr : LBRACE exprsemi RBRACE'
-    p[0] = [p[2]]
+    p[0] = ASTBlock(p.lineno(1), p[2])
 
 # exprsemi ::= [expr;]+
 def p_exprsemi(p):
@@ -354,10 +524,13 @@ def p_exprsemi_base(p):
     'exprsemi : expr SEMI'
     p[0] = [p[1]]
 
+# LET/CASE #
+
+# params: 
 # expr ::= let ID : TYPE [ <- expr ] [, ID : TYPE [<- expr]]* in expr
 def p_expr_let(p):
     'expr : LET binding bindings IN expr'
-    p[0] = ('let', p.lineno(1), p[2], p[3], p[4])
+    p[0] = ASTLet('let', p.lineno(1), p[2], p[3], p[4])
 
 # bindings ::= ID : TYPE <- expr
 def p_binding_init(p):
@@ -386,102 +559,105 @@ def p_bindings_base(p):
 # expr ::= case expr of [ID : TYPE => expr;]+ esac
 def p_expr_case(p):
     'expr : CASE expr OF cases ESAC'    
-    p[0] = ('case', p.lineno(1), p[2], p[4])
+    p[0] = ASTCase('case', p.lineno(1), p[2], p[4])
 
 # cases ::= [ID : TYPE => expr;]+
 def p_cases(p):
     'cases : IDENTIFIER COLON TYPE RARROW expr SEMI cases'
-    p[0] = [('case_element', p.lineno(1), p[1], p[3], p[5])] + p[7]
+    p[0] = [ASTCase('case_element', p.lineno(1), p[1], p[3], p[5])] + p[7]
 
 # cases ::= ID : TYPE => expr;
 def p_cases_base(p):
     'cases : IDENTIFIER COLON TYPE RARROW expr SEMI'
-    p[0] = [('case_element', p.lineno(1), p[1], p[3], p[5])]
+    p[0] = [ASTCase('case_element', p.lineno(1), p[1], p[3], p[5])]
+
+
+# EVERYTHING ELSE #
 
 # expr ::= new TYPE
 def p_expr_new(p):
     'expr : NEW TYPE'
-    p[0] = ('new', p.lineno(1), p[2])
+    p[0] = ASTNew('new', p.lineno(1), p[2])
 
 # expr ::= isvoid expr
 def p_expr_isvoid(p):
     'expr : ISVOID expr'
-    p[0] = ('isvoid', p.lineno(1), p[2])
+    p[0] = ASTIsVoid('isvoid', p.lineno(1), p[2])
 
 # expr ::= expr + expr
 def p_expr_plus(p):
     'expr : expr PLUS expr'
-    p[0] = ('plus', p.lineno(1), p[1], p[3])
+    p[0] = ASTBinOp('plus', p.lineno(1), p[1], p[3])
 
 # expr ::= expr - expr
 def p_expr_minus(p):
     'expr : expr MINUS expr'
-    p[0] = ('minus', p.lineno(1), p[1], p[3])
+    p[0] = ASTBinOp('minus', p.lineno(1), p[1], p[3])
 
 # expr ::= expr * expr
 def p_expr_times(p):
     'expr : expr TIMES expr'
-    p[0] = ('times', p.lineno(1), p[1], p[3])
+    p[0] = ASTBinOp('times', p.lineno(1), p[1], p[3])
 
 # expr ::= expr / expr
 def p_expr_divide(p):
     'expr : expr DIVIDE expr'
-    p[0] = ('divide', p.lineno(1), p[1], p[3])
+    p[0] = ASTBinOp('divide', p.lineno(1), p[1], p[3])
 
 # expr ::= ~ expr
 def p_expr_negate(p):
     'expr : TILDE expr'
-    p[0] = ('negate', p.lineno(1), p[2])
+    p[0] = ASTNegate('negate', p.lineno(1), p[2])
 
 # expr ::= expr < expr
 def p_expr_lt(p):
     'expr : expr LT expr'
-    p[0] = ('lt', p.lineno(1), p[1], p[3])
+    p[0] = ASTBoolOp('lt', p.lineno(1), p[1], p[3])
 
 # expr ::= expr <= expr
 def p_expr_le(p):
     'expr : expr LE expr'
-    p[0] = ('le', p.lineno(1), p[1], p[3])
+    p[0] = ASTBoolOp('le', p.lineno(1), p[1], p[3])
 
 # expr ::= expr = expr
 def p_expr_equals(p):
     'expr : expr EQUALS expr'
-    p[0] = ('eq', p.lineno(1), p[1], p[3])
+    p[0] = ASTBoolOp('eq', p.lineno(1), p[1], p[3])
 
 # expr ::= not expr
 def p_expr_not(p):
     'expr : NOT expr'
-    p[0] = ('not', p.lineno(1), p[2])
+    p[0] = ASTNot('not', p.lineno(1), p[2])
 
 # expr ::= (expr)
 def p_expr_parens(p):
     'expr : LPAREN expr RPAREN'
-    p[0] = ('parens', p.lineno(1), p[2])
+    p[0] = p[2]
 
 # expr ::= ID
 def p_expr_identifier(p):
     'expr : IDENTIFIER'
-    p[0] = ('identifier', p.lineno(1), p[1])
+    p[0] = ASTIdentifier('identifier', p.lineno(1), p[1])
 
 # expr ::= integer
 def p_expr_integer(p):
     'expr : INTEGER'
-    p[0] = ('integer', p.lineno(1), p[1])
+    p[0] = ASTInteger('integer', p.lineno(1), p[1])
 
 # expr ::= string
 def p_expr_string(p):
     'expr : STRING'
-    p[0] = ('string', p.lineno(1), p[1])
+    p[0] = ASTString('string', p.lineno(1), p[1])
 
 # expr ::= true
 def p_expr_true(p):
     'expr : TRUE'
-    p[0] = ('true', p.lineno(1), p[1])
+    p[0] = ASTBoolean('true', p.lineno(1), p[1])
 
 # expr ::= false
 def p_expr_false(p):
     'expr : FALSE'
-    p[0] = ('false', p.lineno(1), p[1])
+    p[0] = ASTBoolean('false', p.lineno(1), p[1])
 
 def p_error(p):
     print "Syntax error in input!"    
