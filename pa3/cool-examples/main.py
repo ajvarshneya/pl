@@ -94,10 +94,9 @@ class ASTClass(object):
             s += "no_inherits" + "\n"
 
         # features-list \n
-        if self.features:
-            s += str(len(self.features)) + "\n"
-            for feature in self.features:
-                s += str(feature)
+        s += str(len(self.features)) + "\n"
+        for feature in self.features:
+            s += str(feature)
 
         return s
 
@@ -118,10 +117,9 @@ class ASTFeature(object):
             s += "method" + "\n"
             s += str(self.name_line) + "\n"
             s += str(self.name) + "\n"
-            if self.formals:
-                s += str(len(self.formals)) + "\n"
-                for formal in self.formals:
-                    s += str(self.formals)
+            s += str(len(self.formals)) + "\n"
+            for formal in self.formals:
+                s += str(formal)
             s += str(self.typ_line) + "\n"
             s += str(self.typ) + "\n"
             s += str(self.expr)
@@ -130,6 +128,7 @@ class ASTFeature(object):
             s += "method" + "\n"
             s += str(self.name_line) + "\n"
             s += str(self.name) + "\n"
+            s += str(len(self.formals)) + "\n"
             s += str(self.typ_line) + "\n"
             s += str(self.typ) + "\n"
             s += str(self.expr)
@@ -156,6 +155,7 @@ class ASTFormal(object):
        self.name_line = name_line 
        self.typ = typ 
        self.typ_line = typ_line 
+
     def __str__(self):
         # name:identifier \n type:identifier
         s = ""
@@ -201,10 +201,9 @@ class ASTDynamicDispatch(ASTExpression):
         s += str(self.expr)
         s += str(self.method_line) + "\n"
         s += str(self.method) + "\n"
-        if self.args:
-            s += str(len(self.args)) + "\n"
-            for arg in self.args:
-                s += str(arg)
+        s += str(len(self.args)) + "\n"
+        for arg in self.args:
+            s += str(arg)
         return s
 
 
@@ -228,10 +227,9 @@ class ASTStaticDispatch(ASTExpression):
         s += str(self.typ) + "\n"
         s += str(self.method_line) + "\n"
         s += str(self.method) + "\n"
-        if self.args:
-            s += str(len(self.args)) + "\n"
-            for arg in self.args:
-                s += str(arg)
+        s += str(len(self.args)) + "\n"
+        for arg in self.args:
+            s += str(arg)
         return s
 
 class ASTSelfDispatch(ASTExpression):
@@ -248,10 +246,9 @@ class ASTSelfDispatch(ASTExpression):
         s += "self_dispatch" + "\n"
         s += str(self.method_line) + "\n"
         s += str(self.method) + "\n"
-        if self.args:
-            s += str(len(self.args)) + "\n"
-            for arg in self.args:
-                s += str(arg)
+        s += str(len(self.args)) + "\n"
+        for arg in self.args:
+            s += str(arg)
         return s
 
 class ASTIf(ASTExpression):
@@ -296,10 +293,9 @@ class ASTBlock(ASTExpression):
         s = ""
         s += str(self.lineno) + "\n"
         s += "block" + "\n"
-        if self.body:
-            s += str(len(self.body)) + "\n"
-            for expr in self.body:
-                s += str(expr)
+        s += str(len(self.body)) + "\n"
+        for expr in self.body:
+            s += str(expr)
         return s
 
 class ASTBinding(object):
@@ -342,10 +338,9 @@ class ASTLet(ASTExpression):
         s = ""
         s += str(self.lineno) + "\n"
         s += "let" + "\n"
-        if self.bindings:
-            s += str(len(self.bindings)) + "\n"
-            for binding in self.bindings:
-                s += str(binding)
+        s += str(len(self.bindings)) + "\n"
+        for binding in self.bindings:
+            s += str(binding)
         return s
 
 class ASTCaseElement(object):
@@ -378,10 +373,9 @@ class ASTCase(ASTExpression):
         s += str(self.lineno) + "\n"
         s += "case" + "\n"
         s += str(self.expr)
-        if self.cases:
-            s += str(len(self.cases)) + "\n"
-            for case in self.cases:
-                s += str(case)
+        s += str(len(self.cases)) + "\n"
+        for case in self.cases:
+            s += str(case)
         return s
 
 class ASTNew(ASTExpression):
@@ -552,7 +546,7 @@ def p_class_inherits(p):
 def p_class_no_inherits(p):
     # class ::= class TYPE { [feature;]* }
     'class : CLASS TYPE LBRACE features RBRACE'
-    p[0] = ASTClass('no_inherits', p[2], p.lineno(1), None, None, p[4])
+    p[0] = ASTClass('no_inherits', p[2], p.lineno(1), [], None, p[4])
 
 def p_features(p):
     # features ::= [feature;]*
@@ -576,17 +570,17 @@ def p_feature_method_formals(p):
 # feature ::= ID() : TYPE { expr }
 def p_feature_method(p):
     'feature : IDENTIFIER LPAREN RPAREN COLON TYPE LBRACE expr RBRACE'
-    p[0] = ASTFeature('method', p[1], p.lineno(1), None, p[5], p.lineno(5),  p[7])
+    p[0] = ASTFeature('method', p[1], p.lineno(1), [], p[5], p.lineno(5),  p[7])
 
 # feature ::= ID : TYPE [ <- expr ]
 def p_feature_init(p):
     'feature : IDENTIFIER COLON TYPE LARROW expr'
-    p[0] = ASTFeature('attribute_init', p[1], p.lineno(1), None, p[3], p.lineno(3), p[5])
+    p[0] = ASTFeature('attribute_init', p[1], p.lineno(1), [], p[3], p.lineno(3), p[5])
 
 # feature ::= ID : TYPE
 def p_feature(p):
     'feature : IDENTIFIER COLON TYPE'
-    p[0] = ASTFeature('attribute_no_init', p[1], p.lineno(1), None, p[3], p.lineno(3), None)
+    p[0] = ASTFeature('attribute_no_init', p[1], p.lineno(1), [], p[3], p.lineno(3), None)
 
 # formals ::= [formal [, formal]*]
 def p_formals(p):
@@ -625,7 +619,7 @@ def p_expr_dynamic_dispatch_params(p):
 # expr ::= expr.ID( [expr [, expr]*] )
 def p_expr_dynamic_dispatch(p):
     'expr : expr DOT IDENTIFIER LPAREN RPAREN'
-    p[0] = ASTDynamicDispatch(p.lineno(1), p[1], p[3], p.lineno(3), None)
+    p[0] = ASTDynamicDispatch(p.lineno(1), p[1], p[3], p.lineno(3), [])
 
 # params : expr, typ, typ_line, method, method_line, args
 # expr ::= expr[@TYPE].ID( [expr [, expr]*] )
@@ -636,7 +630,7 @@ def p_expr_static_dispatch_params(p):
 # expr ::= expr[@TYPE].ID( [expr [, expr]*] )
 def p_expr_static_dispatch(p):
     'expr : expr AT TYPE DOT IDENTIFIER LPAREN RPAREN'
-    p[0] = ASTStaticDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5], p.lineno(5), None)
+    p[0] = ASTStaticDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5], p.lineno(5), [])
 
 # params : method, method_line, args
 # expr ::= ID( [expr [, expr]*] )
@@ -647,7 +641,7 @@ def p_expr_dispatch_params(p):
 # expr ::= ID( [expr [, expr]*] )
 def p_expr_dispatch(p):
     'expr : IDENTIFIER LPAREN RPAREN'
-    p[0] = ASTSelfDispatch(p.lineno(1), p[1], p.lineno(1), None)
+    p[0] = ASTSelfDispatch(p.lineno(1), p[1], p.lineno(1), [])
 
 # exprs ::= expr [, expr]*
 def p_exprs(p):
