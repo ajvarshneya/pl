@@ -3,6 +3,7 @@ class AST(object):
         self.classes = classes
 
     def __str__(self):
+        # classes-list
         s = ""
         s += str(len(self.classes)) + "\n"
         for ast_class in self.classes:

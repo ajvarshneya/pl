@@ -52,7 +52,7 @@ precedence = (
     ('right', 'IN'),
     ('right', 'LARROW'),
     ('left', 'NOT'),
-    ('left', 'LE', 'LT', 'EQUALS'),
+    ('nonassoc', 'LE', 'LT', 'EQUALS'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
     ('left', 'ISVOID'),
@@ -161,7 +161,7 @@ def p_expr_dynamic_dispatch_params(p):
     p.set_lineno(0, p.lineno(1))    
     p[0] = ASTDynamicDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5])
 
-# expr ::= expr.ID( [expr [, expr]*] )
+# expr ::= expr.ID()
 def p_expr_dynamic_dispatch(p):
     'expr : expr DOT IDENTIFIER LPAREN RPAREN'
     p.set_lineno(0, p.lineno(1))    
@@ -174,7 +174,7 @@ def p_expr_static_dispatch_params(p):
     p.set_lineno(0, p.lineno(1))    
     p[0] = ASTStaticDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5], p.lineno(5), p[7])
 
-# expr ::= expr[@TYPE].ID( [expr [, expr]*] )
+# expr ::= expr[@TYPE].ID()
 def p_expr_static_dispatch(p):
     'expr : expr AT TYPE DOT IDENTIFIER LPAREN RPAREN'
     p.set_lineno(0, p.lineno(1))    

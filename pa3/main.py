@@ -52,7 +52,7 @@ precedence = (
     ('right', 'IN'),
     ('right', 'LARROW'),
     ('left', 'NOT'),
-    ('left', 'LE', 'LT', 'EQUALS'),
+    ('nonassoc', 'LE', 'LT', 'EQUALS'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE'),
     ('left', 'ISVOID'),
