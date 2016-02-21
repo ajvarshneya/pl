@@ -1,9 +1,7 @@
 import sys
 import yacc
+from mylex import *
 from nodes import *
-
-# Notes 
-# - Optional parameters
 
 tokens = (
     'AT',
@@ -163,7 +161,7 @@ def p_expr_dynamic_dispatch_params(p):
     p.set_lineno(0, p.lineno(1))    
     p[0] = ASTDynamicDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5])
 
-# expr ::= expr.ID( [expr [, expr]*] )
+# expr ::= expr.ID()
 def p_expr_dynamic_dispatch(p):
     'expr : expr DOT IDENTIFIER LPAREN RPAREN'
     p.set_lineno(0, p.lineno(1))    
@@ -176,7 +174,7 @@ def p_expr_static_dispatch_params(p):
     p.set_lineno(0, p.lineno(1))    
     p[0] = ASTStaticDispatch(p.lineno(1), p[1], p[3], p.lineno(3), p[5], p.lineno(5), p[7])
 
-# expr ::= expr[@TYPE].ID( [expr [, expr]*] )
+# expr ::= expr[@TYPE].ID()
 def p_expr_static_dispatch(p):
     'expr : expr AT TYPE DOT IDENTIFIER LPAREN RPAREN'
     p.set_lineno(0, p.lineno(1))    
@@ -401,7 +399,6 @@ def p_expr_true(p):
 def p_expr_false(p):
     'expr : FALSE'
     p.set_lineno(0, p.lineno(1))
-    p.set_lineno(0, p.lineno(1))
     p[0] = ASTBoolean(p.lineno(1), 'false')
 
 # Error messages
@@ -416,34 +413,6 @@ def p_error(p):
             s = str(p.type)
     print "ERROR: " + str(lineno) + ": Parser: syntax error near " + s
     sys.exit()   
-
-# Produces Token objects from input
-class Lexer(object):
-    def __init__(self, tokens):
-        self.tokens = tokens
-        self.iterator = iter(tokens)
-
-    def token(self):
-        try:
-            token = next(self.iterator)
-            # print token
-            if len(token) == 2:
-                return Token(token[0], token[1], None) 
-            else:
-                return Token(token[0], token[1], token[2])
-        except StopIteration:
-            return None
-
-# A token class compatible with ply
-class Token(object):
-    def __init__(self, token_lineno, token_type, token_value):
-        self.lineno = int(token_lineno)
-        self.type = token_type.upper()
-        self.value = token_value
-        self.lexpos = None
-
-    def __str__(self):
-        return "<line: " + str(self.lineno) + ", type: " + str(self.type) + ", value: " + str(self.value) + ">"
 
 # Groups raw input into tokens represented as tuples
 def get_tokens(lexed):

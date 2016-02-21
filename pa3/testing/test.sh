@@ -1,6 +1,7 @@
 for FILE in *.cl
 do
 # FILE=$1
+cp ../mylex.py .
 cp ../main.py .
 cp ../nodes.py .
 printf "Processing $FILE file...\n"
