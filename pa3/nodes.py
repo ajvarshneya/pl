@@ -454,6 +454,6 @@ class ASTIdentifier(ASTExpression):
         s = ""
         s += str(self.lineno) + "\n"
         s += "identifier" + "\n"
-        s += str(self.name) + "\n"
         s += str(self.name_line) + "\n"
+        s += str(self.name) + "\n"
         return s

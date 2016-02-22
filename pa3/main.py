@@ -374,7 +374,7 @@ def p_expr_parens(p):
 def p_expr_identifier(p):
     'expr : IDENTIFIER'
     p.set_lineno(0, p.lineno(1))
-    p[0] = ASTIdentifier(p.lineno(1), p.lineno(1), p[1])
+    p[0] = ASTIdentifier(p.lineno(1), p[1], p.lineno(1))
 
 # params : lineno, constant
 # expr ::= integer
