@@ -1,0 +1,146 @@
+comment start
+label Main_main_0
+t$5 <- int 1
+t$6 <- int 2
+t$4 <- + t$5 t$6
+t$8 <- int 3
+t$9 <- int 4
+t$7 <- * t$8 t$9
+t$3 <- + t$4 t$7
+t$2 <- t$3
+t$11 <- new B
+t$10 <- t$11
+t$14 <- string
+plz
+t$13 <- call out_string t$14
+t$12 <- t$13
+t$16 <- string
+maybe
+t$15 <- call out_string t$16
+t$12 <- t$15
+t$18 <- string
+yes
+t$17 <- call out_string t$18
+t$12 <- t$17
+t$21 <- int 10
+t$20 <- t$21
+t$23 <- int 3
+t$22 <- t$23
+t$25 <- int 4
+t$24 <- t$25
+t$27 <- string
+
+t$26 <- t$27
+t$31 <- t$22
+t$32 <- t$24
+t$30 <- < t$31 t$32
+t$33 <- not t$30
+bt t$30 if_then_1
+bt t$33 if_else_2
+label if_then_1
+t$36 <- string
+c less than d
+t$35 <- call out_string t$36
+t$34 <- t$35
+t$29 <- t$34
+jmp if_fi_3
+label if_else_2
+t$39 <- string
+c not less than d
+t$38 <- call out_string t$39
+t$37 <- t$38
+t$29 <- t$37
+label if_fi_3
+t$28 <- t$29
+t$42 <- t$22
+t$43 <- t$24
+t$41 <- <= t$42 t$43
+t$44 <- not t$41
+bt t$41 if_then_4
+bt t$44 if_else_5
+label if_then_4
+t$47 <- string
+c less than d
+t$46 <- call out_string t$47
+t$45 <- t$46
+t$40 <- t$45
+jmp if_fi_6
+label if_else_5
+t$50 <- string
+c not less than d
+t$49 <- call out_string t$50
+t$48 <- t$49
+t$40 <- t$48
+label if_fi_6
+t$28 <- t$40
+label while_pred_7
+t$53 <- t$22
+t$54 <- t$20
+t$52 <- < t$53 t$54
+t$55 <- not t$52
+bt t$55 while_end_8
+t$58 <- t$20
+t$59 <- int 1
+t$57 <- - t$58 t$59
+t$20 <- t$57
+t$56 <- t$20
+t$61 <- t$20
+t$60 <- call out_int t$61
+t$56 <- t$60
+jmp while_pred_7
+label while_end_8
+t$51 <- default Object
+t$28 <- t$51
+t$62 <- call in_int
+t$24 <- t$62
+t$28 <- t$24
+label while_pred_9
+t$66 <- t$24
+t$67 <- int 10
+t$65 <- = t$66 t$67
+t$64 <- not t$65
+t$68 <- not t$64
+bt t$68 while_end_10
+t$70 <- call in_int
+t$24 <- t$70
+t$69 <- t$24
+jmp while_pred_9
+label while_end_10
+t$63 <- default Object
+t$28 <- t$63
+t$71 <- call in_string
+t$26 <- t$71
+t$28 <- t$26
+label while_pred_11
+t$75 <- t$26
+t$76 <- string
+stop
+t$74 <- = t$75 t$76
+t$73 <- not t$74
+t$77 <- not t$73
+bt t$77 while_end_12
+t$79 <- call in_string
+t$26 <- t$79
+t$78 <- t$26
+jmp while_pred_11
+label while_end_12
+t$72 <- default Object
+t$28 <- t$72
+t$82 <- bool true
+t$83 <- not t$82
+bt t$82 if_then_13
+bt t$83 if_else_14
+label if_then_13
+t$84 <- int 5
+t$81 <- t$84
+jmp if_fi_15
+label if_else_14
+t$85 <- int 7
+t$81 <- t$85
+label if_fi_15
+t$80 <- call out_int t$81
+t$28 <- t$80
+t$19 <- t$28
+t$12 <- t$19
+t$1 <- t$12
+return t$0
