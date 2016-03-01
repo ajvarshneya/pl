@@ -1,11 +1,3 @@
-from tacs import *
-from ast import *
-
-symbol_counter = 0
-label_counter = 0
-symbol_tables = []
-tacs = []
-
 def ns():
 	global symbol_counter
 	c = symbol_counter
