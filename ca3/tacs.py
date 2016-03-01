@@ -1,4 +1,3 @@
-import sys
 import copy
 
 # Arithmetic instructions

@@ -22,5 +22,5 @@ main:
 	.cfi_endproc
 .LFE0:
 	.size	main, .-main
-	.ident	"GCC: (Ubuntu 4.8.4-2ubuntu1~14.04) 4.8.4"
+	.ident	"GCC: (Ubuntu 5.2.1-22ubuntu2) 5.2.1 20151010"
 	.section	.note.GNU-stack,"",@progbits
