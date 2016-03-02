@@ -68,6 +68,9 @@ def main():
 	blocks = dead_code(blocks)
 
 	# Register allocation
+	# Spill and Fill
+		# 
+		
 	# While our virtual registers cannot be fit into the 'k' registers we have (i.e. RIG is not k-colorable):
 	# Iterate through basic blocks
 
