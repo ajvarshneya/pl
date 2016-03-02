@@ -1,0 +1,198 @@
+2,104c2,9
+< label Main_main_0
+< t$4 <- bool false
+< t$3 <- t$4
+< label while_pred_1
+< t$8 <- t$3
+< t$7 <- not t$8
+< t$9 <- not t$7
+< bt t$9 while_end_2
+< t$13 <- call in_string
+< t$12 <- t$13
+< t$17 <- t$12
+< t$18 <- string
+< 
+< t$16 <- = t$17 t$18
+< t$19 <- not t$16
+< bt t$16 if_then_3
+< bt t$19 if_else_4
+< label if_then_3
+< t$20 <- bool true
+< t$3 <- t$20
+< t$15 <- t$3
+< jmp if_fi_5
+< label if_else_4
+< t$24 <- call in_string
+< t$23 <- t$24
+< t$27 <- not t$28
+< t$29 <- not t$27
+< bt t$27 if_then_6
+< bt t$29 if_else_7
+< label if_then_6
+< t$33 <- new NilList
+< t$32 <- t$33
+< t$35 <- t$36
+< t$34 <- t$35
+< t$31 <- t$34
+< t$30 <- t$31
+< t$26 <- t$30
+< jmp if_fi_8
+< label if_else_7
+< t$38 <- string
+< 
+< t$37 <- call out_string t$38
+< t$26 <- t$37
+< label if_fi_8
+< t$25 <- t$26
+< t$40 <- not t$41
+< t$42 <- not t$40
+< bt t$40 if_then_9
+< bt t$42 if_else_10
+< label if_then_9
+< t$46 <- new NilList
+< t$45 <- t$46
+< t$48 <- t$49
+< t$47 <- t$48
+< t$44 <- t$47
+< t$43 <- t$44
+< t$39 <- t$43
+< jmp if_fi_11
+< label if_else_10
+< t$51 <- string
+< 
+< t$50 <- call out_string t$51
+< t$39 <- t$50
+< label if_fi_11
+< t$25 <- t$39
+< t$53 <- t$54
+< t$56 <- t$57
+< t$55 <- t$56
+< t$53 <- t$58
+< t$55 <- t$53
+< t$56 <- t$59
+< t$55 <- t$56
+< t$52 <- t$55
+< t$25 <- t$52
+< t$22 <- t$25
+< t$21 <- t$22
+< t$15 <- t$21
+< label if_fi_5
+< t$14 <- t$15
+< t$11 <- t$14
+< t$10 <- t$11
+< jmp while_pred_1
+< label while_end_2
+< t$6 <- default Object
+< t$5 <- t$6
+< t$2 <- t$5
+< t$1 <- t$2
+< t$1 <- t$60
+< t$63 <- t$64
+< t$62 <- not t$63
+< t$65 <- not t$62
+< bt t$62 if_then_12
+< bt t$65 if_else_13
+< label if_then_12
+< t$61 <- t$66
+< jmp if_fi_14
+< label if_else_13
+< t$68 <- string
+< 
+< t$67 <- call out_string t$68
+< t$61 <- t$67
+< label if_fi_14
+< t$1 <- t$61
+---
+> label ConsDict_construct_0
+> t$1 <- new ConsDict
+> t$2 <- k
+> t$3 <- v
+> t$4 <- m
+> t$5 <- self
+> t$6 <- t$1
+> t$0 <- call init t$2 t$3 t$4 t$5
+106,189d10
+< label List_get_head_15
+< t$70 <- string
+< 
+< return t$69
+< label List_get_tail_16
+< t$72 <- t$73
+< return t$71
+< label List_print_17
+< return t$74
+< label ConsList_get_head_18
+< t$77 <- t$78
+< return t$76
+< label ConsList_get_tail_19
+< t$80 <- t$81
+< return t$79
+< label ConsList_print_20
+< t$85 <- t$78
+< t$84 <- call out_string t$85
+< t$83 <- t$84
+< t$87 <- string
+< \n
+< t$86 <- call out_string t$87
+< t$83 <- t$86
+< t$83 <- t$88
+< return t$82
+< label NilList_get_tail_21
+< t$90 <- t$91
+< return t$89
+< label NilList_get_head_22
+< t$93 <- string
+< 
+< return t$92
+< label NilList_print_23
+< t$95 <- bool true
+< return t$94
+< label Dict_get_key_24
+< t$97 <- string
+< 
+< return t$96
+< label Dict_get_value_25
+< t$99 <- new NilList
+< return t$98
+< label Dict_get_mark_26
+< t$101 <- int 0
+< return t$100
+< label Dict_get_tail_27
+< t$103 <- t$104
+< return t$102
+< label Dict_print_28
+< return t$105
+< label ConsDict_get_key_29
+< t$108 <- t$109
+< return t$107
+< label ConsDict_get_value_30
+< t$111 <- t$112
+< return t$110
+< label ConsDict_get_mark_31
+< t$114 <- t$115
+< return t$113
+< label ConsDict_get_tail_32
+< t$117 <- t$118
+< return t$116
+< label ConsDict_print_33
+< t$122 <- t$109
+< t$121 <- call out_string t$122
+< t$120 <- t$121
+< t$120 <- t$123
+< return t$119
+< label NilDict_get_key_34
+< t$125 <- string
+< 
+< return t$124
+< label NilDict_get_value_35
+< t$127 <- new NilList
+< return t$126
+< label NilDict_get_mark_36
+< t$129 <- int 0
+< return t$128
+< label NilDict_get_tail_37
+< t$131 <- t$132
+< return t$130
+< label NilDict_print_38
+< t$134 <- bool true
+< return t$133

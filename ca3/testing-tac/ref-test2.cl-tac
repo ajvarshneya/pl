@@ -1,0 +1,162 @@
+comment start
+label Main_main_0
+t$4 <- int 1
+t$5 <- int 2
+t$2 <- + t$4 t$5
+t$6 <- int 3
+t$7 <- int 4
+t$3 <- * t$6 t$7
+t$1 <- + t$2 t$3
+t$8 <- new B
+t$10 <- string
+plz
+t$9 <- call out_string t$10
+t$12 <- string
+maybe
+t$13 <- self
+t$11 <- call out_string t$12
+t$15 <- string
+yes
+t$16 <- self
+t$14 <- call out_string t$15
+t$17 <- int 10
+t$18 <- int 3
+t$19 <- int 4
+t$20 <- string
+
+t$23 <- t$18
+t$24 <- t$19
+t$22 <- < t$23 t$24
+t$58 <- not t$22
+bt t$58 Main_main_8
+bt t$22 Main_main_7
+comment then branch
+label Main_main_7
+t$25 <- string
+c less than d
+jmp Main_main_10
+comment else branch
+label Main_main_8
+t$26 <- string
+c not less than d
+jmp Main_main_12
+comment if-join
+label Main_main_9
+t$29 <- t$18
+t$30 <- t$19
+t$28 <- <= t$29 t$30
+t$59 <- not t$28
+bt t$59 Main_main_15
+bt t$28 Main_main_14
+comment fcall-pre to out_string
+label Main_main_10
+t$21 <- call out_string t$25
+jmp Main_main_9
+comment fcall-pre to out_string
+label Main_main_12
+t$21 <- call out_string t$26
+jmp Main_main_9
+comment then branch
+label Main_main_14
+t$31 <- string
+c less than d
+jmp Main_main_17
+comment else branch
+label Main_main_15
+t$32 <- string
+c not less than d
+jmp Main_main_19
+comment if-join
+label Main_main_16
+jmp Main_main_21
+comment fcall-pre to out_string
+label Main_main_17
+t$27 <- call out_string t$31
+jmp Main_main_16
+comment fcall-pre to out_string
+label Main_main_19
+t$27 <- call out_string t$32
+jmp Main_main_16
+comment while-pred
+label Main_main_21
+t$35 <- t$18
+t$36 <- t$17
+t$34 <- < t$35 t$36
+t$60 <- not t$34
+bt t$60 Main_main_22
+bt t$34 Main_main_23
+comment while-join
+label Main_main_22
+t$33 <- default Object
+jmp Main_main_26
+comment while-body
+label Main_main_23
+t$39 <- t$17
+t$40 <- int 1
+t$17 <- - t$39 t$40
+t$38 <- t$17
+t$41 <- t$17
+t$37 <- call out_int t$41
+jmp Main_main_21
+comment fcall-pre to in_int
+label Main_main_26
+t$19 <- call in_int
+t$42 <- t$19
+jmp Main_main_28
+comment while-pred
+label Main_main_28
+t$46 <- t$19
+t$47 <- int 10
+t$45 <- = t$46 t$47
+t$44 <- not t$45
+t$61 <- not t$44
+bt t$61 Main_main_29
+bt t$44 Main_main_30
+comment while-join
+label Main_main_29
+t$43 <- default Object
+jmp Main_main_33
+comment while-body
+label Main_main_30
+t$19 <- call in_int
+t$48 <- t$19
+jmp Main_main_28
+comment fcall-pre to in_string
+label Main_main_33
+t$20 <- call in_string
+t$49 <- t$20
+jmp Main_main_35
+comment while-pred
+label Main_main_35
+t$53 <- t$20
+t$54 <- string
+stop
+t$52 <- = t$53 t$54
+t$51 <- not t$52
+t$62 <- not t$51
+bt t$62 Main_main_36
+bt t$51 Main_main_37
+comment while-join
+label Main_main_36
+t$50 <- default Object
+t$57 <- bool true
+t$63 <- not t$57
+bt t$63 Main_main_41
+bt t$57 Main_main_40
+comment while-body
+label Main_main_37
+t$20 <- call in_string
+t$55 <- t$20
+jmp Main_main_35
+comment then branch
+label Main_main_40
+t$56 <- int 5
+jmp Main_main_42
+comment else branch
+label Main_main_41
+t$56 <- int 7
+jmp Main_main_42
+comment if-join
+label Main_main_42
+t$0 <- call out_int t$56
+return t$0

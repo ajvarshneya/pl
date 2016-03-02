@@ -1,0 +1,40 @@
+comment start
+label main_0
+t$1 <- default int
+t$2 <- default bool
+t$3 <- default string
+t$4 <- int 2
+t$5 <- bool true
+t$6 <- string
+this is a string
+t$7 <- call in_int
+t$8 <- call in_string
+t$9 <- + t$7 t$4
+t$10 <- - t$7 t$4
+t$11 <- * t$7 t$4
+t$12 <- / t$7 t$4
+t$13 <- < t$7 t$4 
+t$14 <- <= t$7 t$4
+t$15 <- = t$7 t$4
+t$16 <- not t$5
+t$17 <- ~ t$11
+t$18 <- new int
+t$19 <- new bool
+t$20 <- new string
+t$21 <- default int
+t$22 <- default bool
+t$23 <- default string
+t$24 <- isvoid t$21
+jmp main_2
+label main_1
+t$11 <- t$7
+label main_2
+t$25 <- call out_int t$4
+t$26 <- call out_string t$6
+t$27 <- call out_int t$11
+bt t$5 main_4
+label main_3
+t$10 <- t$7
+label main_4
+t$28 <- call out_int t$10
+return t$10

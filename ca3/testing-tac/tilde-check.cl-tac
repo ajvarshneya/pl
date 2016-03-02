@@ -1,0 +1,6 @@
+comment start
+label Main_main_0
+t$3 <- int 300
+t$2 <- ~ t$3
+t$1 <- call out_int t$2
+return t$0

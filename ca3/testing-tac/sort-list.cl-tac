@@ -1,0 +1,64 @@
+comment start
+label List_isNil_0
+t$1 <- t$2
+t$3 <- bool true
+t$1 <- t$3
+return t$0
+label List_car_1
+t$5 <- t$6
+t$7 <- new Int
+t$5 <- t$7
+return t$4
+label List_cdr_2
+t$9 <- t$10
+t$11 <- new List
+t$9 <- t$11
+return t$8
+label List_rev_3
+return t$12
+label List_sort_4
+return t$14
+label List_print_list_5
+return t$16
+label Cons_isNil_6
+t$19 <- bool false
+return t$18
+label Cons_car_7
+t$21 <- t$22
+return t$20
+label Cons_cdr_8
+t$24 <- t$25
+return t$23
+label Cons_rev_9
+return t$26
+label Cons_sort_10
+return t$28
+label Cons_print_list_11
+t$33 <- t$22
+t$32 <- call out_int t$33
+t$31 <- t$32
+t$35 <- string
+\n
+t$34 <- call out_string t$35
+t$31 <- t$34
+t$31 <- t$36
+return t$30
+label Nil_isNil_12
+t$38 <- bool true
+return t$37
+label Nil_rev_13
+t$40 <- t$41
+return t$39
+label Nil_sort_14
+t$43 <- t$41
+return t$42
+label Nil_print_list_15
+t$45 <- bool true
+return t$44
+label Main_main_16
+t$49 <- string
+How many numbers to sort? 
+t$48 <- call out_string t$49
+t$47 <- t$48
+t$47 <- t$50
+return t$46

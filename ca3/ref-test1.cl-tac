@@ -1,0 +1,55 @@
+comment start
+label Main_main_0
+t$1 <- default Int
+t$2 <- default Int
+t$3 <- default Bool
+t$1 <- int 3
+t$4 <- t$1
+t$1 <- int 4
+t$5 <- t$1
+t$2 <- int 123123
+t$6 <- t$2
+t$3 <- bool true
+t$7 <- t$3
+t$9 <- t$1
+t$8 <- call out_int t$9
+jmp Main_main_3
+comment while-pred
+label Main_main_3
+t$12 <- t$1
+t$13 <- int 22
+t$11 <- < t$12 t$13
+t$21 <- not t$11
+bt t$21 Main_main_4
+bt t$11 Main_main_5
+comment while-join
+label Main_main_4
+t$10 <- default Object
+t$18 <- int 22
+t$19 <- t$1
+t$17 <- < t$18 t$19
+t$22 <- not t$17
+bt t$22 Main_main_7
+bt t$17 Main_main_6
+comment while-body
+label Main_main_5
+t$15 <- t$1
+t$16 <- int 1
+t$1 <- + t$15 t$16
+t$14 <- t$1
+jmp Main_main_3
+comment then branch
+label Main_main_6
+t$20 <- t$2
+jmp Main_main_9
+comment else branch
+label Main_main_7
+t$0 <- self
+jmp Main_main_8
+comment if-join
+label Main_main_8
+return t$0
+comment fcall-pre to out_int
+label Main_main_9
+t$0 <- call out_int t$20
+jmp Main_main_8

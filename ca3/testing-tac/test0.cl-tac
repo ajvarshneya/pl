@@ -1,0 +1,19 @@
+comment start
+label Main_main_0
+t$2 <- default Int
+t$3 <- default Bool
+t$4 <- default String
+t$7 <- int 3
+t$8 <- int 4
+t$6 <- + t$7 t$8
+t$2 <- t$6
+t$5 <- t$2
+t$9 <- bool true
+t$3 <- t$9
+t$5 <- t$3
+t$10 <- string
+hello
+t$4 <- t$10
+t$5 <- t$4
+t$1 <- t$5
+return t$0

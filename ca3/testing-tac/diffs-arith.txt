@@ -1,0 +1,357 @@
+3c3
+< t$1 <- t$2
+---
+> t$0 <- var
+5,356d4
+< label Main_menu_1
+< t$6 <- string
+< \n\tTo add a number to 
+< t$5 <- call out_string t$6
+< t$4 <- t$5
+< t$4 <- t$7
+< t$9 <- string
+< ...enter a:\n
+< t$8 <- call out_string t$9
+< t$4 <- t$8
+< t$11 <- string
+< \tTo negate 
+< t$10 <- call out_string t$11
+< t$4 <- t$10
+< t$4 <- t$12
+< t$14 <- string
+< ...enter b:\n
+< t$13 <- call out_string t$14
+< t$4 <- t$13
+< t$16 <- string
+< \tTo find the difference between 
+< t$15 <- call out_string t$16
+< t$4 <- t$15
+< t$4 <- t$17
+< t$19 <- string
+< and another number...enter c:\n
+< t$18 <- call out_string t$19
+< t$4 <- t$18
+< t$21 <- string
+< \tTo find the factorial of 
+< t$20 <- call out_string t$21
+< t$4 <- t$20
+< t$4 <- t$22
+< t$24 <- string
+< ...enter d:\n
+< t$23 <- call out_string t$24
+< t$4 <- t$23
+< t$26 <- string
+< \tTo square 
+< t$25 <- call out_string t$26
+< t$4 <- t$25
+< t$4 <- t$27
+< t$29 <- string
+< ...enter e:\n
+< t$28 <- call out_string t$29
+< t$4 <- t$28
+< t$31 <- string
+< \tTo cube 
+< t$30 <- call out_string t$31
+< t$4 <- t$30
+< t$4 <- t$32
+< t$34 <- string
+< ...enter f:\n
+< t$33 <- call out_string t$34
+< t$4 <- t$33
+< t$36 <- string
+< \tTo find out if 
+< t$35 <- call out_string t$36
+< t$4 <- t$35
+< t$4 <- t$37
+< t$39 <- string
+< is a multiple of 3...enter g:\n
+< t$38 <- call out_string t$39
+< t$4 <- t$38
+< t$41 <- string
+< \tTo divide 
+< t$40 <- call out_string t$41
+< t$4 <- t$40
+< t$4 <- t$42
+< t$44 <- string
+< by 8...enter h:\n
+< t$43 <- call out_string t$44
+< t$4 <- t$43
+< t$46 <- string
+< \tTo get a new number...enter j:\n
+< t$45 <- call out_string t$46
+< t$4 <- t$45
+< t$48 <- string
+< \tTo quit...enter q:\n\n
+< t$47 <- call out_string t$48
+< t$4 <- t$47
+< t$49 <- call in_string
+< t$4 <- t$49
+< return t$3
+< label Main_prompt_2
+< t$53 <- string
+< \n
+< t$52 <- call out_string t$53
+< t$51 <- t$52
+< t$55 <- string
+< Please enter a number...  
+< t$54 <- call out_string t$55
+< t$51 <- t$54
+< t$56 <- call in_string
+< t$51 <- t$56
+< return t$50
+< label Main_get_int_3
+< t$61 <- new A2I
+< t$60 <- t$61
+< t$63 <- t$64
+< t$62 <- t$65
+< t$59 <- t$62
+< t$58 <- t$59
+< return t$57
+< label Main_main_4
+< t$69 <- new A
+< t$68 <- t$69
+< t$67 <- t$68
+< label while_pred_5
+< t$71 <- t$72
+< t$73 <- not t$71
+< bt t$73 while_end_6
+< t$76 <- string
+< number 
+< t$75 <- call out_string t$76
+< t$74 <- t$75
+< t$74 <- t$77
+< t$80 <- not t$79
+< bt t$79 if_then_7
+< bt t$80 if_else_8
+< label if_then_7
+< t$82 <- string
+< is even!\n
+< t$81 <- call out_string t$82
+< t$78 <- t$81
+< jmp if_fi_9
+< label if_else_8
+< t$84 <- string
+< is odd!\n
+< t$83 <- call out_string t$84
+< t$78 <- t$83
+< label if_fi_9
+< t$74 <- t$78
+< t$74 <- t$85
+< t$86 <- t$87
+< t$74 <- t$86
+< t$90 <- t$86
+< t$91 <- string
+< a
+< t$89 <- = t$90 t$91
+< t$92 <- not t$89
+< bt t$89 if_then_10
+< bt t$92 if_else_11
+< label if_then_10
+< t$94 <- t$95
+< t$93 <- t$94
+< t$68 <- t$96
+< t$93 <- t$68
+< t$88 <- t$93
+< jmp if_fi_12
+< label if_else_11
+< t$99 <- t$86
+< t$100 <- string
+< b
+< t$98 <- = t$99 t$100
+< t$101 <- not t$98
+< bt t$98 if_then_13
+< bt t$101 if_else_14
+< label if_then_13
+< t$97 <- None
+< jmp if_fi_15
+< label if_else_14
+< t$104 <- t$86
+< t$105 <- string
+< c
+< t$103 <- = t$104 t$105
+< t$106 <- not t$103
+< bt t$103 if_then_16
+< bt t$106 if_else_17
+< label if_then_16
+< t$94 <- t$108
+< t$107 <- t$94
+< t$68 <- t$109
+< t$107 <- t$68
+< t$102 <- t$107
+< jmp if_fi_18
+< label if_else_17
+< t$112 <- t$86
+< t$113 <- string
+< d
+< t$111 <- = t$112 t$113
+< t$114 <- not t$111
+< bt t$111 if_then_19
+< bt t$114 if_else_20
+< label if_then_19
+< t$68 <- t$115
+< t$110 <- t$68
+< jmp if_fi_21
+< label if_else_20
+< t$118 <- t$86
+< t$119 <- string
+< e
+< t$117 <- = t$118 t$119
+< t$120 <- not t$117
+< bt t$117 if_then_22
+< bt t$120 if_else_23
+< label if_then_22
+< t$68 <- t$121
+< t$116 <- t$68
+< jmp if_fi_24
+< label if_else_23
+< t$124 <- t$86
+< t$125 <- string
+< f
+< t$123 <- = t$124 t$125
+< t$126 <- not t$123
+< bt t$123 if_then_25
+< bt t$126 if_else_26
+< label if_then_25
+< t$68 <- t$127
+< t$122 <- t$68
+< jmp if_fi_27
+< label if_else_26
+< t$130 <- t$86
+< t$131 <- string
+< g
+< t$129 <- = t$130 t$131
+< t$132 <- not t$129
+< bt t$129 if_then_28
+< bt t$132 if_else_29
+< label if_then_28
+< t$135 <- not t$134
+< bt t$134 if_then_31
+< bt t$135 if_else_32
+< label if_then_31
+< t$138 <- string
+< number 
+< t$137 <- call out_string t$138
+< t$136 <- t$137
+< t$136 <- t$139
+< t$141 <- string
+< is divisible by 3.\n
+< t$140 <- call out_string t$141
+< t$136 <- t$140
+< t$133 <- t$136
+< jmp if_fi_33
+< label if_else_32
+< t$144 <- string
+< number 
+< t$143 <- call out_string t$144
+< t$142 <- t$143
+< t$142 <- t$145
+< t$147 <- string
+< is not divisible by 3.\n
+< t$146 <- call out_string t$147
+< t$142 <- t$146
+< t$133 <- t$142
+< label if_fi_33
+< t$128 <- t$133
+< jmp if_fi_30
+< label if_else_29
+< t$150 <- t$86
+< t$151 <- string
+< h
+< t$149 <- = t$150 t$151
+< t$152 <- not t$149
+< bt t$149 if_then_34
+< bt t$152 if_else_35
+< label if_then_34
+< t$154 <- default A
+< t$154 <- t$156
+< t$155 <- t$154
+< t$163 <- int 8
+< t$161 <- * t$162 t$163
+< t$159 <- - t$160 t$161
+< t$158 <- t$159
+< t$166 <- string
+< number 
+< t$165 <- call out_string t$166
+< t$164 <- t$165
+< t$164 <- t$167
+< t$169 <- string
+< is equal to 
+< t$168 <- call out_string t$169
+< t$164 <- t$168
+< t$164 <- t$170
+< t$172 <- string
+< times 8 with a remainder of 
+< t$171 <- call out_string t$172
+< t$164 <- t$171
+< t$175 <- new A2I
+< t$174 <- t$175
+< t$177 <- call out_string t$178
+< t$176 <- t$177
+< t$180 <- string
+< \n
+< t$179 <- call out_string t$180
+< t$176 <- t$179
+< t$173 <- t$176
+< t$164 <- t$173
+< t$157 <- t$164
+< t$155 <- t$157
+< t$181 <- t$154
+< t$68 <- t$181
+< t$155 <- t$68
+< t$153 <- t$155
+< t$148 <- t$153
+< jmp if_fi_36
+< label if_else_35
+< t$184 <- t$86
+< t$185 <- string
+< j
+< t$183 <- = t$184 t$185
+< t$186 <- not t$183
+< bt t$183 if_then_37
+< bt t$186 if_else_38
+< label if_then_37
+< t$187 <- new A
+< t$68 <- t$187
+< t$182 <- t$68
+< jmp if_fi_39
+< label if_else_38
+< t$190 <- t$86
+< t$191 <- string
+< q
+< t$189 <- = t$190 t$191
+< t$192 <- not t$189
+< bt t$189 if_then_40
+< bt t$192 if_else_41
+< label if_then_40
+< t$193 <- bool false
+< t$72 <- t$193
+< t$188 <- t$72
+< jmp if_fi_42
+< label if_else_41
+< t$68 <- t$194
+< t$188 <- t$68
+< label if_fi_42
+< t$182 <- t$188
+< label if_fi_39
+< t$148 <- t$182
+< label if_fi_36
+< t$128 <- t$148
+< label if_fi_30
+< t$122 <- t$128
+< label if_fi_27
+< t$116 <- t$122
+< label if_fi_24
+< t$110 <- t$116
+< label if_fi_21
+< t$102 <- t$110
+< label if_fi_18
+< t$97 <- t$102
+< label if_fi_15
+< t$88 <- t$97
+< label if_fi_12
+< t$74 <- t$88
+< jmp while_pred_5
+< label while_end_6
+< t$70 <- default Object
+< t$67 <- t$70
+< return t$66

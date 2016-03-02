@@ -1,0 +1,38 @@
+comment start
+label List_isNil_0
+t$1 <- bool true
+return t$0
+label List_head_1
+t$3 <- t$4
+t$5 <- int 0
+t$3 <- t$5
+return t$2
+label List_tail_2
+t$7 <- t$8
+t$9 <- t$10
+t$7 <- t$9
+return t$6
+label Cons_isNil_3
+t$12 <- bool false
+return t$11
+label Cons_head_4
+t$14 <- t$15
+return t$13
+label Cons_tail_5
+t$17 <- t$18
+return t$16
+label Main_main_6
+t$21 <- t$22
+t$20 <- t$21
+label while_pred_7
+t$24 <- not t$25
+t$26 <- not t$24
+bt t$26 while_end_8
+t$27 <- t$28
+t$21 <- t$29
+t$27 <- t$21
+jmp while_pred_7
+label while_end_8
+t$23 <- default Object
+t$20 <- t$23
+return t$19

@@ -1,0 +1,8 @@
+3,5c3,5
+< t$3 <- int 300
+< t$2 <- ~ t$3
+< t$1 <- call out_int t$2
+---
+> t$2 <- int 300
+> t$1 <- ~ t$2
+> t$0 <- call out_int t$1

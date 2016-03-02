@@ -1,0 +1,10 @@
+comment start
+label ConsDict_construct_0
+t$1 <- new ConsDict
+t$2 <- k
+t$3 <- v
+t$4 <- m
+t$5 <- self
+t$6 <- t$1
+t$0 <- call init t$2 t$3 t$4 t$5
+return t$0

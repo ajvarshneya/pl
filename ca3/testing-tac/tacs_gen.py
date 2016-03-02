@@ -310,7 +310,7 @@ def tac_not(ast_not):
 def tac_negate(ast_negate):
 	assignee = ns()
 	expr = tac_expression(ast_negate.expr)
-	tacs_append(TACNegate(assignee, expr))
+	tacs_append(TACNeg(assignee, expr))
 	return assignee
 
 def tac_int(ast_integer):

@@ -1,4 +1,3 @@
-import copy
 
 # Arithmetic instructions
 class TACAssign(object):
@@ -222,11 +221,27 @@ class TACBt(object):
 	def __str__(self):
 		return 'bt ' + str(self.val) + ' ' + str(self.label)
 
+class TACStore(object):
+	def __init__(self, op1):
+		self.op1 = op1
+
+	def __str__(self):
+		return 'store ' + str(self.op1)
+
+class TACLoad(object):
+	def __init__(self, assignee, addr):
+		self.assignee = assignee
+		self.addr = addr
+
+	def __str__(self):
+		return str(self.assignee) + ' <- ' + 'load ' + str(self.addr)
+
 # Basic block definition
 
 class TACBasicBlock(object):
 	def __init__(self, insts):
 		self.insts = insts
+		self.live_sets = []
 		self.label = self.insts[0].label
 
 		self.children = []
