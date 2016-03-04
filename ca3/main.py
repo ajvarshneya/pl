@@ -3,41 +3,87 @@ from ast import *
 from ast_gen import *
 from tacs import *
 from tacs_gen import *
-from dead_code import *
+from basic_blocks import *
 
-# Generates list of basic blocks given list of TAC objects
-def make_bbs(insts):
-	blocks = []
-	block_insts = []
+def k_color(block):
+	rig = block.rig
+	coloring = {} # Maps nodes to colors
 
-	# Create list of instruction lists
-	for inst in insts:
-		if isinstance(inst, TACLabel):
-			block_insts += [[]]
-		block_insts[-1] += [inst]
+	# Get sorted list of nodes (fewest to greatest # edges)
+	nodes = rig.keys()
+	nodes.sort(key=lambda node : len(rig[node]))
 
-	block_dict = {}
+	# Colors that can be used
+	colors = [0]
 
-	# Create dictionary of labels mapping to blocks
-	for block_inst in block_insts:
-		new_block = TACBasicBlock(block_inst)
+	# Init first node, greatest # edges
+	current_node = nodes.pop()
+	coloring[current_node] = colors[0]
 
-		# Add to list of blocks we can iterate over to generate relationships
-		blocks += [new_block]
-		block_dict[new_block.label] = new_block
+	# Color the nodes, ends when we've popped all the nodes
+	while nodes:
+		# Get a node
+		current_node = nodes.pop()
 
-	# Populate parents/children lists of each block
-	for block in blocks:
-		# Get children
-		for child_label in block.child_labels:
-			child = block_dict[child_label]
-			block.children += [child]
+		# Get the best color for this node
+		best_color = -1
+		for color in colors:
+			is_valid_color = True
+			adj_nodes = rig[current_node]
 
-		# Set parent of children
-		for child in block.children:
-			child.parents += [block]
+			# Does an adjacent node have this color?
+			for adj in adj_nodes:
+				if coloring.has_key(adj) and coloring[adj] == color:
+					is_valid_color = False
 
-	return blocks 
+			# No adjacent nodes have the color
+			if is_valid_color:
+				best_color = color
+				break
+
+		# No best color, add a new one to our list of possible colors
+		if best_color == -1:
+			colors.append(len(colors))
+			best_color = colors[-1]
+
+		# Set color of current node
+		coloring[current_node] = best_color
+
+	block.coloring = coloring
+	return len(colors)
+
+def is_assignee(inst, register):
+	if hasattr(inst, 'assignee'):
+		if inst.assignee == register:
+			return True
+	return False
+
+def is_operand(inst, register):
+	if hasattr(inst, 'op1'):
+		if inst.op1 == register:
+			return True
+	if hasattr(inst, 'op2'):
+		if inst.op2 == register:
+			return True
+	return False
+
+def spill(block, register, visited):
+
+	visited += [block]
+
+	new_insts = []
+	for inst in block.insts:
+		if is_operand(inst, register):
+			new_insts += [TACLoad(register, register)]
+		new_insts += [inst]
+		if is_assignee(inst, register):
+			new_insts += [TACStore(register)] # Change this to offset at some point with a table
+
+	block.insts = new_insts
+
+	for child in block.children:
+		if register in child.live_in and child not in visited:
+			spill(child, register, visited)
 
 # Reads in raw input
 def read_input(filename):
@@ -48,42 +94,80 @@ def read_input(filename):
     f.close()
     return lines
 
+# Original tac implementation
+####################################################################
+# Reads input file
+def read_tac(filename):
+	f = open(filename)
+	tac = []
+	for line in f:
+		tac.append(line.rstrip('\n').rstrip('\r'))
+	f.close()
+	return tac
+####################################################################
+
 def main():
-	# .cl-type file
+	# Original TAC implementation
+	####################################################################
+
 	filename = sys.argv[1]
 
-	# Read AST from file
-	raw_ast = read_input(filename)
+	tac = read_tac(filename) # Get raw instructions
+	insts = make_inst_list(tac) # Generate list of TAC objects
+	blocks = make_bbs(insts) # Generate list of basic blocks
 
-	# Generate AST object
-	ast = generate_ast(raw_ast)
+	####################################################################
 
-	# Generate TAC instructions from AST object
-	tacs = tac_ast(ast)
+	# AST implementation
 
-	# Generate basic blocks from TAC instructions
-	blocks = make_bbs(tacs)
+	# # .cl-type file
+	# filename = sys.argv[1]
 
-	# Dead code elimination
+	# # Read AST from file
+	# raw_ast = read_input(filename)
+
+	# # Generate AST object
+	# ast = generate_ast(raw_ast)
+
+	# # Generate TAC instructions from AST object
+	# tacs = tac_ast(ast)
+
+	# # Generate basic blocks from TAC instructions
+	# blocks = make_bbs(tacs)
+
+	# # Dead code elimination, computes liveness sets/ranges
 	blocks = dead_code(blocks)
+	# blocks = liveness(blocks)
+	# # Register allocation
 
-	# Register allocation
-	# While our virtual registers cannot be fit into the 'k' registers we have (i.e. RIG is not k-colorable):
-	# Iterate through basic blocks
-
-
+	colors = ['eax', 'ebx', 'ecx', 'edx', 'esi', 'edi', 'e8', 'e9', 'e10', 'e11', 'e12', 'e13', 'e14', 'e15']
+	k = len(colors)
+	k = 4
 
 	for block in blocks:
-		for live_set in block.live_sets:
-			if len(live_set) > 11:
+		# Refresh liveness
+		blocks = liveness(blocks)
 
-	# Assembly generation
+		if block.rig:
+			# Is it k-colorable?
+			if k_color(block) > k:
+				# It isn't, we need to spill, register w/ greatest live range
 
-	# Print to stdout
-	# print "comment start"
+				# Get register with greatest live range
+				if block.live_ranges:
+					spill_register = max(block.live_ranges, key=block.live_ranges.get)
+					spill(block, spill_register, [])
+
+	blocks = liveness(blocks)
+
+	# print TAC
+	print "comment start"
+	for block in blocks:
+		for inst in block.insts:
+			print inst
+
 	# for block in blocks:
-	# 	for inst in block.insts:
-	# 		print inst
+	# 	print block.coloring
 
 if __name__ == '__main__':
 	main()

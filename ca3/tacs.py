@@ -229,20 +229,27 @@ class TACStore(object):
 		return 'store ' + str(self.op1)
 
 class TACLoad(object):
-	def __init__(self, assignee, addr):
+	def __init__(self, assignee, offset):
 		self.assignee = assignee
-		self.addr = addr
+		self.offset = offset
 
 	def __str__(self):
-		return str(self.assignee) + ' <- ' + 'load ' + str(self.addr)
+		return str(self.assignee) + ' <- ' + 'load ' + str(self.offset)
 
 # Basic block definition
 
 class TACBasicBlock(object):
 	def __init__(self, insts):
 		self.insts = insts
-		self.live_sets = []
 		self.label = self.insts[0].label
+
+		self.live_sets = []
+		self.live_ranges = {}
+		self.rig = {}
+		self.coloring = {}
+
+		self.register_map = {}
+
 
 		self.children = []
 		self.parents = []

@@ -1,0 +1,79 @@
+def inst_uses(inst, spill_reg):
+	if hasattr(inst, 'op1'):
+		if inst.op1 == spill_reg:
+			return True
+	if hasattr(inst, 'op2'):
+		if inst.op2 == spill_reg:
+			return True
+	return False
+
+def next_use(block, spill_reg):
+	for i, inst in enumerate(block.insts):
+		if inst_uses(inst, spill_reg):
+			block.insts.insert(i, TACLoad(ns(), stack.pop()))
+			return True
+	if block.children != []:
+		for child in block.children:
+			if next_use(child):
+				return True
+	else:
+		return False
+
+
+
+	# Register allocation
+	while True:
+		# Compute live sets/ranges
+		blocks = liveness(blocks)
+
+		# Iterate over the instructions
+		for i, block in enumerate(blocks):
+			for j, live_set in enumerate(block.live_sets):
+				# Find first live set that won't fit into registers at an instruction thats not a store
+				if len(live_set) > len(colors) and not isinstance(block.insts[j], TACStore):
+					spill_reg = ""
+
+					# Add a store for register with greatest live range
+					if live_set:
+						# Pick max live range register
+						mx = live_set.pop()
+						for reg in live_set:
+							if block.live_ranges[mx] < block.live_ranges[reg]:
+								mx = reg
+						# Store it (this kills the register)
+						block.insts.insert(j, TACStore(mx))
+						spill_reg = mx
+
+					# Find next use of the register and insert a load above it into a new register
+
+					# First check this block
+					for k in range(j, len(block.insts)):
+						inst = block.insts[k]
+						if inst_uses(inst, spill_reg): 
+							block.insts.insert(j, TACLoad(ns(), stack.pop()))
+							break
+
+					# Then recursively check children
+					if block.children:
+						for child in block.children:
+							next_use(child)
+
+	#	- Replace all future instances of the register with the new one
+	# 4. If no such instance exists, color the graph
+	# 5. If len(colors) > k:
+	#	- For each register, if color > kth color, do substeps of (3). 
+
+	# Coloring
+
+
+	# for each vertex, set its color to be the first color in the color priority list that it isnt adjacent to
+
+	# Assembly generation
+
+
+# New register allocation algo
+
+# 1. Compute live sets for every instruction (percolate)
+# 2. Compute live ranges for every instruction (percolate)
+# 3. Compute rig graph
+
