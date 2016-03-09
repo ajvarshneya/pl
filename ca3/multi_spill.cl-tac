@@ -1,0 +1,22 @@
+comment start
+label Main_main_0
+t$1 <- default Int
+t$2 <- default Int
+t$3 <- default Int
+t$4 <- default Int
+t$1 <- int 0
+t$5 <- t$1
+t$2 <- int 1
+t$6 <- t$2
+t$3 <- int 2
+t$7 <- t$3
+t$4 <- int 3
+t$8 <- t$4
+t$13 <- t$1
+t$14 <- t$2
+t$11 <- + t$13 t$14
+t$12 <- t$3
+t$9 <- + t$11 t$12
+t$10 <- t$4
+t$0 <- + t$9 t$10
+return t$0
