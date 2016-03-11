@@ -54,7 +54,7 @@ class subl(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\tmov\t" + str(self.src) + ", " + str(self.dst)
+		s = "\tsubl\t" + str(self.src) + ", " + str(self.dst)
 		return s
 
 # subq

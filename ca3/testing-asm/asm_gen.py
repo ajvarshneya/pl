@@ -34,7 +34,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [comment('assign')] # debugging label
 				asm += [movl(op1, assignee)]
 
-			if isinstance(inst, TACPlus):
+			elif isinstance(inst, TACPlus):
 				assignee = get_color(inst.assignee, coloring)
 				op1 = get_color(inst.op1, coloring)
 				op2 = get_color(inst.op2, coloring)
@@ -46,7 +46,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 					asm += [movl(op1, assignee)]
 					asm += [addl(op2, assignee)]
 
-			if isinstance(inst, TACMinus):
+			elif isinstance(inst, TACMinus):
 				assignee = get_color(inst.assignee, coloring)
 				op1 = get_color(inst.op1, coloring)
 				op2 = get_color(inst.op2, coloring)
@@ -59,7 +59,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 					asm += [movl(op1, assignee)]
 					asm += [subl(op2, assignee)]
 
-			if isinstance(inst, TACMultiply):
+			elif isinstance(inst, TACMultiply):
 				assignee = get_color(inst.assignee, coloring)
 				op1 = get_color(inst.op1, coloring)
 				op2 = get_color(inst.op2, coloring)
@@ -71,7 +71,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 					asm += [movl(op1, assignee)]
 					asm += [imull(op2, assignee)]
 
-			if isinstance(inst, TACDivide):
+			elif isinstance(inst, TACDivide):
 				assignee = get_color(inst.assignee, coloring) # rX
 				op1 = get_color(inst.op1, coloring) # rY
 				op2 = get_color(inst.op2, coloring) # rZ
@@ -103,7 +103,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [movl('4(%rsp)', assignee)] # result -> rX
 				asm += [addq('$8', '%rsp')]
 
-			if isinstance(inst, TACLT):
+			elif isinstance(inst, TACLT):
 				assignee = get_color(inst.assignee, coloring)
 				op1 = get_color(inst.op1, coloring)
 				op2 = get_color(inst.op2, coloring)
@@ -116,7 +116,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [movl('$0', assignee)]
 				asm += [label(true_label)]
 
-			if isinstance(inst, TACLEQ):
+			elif isinstance(inst, TACLEQ):
 				assignee = get_color(inst.assignee, coloring)
 				op1 = get_color(inst.op1, coloring)
 				op2 = get_color(inst.op2, coloring)
@@ -129,7 +129,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [movl('$0', assignee)]
 				asm += [label(true_label)]
 
-			if isinstance(inst, TACEqual):
+			elif isinstance(inst, TACEqual):
 				assignee = get_color(inst.assignee, coloring)
 				op1 = get_color(inst.op1, coloring)
 				op2 = get_color(inst.op2, coloring)
@@ -142,13 +142,13 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [movl('$0', assignee)]
 				asm += [label(true_label)]
 
-			if isinstance(inst, TACInt):
+			elif isinstance(inst, TACInt):
 				assignee = get_color(inst.assignee, coloring)
 				value = '$' + str(inst.val)
 				asm += [comment('int init')] # debugging label
 				asm += [movl(value, assignee)]
 
-			if isinstance(inst, TACBool):
+			elif isinstance(inst, TACBool):
 				assignee = get_color(inst.assignee, coloring)
 				value = str(inst.val)
 				if value == 'true':
@@ -158,26 +158,26 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [comment('bool init')] # debugging label
 				asm += [movl(value, assignee)]
 
-			if isinstance(inst, TACNot):
+			elif isinstance(inst, TACNot):
 				assignee = get_color(inst.assignee, coloring)
 				op1 = get_color(inst.op1, coloring)
 				asm += [comment('not')] # debugging label
 				asm += [movl(op1, assignee)]
 				asm += [xorl('$1', assignee)]
 
-			if isinstance(inst, TACNeg):
+			elif isinstance(inst, TACNeg):
 				assignee = get_color(inst.assignee, coloring)
 				op1 = get_color(inst.op1, coloring)
 				asm += [comment('negate')] # debugging label
 				asm += [movl(op1, assignee)]
 				asm += [negl(assignee)]			
 
-			if isinstance(inst, TACDefault):
+			elif isinstance(inst, TACDefault):
 				assignee = get_color(inst.assignee, coloring)
 				asm += [comment('default')] # debugging label
 				asm += [movl('$0', assignee)]
 
-			if isinstance(inst, TACOutInt):
+			elif isinstance(inst, TACOutInt):
 				op1 = get_color(inst.op1, coloring)
 				asm += [comment('out_int')] # debugging label
 
@@ -206,7 +206,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [popq('%rcx')]
 				asm += [popq('%rax')]
 
-			if isinstance(inst, TACInInt):
+			elif isinstance(inst, TACInInt):
 				assignee = get_color(inst.assignee, coloring)
 				
 				asm += [comment('in_int')] # debugging label
@@ -243,32 +243,32 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [movl('(%rsp)', assignee)]
 				asm += [addq('$4', '%rsp')]
 
-			if isinstance(inst, TACJmp):
+			elif isinstance(inst, TACJmp):
 				asm += [jmp(str(inst.label))]
 
-			if isinstance(inst, TACLabel):
+			elif isinstance(inst, TACLabel):
 				asm += [label(str(inst.label))]
 
-			if isinstance(inst, TACBt):
+			elif isinstance(inst, TACBt):
 				predicate = get_color(inst.val, coloring)
 
 				asm += [comment('branch')] # debugging label
 				asm += [cmpl(predicate, '$1')]
 				asm += [je(inst.label)]
 
-			if isinstance(inst, TACStore):
+			elif isinstance(inst, TACStore):
 				asm += [comment('store')] # debugging label
 				register = get_color(inst.val, coloring)
 				stack_address = spilled_register_address[inst.val]
 				asm += [movl(register, stack_address)]
 
-			if isinstance(inst, TACLoad):
+			elif isinstance(inst, TACLoad):
 				asm += [comment('load')] # debugging label
 				register = get_color(inst.val, coloring)
 				stack_address = spilled_register_address[inst.val]
 				asm += [movl(stack_address, register)]
 
-			if isinstance(inst, TACReturn):
+			elif isinstance(inst, TACReturn):
 				value = get_color(inst.val, coloring)
 				asm += [movl(value, '%eax')]
 				asm += [leave()]

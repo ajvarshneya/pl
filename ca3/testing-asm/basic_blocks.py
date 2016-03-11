@@ -65,7 +65,7 @@ def kill_dead_code(block):
 		 		block.insts.remove(inst)
 		 		removal = True
 
- 	block.live_in = copy(live_set)
+ 	block.live_in = live_set
  	return removal
 
 # Percolate live_out set up the block
@@ -109,8 +109,8 @@ def percolate(block):
  	live_sets.reverse()
 
  	# Copy liveness information
-	block.live_in = copy(live_set)
- 	block.live_sets = copy(live_sets)
+	block.live_in = live_set
+ 	block.live_sets = live_sets
 
  	return change
 
@@ -252,14 +252,14 @@ def make_inst_list(tac):
 				if inst[3] == 'out_int':
 					op1 = inst[4]
 					inst_list.append(TACOutInt(assignee, op1))
-				if inst[3] == 'out_string':
+				elif inst[3] == 'out_string':
 					op1 = inst[4]
 					inst_list.append(TACOutString(assignee, op1))					
-				if inst[3] == 'in_int':
+				elif inst[3] == 'in_int':
 					inst_list.append(TACInInt(assignee))
-				if inst[3] == 'in_string':
+				elif inst[3] == 'in_string':
 					inst_list.append(TACInString(assignee))
-				if inst[3] == 'abort':
+				elif inst[3] == 'abort':
 					inst_list.append(TACAbort(assignee))
 
 			else: # Must be an assignment instruction
@@ -267,7 +267,6 @@ def make_inst_list(tac):
 				inst_list.append(TACAssign(assignee, op1))
 
 	return inst_list
-
 
 # Basic block definition
 
@@ -299,16 +298,4 @@ class BasicBlock(object):
 		s += 'Live_in : ' + str([live_var for live_var in self.live_in]) + '\n'
 		s += 'Live_out : ' + str([live_var for live_var in self.live_out]) + '\n'
 
-		return s
-
-class Method(object):
-	def __init__(self, blocks, live_ranges, rig):
-		self.blocks = blocks
-		self.live_ranges = {}
-		self.rig = {}
-
-	def __str__(self):
-		s = ""
-		for block in blocks:
-			s += str(block)
 		return s
