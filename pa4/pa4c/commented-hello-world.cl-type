@@ -1,0 +1,316 @@
+class_map
+6
+Bool
+0
+IO
+0
+Int
+0
+Main
+0
+Object
+0
+String
+0
+
+implementation_map
+
+6 -- num classes
+
+Bool -- class name
+3 -- num methods 
+
+abort -- method name
+0 -- num formals
+Object -- parent class for abort
+0 -- lineno
+Object -- abort body type
+internal -- internal expression
+Object.abort -- Class.method
+
+copy -- method name
+0
+Object
+0
+SELF_TYPE
+internal
+Object.copy
+
+type_name -- method name
+0
+Object
+0
+String
+internal
+Object.type_name
+
+IO -- class name
+7
+
+abort -- method name
+0
+Object
+0
+Object
+internal
+Object.abort
+
+copy -- method name
+0
+Object
+0
+SELF_TYPE
+internal
+Object.copy
+
+type_name -- method name
+0
+Object
+0
+String
+internal
+Object.type_name
+
+in_int -- method name
+0
+IO
+0
+Int
+internal
+IO.in_int
+
+in_string -- method name
+0
+IO
+0
+String
+internal
+IO.in_string
+
+out_int -- method name
+1
+x
+IO
+0
+SELF_TYPE
+internal
+IO.out_int
+
+out_string -- method name
+1
+x
+IO
+0
+SELF_TYPE
+internal
+IO.out_string
+
+Int -- class name
+3
+
+abort -- method name
+0
+Object
+0
+Object
+internal
+Object.abort
+
+copy -- method name
+0
+Object
+0
+SELF_TYPE
+internal
+Object.copy
+
+type_name -- method name
+0
+Object
+0
+String
+internal
+Object.type_name
+
+Main -- class name
+8
+
+abort -- method name
+0
+Object
+0
+Object
+internal
+Object.abort
+
+copy -- method name
+0
+Object
+0
+SELF_TYPE
+internal
+Object.copy
+
+type_name -- method name
+0
+Object
+0
+String
+internal
+Object.type_name
+
+in_int -- method name
+0
+IO
+0
+Int
+internal
+IO.in_int
+
+in_string -- method name
+0
+IO
+0
+String
+internal
+IO.in_string
+
+out_int -- method name
+1
+x
+IO
+0
+SELF_TYPE
+internal
+IO.out_int
+
+out_string -- method name
+1
+x
+IO
+0
+SELF_TYPE
+internal
+IO.out_string
+
+main -- method name
+0 -- num formals
+Main -- class where its defined
+4 -- lineno
+SELF_TYPE -- body type
+identifier -- expression
+4
+self
+
+Object -- class name
+3
+
+abort -- method name
+0
+Object
+0
+Object
+internal
+Object.abort
+
+copy -- method name
+0
+Object
+0
+SELF_TYPE
+internal
+Object.copy
+
+type_name -- method name
+0
+Object
+0
+String
+internal
+Object.type_name
+
+String -- class name
+6
+
+abort -- method name
+0
+Object
+0
+Object
+internal
+Object.abort
+
+copy -- method name
+0
+Object
+0
+SELF_TYPE
+internal
+Object.copy
+
+type_name -- method name
+0
+Object
+0
+String
+internal
+Object.type_name
+
+concat -- method name
+1
+s
+String
+0
+String
+internal
+String.concat
+
+length -- method name
+0
+String
+0
+Int
+internal
+String.length
+
+substr -- method name
+2
+i
+l
+String
+0
+String
+internal
+String.substr
+
+parent_map
+5
+Bool
+Object
+IO
+Object
+Int
+Object
+Main
+IO
+String
+Object
+
+1
+1
+Main
+inherits
+1
+IO
+1
+method
+2
+main
+0
+2
+Object
+4
+SELF_TYPE
+identifier
+4
+self
