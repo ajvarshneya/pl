@@ -6,7 +6,7 @@ end
 
 def write_annotated_ast(filename, ast)
 	output = File.open("#{filename}-type", "w")
-	output << AnnotatedAST.new(ast.classes).to_s()
+	output << AnnotatedAST.new(ast.classes).to_s_cmap()
 	output.close()
 end
 
@@ -24,11 +24,12 @@ def read_ast()
 end
 
 def main()
-	filename = ARGF.argv[0].to_s()[0..-5]
+	filename = ARGV[0].to_s()[0..-5]
 	raw_ast = read_ast()
 	ast = ast(raw_ast)
-	puts AnnotatedAST.new(ast.classes).to_s()
-	# write_annotated_ast(filename, ast)
+	# puts ast.to_s()
+	# puts AnnotatedAST.new(ast.classes).to_s_cmap()
+	write_annotated_ast(filename, ast)
 end
 
 if __FILE__ == $PROGRAM_NAME

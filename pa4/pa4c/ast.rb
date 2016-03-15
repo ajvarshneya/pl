@@ -23,40 +23,30 @@ end
 class AnnotatedAST
     def initialize(classes)
         @classes = classes
+        basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
+        @classes += basic_classes
+        @classes = @classes.sort_by{|obj| obj.name}
     end
 
-    def to_s
+    def to_s_cmap
         s = ""
+        # class_map \n
         s += "class_map\n"
+        # number of classes \n
         s += @classes.length().to_s() + "\n"
-        for ast_class in @classes
-            s += ast_class.name.to_s() + "\n"
-            num_attributes = 0
-            attributes = ""
-            for feature in ast_class.features
-                if feature.kind == "attribute_init" 
-                    num_attributes += 1
-                    attributes += "initializer\n"
-                    attributes += feature.name.to_s() + "\n"
-                    attributes += feature.typ.to_s() + "\n"
-                    attributes += feature.expr.to_s()
-                end
 
-                if feature.kind == "attribute_no_init"
-                    num_attributes += 1
-                    attributes += "no_initializer\n"
-                    attributes += feature.name.to_s() + "\n"
-                    attributes += feature.typ.to_s() + "\n"
-                end
-            end
-            s += num_attributes.to_s()
-            s += attributes
+        for ast_class in @classes
+            s += ast_class.to_s_cmap()
         end
         return s
     end
+
+    # def to_s_imap
+    # end
 end 
 
 class ASTClass
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
 	def initialize(inherits, name, name_line, superclass, superclass_line, features)
        @inherits = inherits 
        @name = name 
@@ -66,28 +56,16 @@ class ASTClass
        @features = features
 	end
 
-    def name
-        return @name
-    end
-
-    def superclass
-        return @superclass
-    end
-
-    def features
-        return @features
-    end
-
 	def to_s
         # name:identifier
         s = ""
         s += @name_line.to_s() + "\n"
-        s += @name.to_s() + "\n"
+        s += @name + "\n"
         if @inherits == "inherits"
             # inherits \n superclass:identifier
             s += "inherits" + "\n"
             s += @superclass_line.to_s() + "\n"
-            s += @superclass.to_s() + "\n"
+            s += @superclass + "\n"
 		end
 
         if @inherits == "no_inherits"
@@ -102,9 +80,166 @@ class ASTClass
         end
         return s
 	end
+
+    def to_s_cmap
+        s = ""
+        # class name \n
+        s += @name + "\n"
+        num_attributes = 0
+        attributes = ""
+        for feature in @features
+            if feature.kind == "attribute_init" 
+                num_attributes += 1
+                # initializer \n attribute name \n type \n expr
+                attributes += "initializer\n"
+                attributes += feature.name + "\n"
+                attributes += feature.typ + "\n"
+                attributes += feature.expr.to_s()
+            end
+
+            if feature.kind == "attribute_no_init"
+                num_attributes += 1
+                # no_initializer \n attribute name \n type \n
+                attributes += "no_initializer\n"
+                attributes += feature.name + "\n"
+                attributes += feature.typ + "\n"
+            end
+        end
+        # number of attributes \n
+        s += num_attributes.to_s() + "\n"
+
+        # attributes
+        s += attributes
+        return s
+    end
+
+    # def to_s_imap
+    # end
+end
+
+class BasicClass
+end
+
+class ObjectClass < BasicClass
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+
+    def initialize()
+        @inherits =  "no_inherits"
+        @name = "Object"
+        @name_line = "0"
+        @superclass = nil
+        @superclass_line = nil
+
+        abort_body = ASTInternal.new("Object", "Object.abort")
+        abort_method = ASTFeature.new("method", "abort", "0", nil, "Object", "0", abort_body)
+        
+        copy_body = ASTInternal.new("SELF_TYPE", "Object.copy")
+        copy_method = ASTFeature.new("method", "copy", "0", nil, "Object", "0", copy_body)
+
+        type_name_body = ASTInternal.new("String", "Object.type_name")
+        type_name_method = ASTFeature.new("method", "type_name", "0", nil, "Object", "0", type_name_body)
+
+        @features = [abort_method, copy_method, type_name_method]
+    end
+
+    def to_s_cmap
+        s = ""
+        s += name + "\n"
+        s += "0\n"
+        return s
+    end
+
+    # def to_s_imap
+    #     s = ""
+    #     s += @name + "\n"
+    #     s += @features.length().to_s() + "\n"
+    #     for feature in @features
+    #         s += feature.to_s_imap()
+    #     end
+    # end
+end
+
+class IOClass < ObjectClass
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    def initialize()
+        super()
+        @inherits =  "inherits"
+        @name = "IO"
+        @name_line = "0"
+        @superclass = "Object"
+        @superclass_line = "0"
+
+        in_int_body = ASTInternal.new("Int", "IO.in_int")
+        in_int_method = ASTFeature.new("method", "in_int", "0", nil, "Object", "0", in_int_body)
+
+        in_string_body = ASTInternal.new("String", "IO.in_string")
+        in_string_method = ASTFeature.new("method", "in_string", "0", nil, "Object", "0", in_string_body)
+        
+        out_int_body = ASTInternal.new("SELF_TYPE", "IO.out_int")
+        out_int_formals = [ASTFormal.new("x", "0", "Int", "0")]
+        out_int_method = ASTFeature.new("method_formals", "out_int", "0", out_int_formals, "Object", "0", out_int_body)
+        
+        out_string_body = ASTInternal.new("SELF_TYPE", "IO.out_string")
+        out_string_formals = [ASTFormal.new("x", "0", "String", "0")]
+        out_string_method = ASTFeature.new("method_formals", "out_string", "0", out_string_formals, "Object", "0", out_string_body)
+
+        @features += [in_int_method, in_string_method, out_int_method, out_string_method]
+    end
+end
+
+class IntClass < ObjectClass
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    def initialize()
+        super()
+        @inherits =  "inherits"
+        @name = "Int"
+        @name_line = "0"
+        @superclass = nil
+        @superclass_line = nil
+        @features += []
+    end
+end
+
+class StringClass < ObjectClass
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    def initialize()
+        super()
+        @inherits =  "inherits"
+        @name = "String"
+        @name_line = "0"
+        @superclass = nil
+        @superclass_line = nil
+
+        concat_body = ASTInternal.new("String", "String.concat")
+        concat_formals = [ASTFormal.new("s", "0", "String", "0")]
+        concat_method = ASTFeature.new("method_formals", "concat", "0", concat_formals, "String", "0", concat_body)
+
+        length_body = ASTInternal.new("String", "String.length")
+        length_method = ASTFeature.new("method", "length", "0", nil, "Int", "0", length_body)
+        
+        substr_body = ASTInternal.new("String", "String.substr")
+        substr_formals = [ASTFormal.new("i", "0", "Int", "0"), ASTFormal.new("l", "0", "Int", "0")]
+        substr_method = ASTFeature.new("method_formals", "substr", "0", substr_formals, "String", "0", substr_body)
+
+        @features += []
+    end
+end
+
+class BoolClass < ObjectClass
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    def initialize()
+        super()
+        @inherits =  "inherits"
+        @name = "Bool"
+        @name_line = "0"
+        @superclass = nil
+        @superclass_line = nil
+        @features += []
+    end
 end
 
 class ASTFeature
+    attr_accessor :kind, :name, :name_line, :formals, :typ, :typ_line, :expr
     def initialize(kind, name, name_line, formals, typ, typ_line, expr)
         @kind = kind 
         @name = name 
@@ -178,6 +313,17 @@ class ASTFeature
         end
         return s
     end
+
+    # def to_s_imap
+    #     s = ""
+    #     s += @name + "\n"
+    #     s += @formals.length().to_s() + "\n"
+    #     for formal in @formals
+    #         s += formal.to_s_imap()
+    #     end
+    #     # ultimate parent class???
+    #     s += @expr.to_s()
+    # end
 end
 
 class ASTFormal
@@ -186,6 +332,10 @@ class ASTFormal
        @name_line = name_line 
        @typ = typ 
        @typ_line = typ_line
+    end
+
+    def name
+        return @name
     end
 
     def to_s
@@ -197,6 +347,10 @@ class ASTFormal
         s += @typ.to_s() + "\n"
         return s
     end
+
+    # def to_s_imap
+    #     return @name + "\n"
+    # end
 end
 
 class ASTExpression
@@ -619,6 +773,22 @@ class ASTIdentifier < ASTExpression
         s += "identifier" + "\n"
         s += @name_line.to_s() + "\n"
         s += @name.to_s() + "\n"
+        return s
+    end
+end
+
+class ASTInternal < ASTExpression
+    def initialize(typ, class_method)
+        @typ = typ
+        @class_method = class_method
+    end
+
+    def to_s
+        s = ""
+        s += "0\n"
+        s += @typ.to_s() + "\n"
+        s += "internal\n"
+        s += @class_method.to_s() + "\n"
         return s
     end
 end
