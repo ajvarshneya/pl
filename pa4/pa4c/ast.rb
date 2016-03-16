@@ -1,34 +1,14 @@
 # Classes defining an object representation of the AST
 
-class AST
-	def initialize(classes)
-		@classes = classes
-	end
-
-    def classes
-        return @classes
-    end
-
-	def to_s
-		s = ""
-		s += @classes.length().to_s() + "\n"
-		for ast_class in @classes
-			s += ast_class.to_s()
-		end
-		return s
-	end
-end
-
-# Annotated AST
-class AnnotatedAST
-    def initialize(classes)
-        @classes = classes
+class ClassMap
+    def initialize(ast)
+        @classes = ast.classes
         basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
         @classes += basic_classes
         @classes = @classes.sort_by{|obj| obj.name}
     end
 
-    def to_s_cmap
+    def to_s
         s = ""
         # class_map \n
         s += "class_map\n"
@@ -36,14 +16,77 @@ class AnnotatedAST
         s += @classes.length().to_s() + "\n"
 
         for ast_class in @classes
-            s += ast_class.to_s_cmap()
+            # class name \n
+            s += ast_class.name + "\n"
+            num_attributes = 0
+            attributes = ""
+            for feature in ast_class.features
+                if feature.kind == "attribute_init" 
+                    num_attributes += 1
+                    # initializer \n attribute name \n type \n expr
+                    attributes += "initializer\n"
+                    attributes += feature.name + "\n"
+                    attributes += feature.typ + "\n"
+                    attributes += feature.expr.to_s()
+                end
+
+                if feature.kind == "attribute_no_init"
+                    num_attributes += 1
+                    # no_initializer \n attribute name \n type \n
+                    attributes += "no_initializer\n"
+                    attributes += feature.name + "\n"
+                    attributes += feature.typ + "\n"
+                end
+            end
+            # number of attributes \n
+            s += num_attributes.to_s() + "\n"
+
+            # attributes
+            s += attributes
         end
         return s
+    end
+end
+
+class ImplementationMap
+    def initialize(ast)
+    end
+end
+
+class ParentMap
+    def initialize(ast)
+    end
+end
+
+# Annotated AST
+class AnnotatedAST
+    attr_accessor :classes
+    def initialize(classes)
+        @classes = classes
+        basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
+        @classes += basic_classes
+        @classes = @classes.sort_by{|obj| obj.name}
     end
 
     # def to_s_imap
     # end
 end 
+
+class AST
+    attr_accessor :classes
+    def initialize(classes)
+        @classes = classes
+    end
+
+    def to_s
+        s = ""
+        s += @classes.length().to_s() + "\n"
+        for ast_class in @classes
+            s += ast_class.to_s()
+        end
+        return s
+    end
+end
 
 class ASTClass
     attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
@@ -81,38 +124,6 @@ class ASTClass
         return s
 	end
 
-    def to_s_cmap
-        s = ""
-        # class name \n
-        s += @name + "\n"
-        num_attributes = 0
-        attributes = ""
-        for feature in @features
-            if feature.kind == "attribute_init" 
-                num_attributes += 1
-                # initializer \n attribute name \n type \n expr
-                attributes += "initializer\n"
-                attributes += feature.name + "\n"
-                attributes += feature.typ + "\n"
-                attributes += feature.expr.to_s()
-            end
-
-            if feature.kind == "attribute_no_init"
-                num_attributes += 1
-                # no_initializer \n attribute name \n type \n
-                attributes += "no_initializer\n"
-                attributes += feature.name + "\n"
-                attributes += feature.typ + "\n"
-            end
-        end
-        # number of attributes \n
-        s += num_attributes.to_s() + "\n"
-
-        # attributes
-        s += attributes
-        return s
-    end
-
     # def to_s_imap
     # end
 end
@@ -140,13 +151,6 @@ class ObjectClass < BasicClass
         type_name_method = ASTFeature.new("method", "type_name", "0", nil, "Object", "0", type_name_body)
 
         @features = [abort_method, copy_method, type_name_method]
-    end
-
-    def to_s_cmap
-        s = ""
-        s += name + "\n"
-        s += "0\n"
-        return s
     end
 
     # def to_s_imap

@@ -1,0 +1,28 @@
+13a14,19
+> 1
+> initializer
+> var
+> Int
+> 9
+> integer
+17a24,29
+> 1
+> initializer
+> var
+> Int
+> 9
+> integer
+19a32,37
+> 1
+> initializer
+> var
+> Int
+> 9
+> integer
+21a40,45
+> 1
+> initializer
+> var
+> Int
+> 9
+> integer

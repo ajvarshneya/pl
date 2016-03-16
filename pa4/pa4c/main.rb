@@ -27,9 +27,10 @@ def main()
 	filename = ARGV[0].to_s()[0..-5]
 	raw_ast = read_ast()
 	ast = ast(raw_ast)
+	puts ClassMap.new(ast).to_s()
 	# puts ast.to_s()
 	# puts AnnotatedAST.new(ast.classes).to_s_cmap()
-	write_annotated_ast(filename, ast)
+	# write_annotated_ast(filename, ast)
 end
 
 if __FILE__ == $PROGRAM_NAME
