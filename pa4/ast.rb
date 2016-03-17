@@ -1,7 +1,7 @@
 # Classes defining an object representation of the AST
 
 class ClassMap
-    def initialize(ast, inheritance_tree)
+    def initialize(ast, inheritance_graph)
         @classes = ast.classes
         @basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
         @all_classes = @classes + @basic_classes
@@ -9,7 +9,7 @@ class ClassMap
     end
 
     def propogate_features(ast)
-        
+
     end
 
     def to_s

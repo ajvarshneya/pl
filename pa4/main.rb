@@ -17,21 +17,20 @@ def check_duplicates(ast)
 	end
 end
 
-def get_inheritance_tree(ast)
-	inheritance_tree = {}
+def get_inheritance_graph(ast)
+	inheritance_graph = {}
 	classes = ast.classes
 	for ast_class in classes
 		# If there's a superclass, add this object to its list
 		if ast_class.superclass != nil
-			if inheritance_tree.has_key?(ast_class.superclass)
-				inheritance_tree[ast_class.superclass] << ast_class
+			if inheritance_graph.has_key?(ast_class.superclass)
+				inheritance_graph[ast_class.superclass] << ast_class
 			else
-				inheritance_tree[ast_class.superclass] = [ast_class]
+				inheritance_graph[ast_class.superclass] = [ast_class]
 			end
-		else
-			inheritance_tree["Object"] = [ast_class]
+		# else
+		# 	inheritance_tree["Object"] = [ast_class]
 		end
-
 		# 
 	end
 end
@@ -60,8 +59,8 @@ def main()
 	raw_ast = read_ast()
 	ast = ast(raw_ast)
 	check_duplicates(ast)
-	inheritance_tree = get_inheritance_tree(ast)
-	puts ClassMap.new(ast).to_s()
+	inheritance_graph = get_inheritance_graph(ast)
+	puts ClassMap.new(ast, inheritance_graph).to_s()
 	# puts ast.to_s()
 	# puts AnnotatedAST.new(ast.classes).to_s_cmap()
 	# write_annotated_ast(filename, ast)

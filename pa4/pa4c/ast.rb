@@ -1,11 +1,15 @@
 # Classes defining an object representation of the AST
 
 class ClassMap
-    def initialize(ast)
+    def initialize(ast, inheritance_tree)
         @classes = ast.classes
-        basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
-        @classes += basic_classes
-        @classes = @classes.sort_by{|obj| obj.name}
+        @basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
+        @all_classes = @classes + @basic_classes
+        @all_classes = @all_classes.sort_by{|obj| obj.name}
+    end
+
+    def propogate_features(ast)
+        
     end
 
     def to_s
@@ -13,9 +17,9 @@ class ClassMap
         # class_map \n
         s += "class_map\n"
         # number of classes \n
-        s += @classes.length().to_s() + "\n"
+        s += @all_classes.length().to_s() + "\n"
 
-        for ast_class in @classes
+        for ast_class in @all_classes
             # class name \n
             s += ast_class.name + "\n"
             num_attributes = 0
@@ -63,13 +67,16 @@ class AnnotatedAST
     attr_accessor :classes
     def initialize(classes)
         @classes = classes
-        basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
-        @classes += basic_classes
-        @classes = @classes.sort_by{|obj| obj.name}
     end
 
-    # def to_s_imap
-    # end
+    def to_s
+        s = ""
+        s += @classes.length().to_s() + "\n"
+        for ast_class in @classes
+            s += ast_class.to_s()
+        end
+        return s
+    end
 end 
 
 class AST
@@ -97,6 +104,10 @@ class ASTClass
        @superclass = superclass 
        @superclass_line = superclass_line 
        @features = features
+
+       # Used by type checking maps
+       @attributes = []
+       @methods = []
 	end
 
 	def to_s
@@ -252,22 +263,6 @@ class ASTFeature
         @typ = typ 
         @typ_line = typ_line 
         @expr = expr
-    end
-
-    def kind
-        return @kind
-    end
-
-    def name
-        return @name
-    end
-
-    def typ
-        return @typ
-    end
-
-    def expr
-        return @expr
     end
 
     def to_s
