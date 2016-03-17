@@ -1,11 +1,21 @@
 
-class A {
-  a : Int;
+class A inherits B {
+  d : Int;
 };
 
-class A {
+class B inherits C {
+	c : Int;
+};
+
+
+class C inherits D {
+  b : Int;
+};
+
+class D {
 	a : Int;
 };
+
 
 class Main inherits IO {
   main() : Object {

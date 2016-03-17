@@ -344,6 +344,7 @@ class ASTFeature
 end
 
 class ASTFormal
+    attr_accessor :name, :name_line, :typ, :typ_line
     def initialize(name, name_line, typ, typ_line)
        @name = name 
        @name_line = name_line 
