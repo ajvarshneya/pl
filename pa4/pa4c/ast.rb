@@ -1,6 +1,7 @@
 # Classes defining an object representation of the AST
 
 class ClassMap
+<<<<<<< HEAD
     def initialize(ast, inheritance_tree)
         @classes = ast.classes
         @basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
@@ -10,6 +11,14 @@ class ClassMap
 
     def propogate_features(ast)
         
+=======
+    attr_accessor :classes, :basic_classes, :all_classes
+    def initialize(classes)
+        @classes = classes
+        @basic_classes = [ObjectClass.new(), IOClass.new(), IntClass.new(), StringClass.new(), BoolClass.new()]
+        @all_classes = @classes + @basic_classes
+        @all_classes = @all_classes.sort_by{|obj| obj.name}
+>>>>>>> f5bd7a9f1020658528a44300672bc09f89a3be8c
     end
 
     def to_s
@@ -24,22 +33,22 @@ class ClassMap
             s += ast_class.name + "\n"
             num_attributes = 0
             attributes = ""
-            for feature in ast_class.features
-                if feature.kind == "attribute_init" 
+            for attribute in ast_class.attributes
+                if attribute.kind == "attribute_init" 
                     num_attributes += 1
                     # initializer \n attribute name \n type \n expr
                     attributes += "initializer\n"
-                    attributes += feature.name + "\n"
-                    attributes += feature.typ + "\n"
-                    attributes += feature.expr.to_s()
+                    attributes += attribute.name + "\n"
+                    attributes += attribute.typ + "\n"
+                    attributes += attribute.expr.to_s()
                 end
 
-                if feature.kind == "attribute_no_init"
+                if attribute.kind == "attribute_no_init"
                     num_attributes += 1
                     # no_initializer \n attribute name \n type \n
                     attributes += "no_initializer\n"
-                    attributes += feature.name + "\n"
-                    attributes += feature.typ + "\n"
+                    attributes += attribute.name + "\n"
+                    attributes += attribute.typ + "\n"
                 end
             end
             # number of attributes \n
@@ -96,7 +105,7 @@ class AST
 end
 
 class ASTClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
 	def initialize(inherits, name, name_line, superclass, superclass_line, features)
        @inherits = inherits 
        @name = name 
@@ -143,7 +152,7 @@ class BasicClass
 end
 
 class ObjectClass < BasicClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
 
     def initialize()
         @inherits =  "no_inherits"
@@ -153,15 +162,21 @@ class ObjectClass < BasicClass
         @superclass_line = nil
 
         abort_body = ASTInternal.new("Object", "Object.abort")
-        abort_method = ASTFeature.new("method", "abort", "0", nil, "Object", "0", abort_body)
+        abort_formals = []
+        abort_method = ASTFeature.new("method", "abort", "0", abort_formals, "Object", "0", abort_body)
         
         copy_body = ASTInternal.new("SELF_TYPE", "Object.copy")
-        copy_method = ASTFeature.new("method", "copy", "0", nil, "Object", "0", copy_body)
+        copy_formals = []
+        copy_method = ASTFeature.new("method", "copy", "0", copy_formals, "Object", "0", copy_body)
 
         type_name_body = ASTInternal.new("String", "Object.type_name")
-        type_name_method = ASTFeature.new("method", "type_name", "0", nil, "Object", "0", type_name_body)
+        type_name_formals = []
+        type_name_method = ASTFeature.new("method", "type_name", "0", type_name_formals, "Object", "0", type_name_body)
 
         @features = [abort_method, copy_method, type_name_method]
+
+        @attributes = []
+        @methods = []
     end
 
     # def to_s_imap
@@ -175,20 +190,22 @@ class ObjectClass < BasicClass
 end
 
 class IOClass < ObjectClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
     def initialize()
         super()
-        @inherits =  "inherits"
+        @inherits =  "no_inherits"
         @name = "IO"
         @name_line = "0"
-        @superclass = "Object"
-        @superclass_line = "0"
+        @superclass = nil
+        @superclass_line = nil
 
         in_int_body = ASTInternal.new("Int", "IO.in_int")
-        in_int_method = ASTFeature.new("method", "in_int", "0", nil, "Object", "0", in_int_body)
+        in_int_formals = []
+        in_int_method = ASTFeature.new("method", "in_int", "0", in_int_formals, "Object", "0", in_int_body)
 
         in_string_body = ASTInternal.new("String", "IO.in_string")
-        in_string_method = ASTFeature.new("method", "in_string", "0", nil, "Object", "0", in_string_body)
+        in_string_formals = []
+        in_string_method = ASTFeature.new("method", "in_string", "0", in_string_formals, "Object", "0", in_string_body)
         
         out_int_body = ASTInternal.new("SELF_TYPE", "IO.out_int")
         out_int_formals = [ASTFormal.new("x", "0", "Int", "0")]
@@ -199,27 +216,33 @@ class IOClass < ObjectClass
         out_string_method = ASTFeature.new("method_formals", "out_string", "0", out_string_formals, "Object", "0", out_string_body)
 
         @features += [in_int_method, in_string_method, out_int_method, out_string_method]
+
+        @attributes = []
+        @methods = []
     end
 end
 
 class IntClass < ObjectClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
     def initialize()
         super()
-        @inherits =  "inherits"
+        @inherits =  "no_inherits"
         @name = "Int"
         @name_line = "0"
         @superclass = nil
         @superclass_line = nil
         @features += []
+
+        @attributes = []
+        @methods = []
     end
 end
 
 class StringClass < ObjectClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
     def initialize()
         super()
-        @inherits =  "inherits"
+        @inherits =  "no_inherits"
         @name = "String"
         @name_line = "0"
         @superclass = nil
@@ -230,26 +253,33 @@ class StringClass < ObjectClass
         concat_method = ASTFeature.new("method_formals", "concat", "0", concat_formals, "String", "0", concat_body)
 
         length_body = ASTInternal.new("String", "String.length")
-        length_method = ASTFeature.new("method", "length", "0", nil, "Int", "0", length_body)
+        length_formals = []
+        length_method = ASTFeature.new("method", "length", "0", length_formals, "Int", "0", length_body)
         
         substr_body = ASTInternal.new("String", "String.substr")
         substr_formals = [ASTFormal.new("i", "0", "Int", "0"), ASTFormal.new("l", "0", "Int", "0")]
         substr_method = ASTFeature.new("method_formals", "substr", "0", substr_formals, "String", "0", substr_body)
 
-        @features += []
+        @features += [concat_method, length_method, substr_method]
+
+        @attributes = []
+        @methods = []
     end
 end
 
 class BoolClass < ObjectClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
     def initialize()
         super()
-        @inherits =  "inherits"
+        @inherits =  "no_inherits"
         @name = "Bool"
         @name_line = "0"
         @superclass = nil
         @superclass_line = nil
         @features += []
+
+        @attributes = []
+        @methods = []
     end
 end
 
@@ -326,6 +356,7 @@ class ASTFeature
 end
 
 class ASTFormal
+    attr_accessor :name, :name_line, :typ, :typ_line
     def initialize(name, name_line, typ, typ_line)
        @name = name 
        @name_line = name_line 

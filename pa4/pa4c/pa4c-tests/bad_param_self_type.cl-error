@@ -1,0 +1,1 @@
+ERROR: 8: Type-Check: class Main has method method with formal parameter of unknown type SELF_TYPE
