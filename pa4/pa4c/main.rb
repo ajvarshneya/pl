@@ -4,27 +4,42 @@ require './ast_gen'
 def type_check(ast)
 end
 
-<<<<<<< HEAD
-def check_duplicates(ast)
-	seen = {}
-	classes = ast.classes
-	for ast_class in classes
-		if seen.has_key?(ast_class.name)
-			puts "Redefined classes."
-			exit
-		else
-			seen[ast_class.name] = 1 
-=======
 def type_error(line_number, message)
 	puts "ERROR: #{line_number}: Type-Check: #{message}"
 	exit
 end
 
-# If a class name appears more than once, we fail
+# Checks that there is a Main class
+def check_class_main(class_map)
+	has_main = false
+	for ast_class in class_map.classes
+		if ast_class.name == "Main"
+			has_main = true
+		end
+	end	
+
+	if not has_main
+		line_number = 0
+		message = "class Main not found"
+		type_error(line_number, message)
+	end
+end
+
+# Checks that no class is named SELF_TYPE
+def check_class_self(class_map)
+	for ast_class in class_map.classes
+		if ast_class.name == "SELF_TYPE"
+			line_number = ast_class.name_line
+			message = "class named SELF_TYPE"
+			type_error(line_number, message)
+		end
+	end
+end
+
+# Checks that no class is defined more than once
 def check_class_redefined(class_map)
 	seen = {}
-	classes = class_map.all_classes.sort_by{|obj| obj.name_line.to_i}
-	classes.each do |ast_class|
+	for ast_class in class_map.all_classes.sort_by{|x| x.name_line.to_i}
 		if seen.has_key?(ast_class.name)
 			line_number = ast_class.name_line
 			message = "class #{ast_class.name} redefined"
@@ -42,7 +57,8 @@ def check_cycle(class_map, inheritance_graph)
 
 	# Get list of class names
 	classes = []
-	class_map.all_classes.each do |ast_class|
+
+	for ast_class in class_map.all_classes
 		classes << ast_class.name
 	end
 
@@ -51,7 +67,7 @@ def check_cycle(class_map, inheritance_graph)
 	if cycle != []
 		line_number = 0
 		path = ""
-		cycle.each do |class_name|
+		for class_name in cycle
 			path += class_name + " "
 		end
 		message = "inheritance cycle: #{path}"
@@ -63,7 +79,7 @@ end
 def check_cycle_visit(node, inheritance_graph, visited)
 	visited << node
 	if inheritance_graph[node]
-		inheritance_graph[node].each do |child|
+		for child in inheritance_graph[node]
 			if not visited.include? child.name
 				check_cycle_visit(child.name, inheritance_graph, visited)
 			end
@@ -71,34 +87,9 @@ def check_cycle_visit(node, inheritance_graph, visited)
 	end
 end
 
-def check_class_name(class_map)
-	# Find Main definition
-	has_main = false
-	class_map.classes.each do |ast_class|
-		if ast_class.name == "Main"
-			has_main = true
-		end
-	end	
-
-	if not has_main
-		line_number = 0
-		message = "class Main not found"
-		type_error(line_number, message)
-	end
-
-	# No SELF_TYPE definition
-	class_map.classes.each do |ast_class|
-		if ast_class.name == "SELF_TYPE"
-			line_number = ast_class.name_line
-			message = "class named SELF_TYPE"
-			type_error(line_number, message)
-		end
-	end
-end
-
 def check_class_inherits(class_map, class_lut)
 	# Check that the superclass isnt a constant
-	class_map.classes.each do |ast_class|
+	for ast_class in class_map.classes
 		if ast_class.superclass == "Int" ||
 			ast_class.superclass == "String" ||
 			ast_class.superclass == "Bool"
@@ -109,7 +100,7 @@ def check_class_inherits(class_map, class_lut)
 	end
 
 	# Check that each super class has a valid type
-	class_map.classes.each do |ast_class|
+	for ast_class in class_map.classes
 		if ast_class.superclass != nil
 			if not class_lut.include? ast_class.superclass
 				line_number = ast_class.superclass_line
@@ -120,44 +111,13 @@ def check_class_inherits(class_map, class_lut)
 	end
 end
 
-# Checks if the attribute has been defined more than once
-def check_attribute_redefined(ast_class, attributes, attribute)
-	attributes.each do | attribute |
-		duplicates = attributes.select{|att| att.name == attribute.name}
-		if duplicates.length > 1
-			duplicate = duplicates[1]
-			line_number = duplicate.name_line
-			message = "class #{ast_class} redefines attribute #{duplicate.name}"
-			type_error(line_number, message)	
-		end
-	end
-end
-
-# Attribute must not be named 'self'
-def check_attribute_self(ast_class, attribute)
-	if attribute.name == "self"
-		line_number = attribute.name_line
-		message = "class #{ast_class} has an attribute named self"
-		type_error(line_number, message)		
-	end
-end
-
-# Attribute must have a defined type
-def check_attribute_type(ast_class, attribute, class_lut)
-	if not class_lut.include? attribute.typ
-		line_number = attribute.typ_line
-		message = "class #{ast_class} has attribute #{attribute.name} with unknown type #{attribute.typ}"
-		type_error(line_number, message)			
-	end
-end
-
-# Check that main method is defined
+# Verifies that main method is defined
 def check_method_main(class_map)
 	has_main = false
 	has_main_no_params = false
-	class_map.classes.each do |ast_class|
+	for ast_class in class_map.classes
 		if ast_class.name == "Main"
-			ast_class.features.each do |feature|
+			for feature in ast_class.features
 				if feature.name == "main"
 					has_main = true
 					if feature.formals == []
@@ -167,143 +127,267 @@ def check_method_main(class_map)
 			end
 		end
 	end
-	if not has_main_no_params and not has_main
+
+	if not has_main
+		# Doesn't have main
 		line_number = 0
 		message = "class Main method main not found"
 		type_error(line_number, message)
-	elsif not has_main_no_params
+	end
+
+	if not has_main_no_params
+		# Has main, but nonzero parameters
 		line_number = 0
 		message = "class Main method main with 0 parameters not found"
 		type_error(line_number, message)
 	end
 end
 
-def check_method_params(class_map, class_lut)
-	class_map.classes.each do |ast_class|
-		features = ast_class.features.sort_by{|obj| obj.name_line.to_i}
-		features.each do | feature |
-			if feature.kind == "method_formals"
-				feature.formals.each do |formal|
+def check_method_override(ast_class_name, method, parent_methods)
+	# Get methods from ancestors with the same name
+	duplicates = parent_methods.select{|x| x.name == method.name}
+	if duplicates != []
+		duplicate = duplicates[0]
 
-					# Check that no parameter is named self
-					if formal.name == "self"
-						line_number = formal.name_line
-						message = "class #{ast_class.name} has method #{feature.name} with formal parameter named self"
-						type_error(line_number, message)	
-					end
+		# Check that the number of formals is valid
+		if duplicate.formals.length != method.formals.length
+			line_number = method.name_line
+			message = "class #{ast_class_name} redefines method #{method.name} and changes number of formals"
+			type_error(line_number, message)
+		end
 
-					# Check for duplicate parameters
-					duplicates = feature.formals.select{|fml| fml.name == formal.name}
-					if duplicates.length > 1
-						# Select the second instance of the formal
-						duplicate = duplicates[1]
-						line_number = duplicate.name_line
-						message = "class #{ast_class.name} has method #{feature.name} with duplicate formal parameter named #{duplicate.name}"
-						type_error(line_number, message)	
-					end
-
-					# Check that the formal's type is valid
-					if not class_lut.include? formal.typ
-						line_number = formal.typ_line
-						message = "class #{ast_class.name} has method #{feature.name} with formal parameter of unknown type #{formal.typ}"
-						type_error(line_number, message)			
-					end
-				end
+		# Check that the formals have the same types
+		for fml1, fml2 in duplicate.formals.zip(method.formals)
+			if fml1.typ != fml2.typ
+				line_number = fml2.typ_line
+				message = "class #{ast_class_name} redefines method #{method.name} and changes type of formal #{fml2.name}"
+				type_error(line_number, message)
 			end
 		end
-	end
-end
 
-def check_method_redefined(class_map)
-	# Check that methods are uniquely defined
-	class_map.classes.each do |ast_class|
-		features = ast_class.features.sort_by{|obj| obj.name_line.to_i}
-		features.each do | feature | 
-			if feature.kind == "method" or feature.kind == "method_formals"
-				# Get list of features with same name
-				duplicates = features.select{|method| method.name == feature.name}
-				if duplicates.length > 1
-					# Select the second instance of the feature
-					duplicate = duplicates[1]
-					line_number = duplicate.name_line
-					message = "class #{ast_class.name} redefines method #{duplicate.name}"
-					type_error(line_number, message)	
-				end
-			end
+		# Check that the formals have the same return types
+		if duplicate.typ != method.typ
+			line_number = method.typ_line
+			message = "class #{ast_class_name} redefines method #{method.name} and changes return type (from #{duplicate.typ} to #{method.typ})"
+			type_error(line_number, message)
 		end
 	end
 end
 
-# Pushes features and attributes down the inheritance tree
-def flatten_features(ast_class, class_lut, inheritance_graph, parent_attributes, parent_methods, method_table)
-	attributes = parent_attributes
-	methods = parent_methods
+# Check that formal has a defined type, note that it CANNOT be SELF_TYPE
+def check_formal_type(ast_class_name, method_name, formal, class_lut)
+	if not class_lut.include? formal.typ
+		line_number = formal.typ_line
+		message = "class #{ast_class_name} has method #{method_name} with formal parameter of unknown type #{formal.typ}"
+		type_error(line_number, message)			
+	end
+end
 
-	# Add methods/attributes of this ast_class to parents
-	class_lut[ast_class].features.each do | feature |
-		if feature.kind == "method" or feature.kind == "method_formals"
-			method_table[feature.name] = ast_class
-			methods << feature
-		else
-			attributes << feature
+# Check that formals are uniquely defined in the given list
+def check_formal_redefined(ast_class_name, method_name, formals, formal)
+	# Get all formals with same name in list
+	duplicates = formals.select{|x| x.name == formal.name}
+	if duplicates.length > 1
+		duplicate = duplicates[1]
+		line_number = duplicate.name_line
+		message = "class #{ast_class_name} has method #{method_name} with duplicate formal parameter named #{duplicate.name}"
+		type_error(line_number, message)	
+	end
+end
+
+# Check that no formal is named 'self'
+def check_formal_self(ast_class_name, method_name, formal)
+	if formal.name == "self"
+		line_number = formal.name_line
+		message = "class #{ast_class_name} has method #{method_name} with formal parameter named self"
+		type_error(line_number, message)	
+	end
+end
+
+# Verifies the types of the given method's formals
+def check_method_formals(ast_class_name, method, class_lut)
+
+	formals = method.formals
+	method_name = method.name
+
+	# Check that no formal is named 'self' in this method
+	for formal in formals
+		check_formal_self(ast_class_name, method_name, formal)
+	end
+
+	# Check that formals are uniquely defined in this method
+	for formal in formals
+		check_formal_redefined(ast_class_name, method_name, formals, formal)
+	end
+
+	# Check that formals have valid types in this method
+	for formal in formals
+		check_formal_type(ast_class_name, method_name, formal, class_lut)
+	end
+end
+
+# Checks that the method has a defined return type
+def check_method_return(ast_class_name, method, class_lut)
+	if not (class_lut.include? method.typ or method.typ == "SELF_TYPE")
+		line_number = method.typ_line
+		message = "class #{ast_class_name} has method #{method.name} with unknown return type #{method.typ}"
+		type_error(line_number, message)			
+	end
+end
+
+# Checks that method is uniquely defined in the given list
+def check_method_redefined(ast_class_name, methods, method)
+	# Get all methods with same name in list
+	duplicates = methods.select{|x| x.name == method.name}
+	if duplicates.length > 1
+		duplicate = duplicates[1]
+		line_number = duplicate.name_line
+		message = "class #{ast_class_name} redefines method #{duplicate.name}"
+		type_error(line_number, message)	
+	end
+end
+
+# Typechecks class methods by traversing inheritance tree
+def check_methods(ast_class_name, class_lut, inheritance_graph)
+
+	ast_class = class_lut[ast_class_name]
+	methods = ast_class.methods
+	parent_methods = ast_class.parent_methods
+
+	# Check that methods are uniquely defined in this class
+	for method in methods
+		check_method_redefined(ast_class_name, methods, method)
+	end
+
+	# Check that methods have valid return types in this class
+	for method in methods
+		check_method_return(ast_class_name, method, class_lut)
+	end
+
+	# Check that methods have valid parameters in this class
+	for method in methods
+		if method.kind == "method_formals"
+			check_method_formals(ast_class_name, method, class_lut)
 		end
 	end
 
-	# Assign to object
-	class_lut[ast_class].methods = methods
-	class_lut[ast_class].attributes = attributes
-
-	# Typecheck attributes
-	attributes.each do | attribute |
-		check_attribute_redefined(ast_class, attributes, attribute)
-		check_attribute_self(ast_class, attribute)
-		check_attribute_type(ast_class, attribute, class_lut)
+	# Check that overridden methods have valid numbers of formals, types of formals, and return types
+	for method in methods
+		check_method_override(ast_class_name, method, parent_methods)
 	end
 
-	# Recurse on a duplicate list
-	if inheritance_graph.has_key? ast_class
-		inheritance_graph[ast_class].each do | child |
-			flatten_features(child.name, class_lut, inheritance_graph, attributes.dup(), methods.dup(), method_table)
->>>>>>> f5bd7a9f1020658528a44300672bc09f89a3be8c
+	# Recurse on children's subtrees
+	if inheritance_graph.has_key? ast_class_name
+		for child in inheritance_graph[ast_class_name]
+			check_methods(child.name, class_lut, inheritance_graph)
 		end
 	end
 end
 
-<<<<<<< HEAD
-def get_inheritance_tree(ast)
-	inheritance_tree = {}
-	classes = ast.classes
-	for ast_class in classes
-		# If there's a superclass, add this object to its list
-		if ast_class.superclass != nil
-			if inheritance_tree.has_key?(ast_class.superclass)
-				inheritance_tree[ast_class.superclass] << ast_class
-			else
-				inheritance_tree[ast_class.superclass] = [ast_class]
-			end
-		# else
-		# 	inheritance_tree["Object"] = [ast_class]
+# Checks that attribute has a defined type
+def check_attribute_type(ast_class_name, attribute, class_lut)
+	if not (class_lut.include? attribute.typ or attribute.typ == "SELF_TYPE")
+		line_number = attribute.typ_line
+		message = "class #{ast_class_name} has attribute #{attribute.name} with unknown type #{attribute.typ}"
+		type_error(line_number, message)			
+	end
+end
+
+# Checks that attribute is not named 'self'
+def check_attribute_self(ast_class_name, attribute)
+	if attribute.name == "self"
+		line_number = attribute.name_line
+		message = "class #{ast_class_name} has an attribute named self"
+		type_error(line_number, message)		
+	end
+end
+
+# Checks that attribute is uniquely defined in the given list
+def check_attribute_ancestors(ast_class_name, attributes, attribute)
+	# Get all attributes with same name in the list
+	duplicates = attributes.select{|x| x.name == attribute.name}
+	if duplicates.length > 0
+		duplicate = duplicates[0]
+		line_number = attribute.name_line
+		message = "class #{ast_class_name} redefines attribute #{duplicate.name}"
+		type_error(line_number, message)	
+	end
+end
+
+# Checks that attribute is uniquely defined in the given list
+def check_attribute_redefined(ast_class_name, attributes, attribute)
+	# Get all attributes with same name in the list
+	duplicates = attributes.select{|x| x.name == attribute.name}
+	if duplicates.length > 1
+		duplicate = duplicates[1]
+		line_number = duplicate.name_line
+		message = "class #{ast_class_name} redefines attribute #{duplicate.name}"
+		type_error(line_number, message)	
+	end
+end
+
+# Typechecks class attributes by traversing inheritance tree
+def check_attributes(ast_class_name, class_lut, inheritance_graph)
+
+	ast_class = class_lut[ast_class_name]
+	attributes = ast_class.attributes
+	parent_attributes = ast_class.parent_attributes
+
+	# Check that attributes are uniquely defined in this class
+	for attribute in attributes
+		check_attribute_redefined(ast_class_name, attributes, attribute)
+	end
+
+	# Check that attributes are uniquely defined from ancestors
+	for attribute in attributes
+		check_attribute_ancestors(ast_class_name, parent_attributes, attribute)
+	end
+
+	# Check that no attribute is named 'self' in this class
+	for attribute in attributes
+		check_attribute_self(ast_class_name, attribute)
+	end	
+
+	# Check that attributes have valid types in this class
+	for attribute in attributes
+		check_attribute_type(ast_class_name, attribute, class_lut)
+	end
+
+	# Recurse on children's subtrees
+	if inheritance_graph.has_key? ast_class_name
+		for child in inheritance_graph[ast_class_name]
+			check_attributes(child.name, class_lut, inheritance_graph)
 		end
-		# 
 	end
 end
 
-def write_annotated_ast(filename, ast)
-=======
-def get_class_lut(class_map)
-	class_lut = {}
-	class_map.all_classes.each do |ast_class|
-		class_lut[ast_class.name] = ast_class
+# Flattens the attributes/methods of each class with all of its ancestor's attributes/methods
+def flatten_parent_features(ast_class_name, class_lut, inheritance_graph, parent_attributes, parent_methods)
+
+	# Update the object with flattened lists
+	ast_class = class_lut[ast_class_name]
+	ast_class.parent_attributes = parent_attributes
+	ast_class.parent_methods = parent_methods
+
+	attributes = ast_class.attributes
+	methods = ast_class.methods
+
+	# Recurse on children
+	if inheritance_graph.has_key? ast_class_name
+		for child in inheritance_graph[ast_class_name]
+			flatten_parent_features(child.name, class_lut, inheritance_graph, (parent_attributes + attributes), (parent_methods + methods))
+		end
 	end
-	return class_lut
 end
 
-# Graph mapping parents to children
+# Returns an adjacency list (hash) representation of the inheritance graph
+# with class names mapping to the objects of their children
 def get_inheritance_graph(class_map)
 	inheritance_graph = {}
 
-	class_map.all_classes.each do |ast_class|
-		# If there's a superclass, add this object to its list, otherwise add it to Object's list
+	for ast_class in class_map.all_classes
+
+		# If there is a superclass, add the object to its list
 		if ast_class.superclass != nil
 			if inheritance_graph.has_key?(ast_class.superclass)
 				inheritance_graph[ast_class.superclass] << ast_class
@@ -311,6 +395,7 @@ def get_inheritance_graph(class_map)
 				inheritance_graph[ast_class.superclass] = [ast_class]
 			end
 		else
+			# If there is no superclass, add the object to Object's list (root of inheritance tree)
 			if ast_class.name != "Object"
 				if inheritance_graph.has_key?("Object")
 					inheritance_graph["Object"] << ast_class
@@ -323,8 +408,17 @@ def get_inheritance_graph(class_map)
 	return inheritance_graph
 end
 
+# Returns a mapping between class names and their objects
+def get_class_lut(class_map)
+	class_lut = {}
+	for ast_class in class_map.all_classes
+		class_lut[ast_class.name] = ast_class
+	end
+	return class_lut
+end
+
+### I/O Functions ###
 def write_output(filename, out)
->>>>>>> f5bd7a9f1020658528a44300672bc09f89a3be8c
 	output = File.open("#{filename}-type", "w")
 	output << out.to_s()
 	output.close()
@@ -343,6 +437,7 @@ def read_ast()
 	return lines
 end
 
+# Used for debuggging
 def print_graph(graph)
 	graph.each do |k, v|
 		puts k + ": "
@@ -354,51 +449,39 @@ def print_graph(graph)
 end
 
 def main()
+	# Generate AST object from file
 	filename = ARGV[0].to_s()[0..-5]
-<<<<<<< HEAD
 	raw_ast = read_ast()
 	ast = ast(raw_ast)
-	check_duplicates(ast)
-	inheritance_tree = get_inheritance_tree(ast)
-	puts ClassMap.new(ast).to_s()
-	# puts ast.to_s()
-	# puts AnnotatedAST.new(ast.classes).to_s_cmap()
-	# write_annotated_ast(filename, ast)
-=======
-	raw_ast = read_ast() # read ast from file
-	ast = ast(raw_ast) # generate object representation of ast
 	
+	# Init class map, look-up table, inheritance graph
 	class_map = ClassMap.new(ast.classes)
-
 	class_lut = get_class_lut(class_map)
 	inheritance_graph = get_inheritance_graph(class_map)
-	
-	# No SELF_TYPE definition
-	check_class_name(class_map)
 
-	# Check there is a main method
-	check_method_main(class_map)
-
-	check_method_params(class_map, class_lut)
-
-	# No redefined classes
+	# Ensure there are no cycles or duplicates
 	check_class_redefined(class_map)
-
-	# No redefined methods
-	check_method_redefined(class_map)
-
-	# Flatten features across the inheritance tree
-	flatten_features("Object", class_lut, inheritance_graph, [], [], {})
-
-	# No inheriting undefined or constant types
 	check_class_inherits(class_map, class_lut)
-
-	# No inheritance cycles
 	check_cycle(class_map, inheritance_graph)
 
-	puts class_map.to_s()
-	# write_output(filename, class_map)
->>>>>>> f5bd7a9f1020658528a44300672bc09f89a3be8c
+	# Flatten features across the inheritance tree
+	flatten_parent_features("Object", class_lut, inheritance_graph, [], [])
+
+	# Class checks
+	check_class_main(class_map)
+	check_class_self(class_map)
+
+	# Typecheck attributes
+	check_attributes("Object", class_lut, inheritance_graph)	
+
+	# Typecheck methods
+	check_methods("Object", class_lut, inheritance_graph)
+
+	# Check that there is a main method
+	check_method_main(class_map)
+
+	# puts class_map.to_s()
+	write_output(filename, class_map)
 end
 
 if __FILE__ == $PROGRAM_NAME

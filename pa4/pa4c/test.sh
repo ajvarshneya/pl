@@ -7,5 +7,6 @@ do
 	cool $FILE --class-map --out ref-${FILE%%.*}
 	ruby main.rb ref-$FILE-ast > $FILE-type
 	diff $FILE-type ref-$FILE-type > diffs-${FILE%%.*}.txt
+	# cat $FILE-type
 	cat diffs-${FILE%%.*}.txt
 done

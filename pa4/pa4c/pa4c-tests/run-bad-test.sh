@@ -20,6 +20,7 @@ do
 
 	diff $source_file-error ref-$source_file-error > diff-$source_file-error
 
+	cat diff-$source_file-error
 	# echo
 done
 echo "Complete"

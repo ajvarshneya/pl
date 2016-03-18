@@ -1,24 +1,16 @@
-
-class A inherits B {
-  d : Int;
-};
-
-class B inherits C {
-	c : Int;
-};
-
-
-class C inherits D {
-  b : Int;
-};
-
-class D {
+class A inherits IO {
 	a : Int;
 };
 
 
+-- class A inherits IO {
+-- 	abc(b : String, a : Int) : Object {
+--   	self
+--   };
+-- };
+
 class Main inherits IO {
-  main() : Object {
+  main(a : Int) : Object {
     self
   };
 };

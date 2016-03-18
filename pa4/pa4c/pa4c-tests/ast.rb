@@ -21,7 +21,7 @@ class ClassMap
             s += ast_class.name + "\n"
             num_attributes = 0
             attributes = ""
-            for attribute in ast_class.attributes
+            for attribute in ast_class.parent_attributes + ast_class.attributes
                 if attribute.kind == "attribute_init" 
                     num_attributes += 1
                     # initializer \n attribute name \n type \n expr
@@ -93,18 +93,23 @@ class AST
 end
 
 class ASTClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :parent_attributes, :parent_methods, :parent_attributes, :parent_methods, :attributes, :methods
 	def initialize(inherits, name, name_line, superclass, superclass_line, features)
-       @inherits = inherits 
-       @name = name 
-       @name_line = name_line 
-       @superclass = superclass 
-       @superclass_line = superclass_line 
-       @features = features
+        @inherits = inherits 
+        @name = name 
+        @name_line = name_line 
+        @superclass = superclass 
+        @superclass_line = superclass_line 
+        @features = features
 
-       # Used by type checking maps
-       @attributes = []
-       @methods = []
+        # Used by type checking maps
+        @parent_attributes = []
+        @parent_methods = []
+        @attributes = []
+        @methods = []
+
+        init_methods()
+        init_attributes()
 	end
 
 	def to_s
@@ -132,6 +137,22 @@ class ASTClass
         return s
 	end
 
+    def init_methods()
+        for feature in @features
+            if feature.kind == "method" or feature.kind == "method_formals"
+                @methods << feature
+            end
+        end
+    end
+
+    def init_attributes()
+        for feature in @features
+            if feature.kind == "attribute_init" or feature.kind == "attribute_no_init"
+                @attributes << feature 
+            end
+        end
+    end
+
     # def to_s_imap
     # end
 end
@@ -140,7 +161,7 @@ class BasicClass
 end
 
 class ObjectClass < BasicClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :parent_attributes, :parent_methods, :attributes, :methods
 
     def initialize()
         @inherits =  "no_inherits"
@@ -163,8 +184,29 @@ class ObjectClass < BasicClass
 
         @features = [abort_method, copy_method, type_name_method]
 
+        @parent_attributes = []
+        @parent_methods = []
         @attributes = []
         @methods = []
+
+        init_methods()
+        init_attributes()
+    end
+
+    def init_methods()
+        for feature in @features
+            if feature.kind == "method" or feature.kind == "method_formals"
+                @methods << feature
+            end
+        end
+    end
+
+    def init_attributes()
+        for feature in @features
+            if feature.kind == "attribute_init" or feature.kind == "attribute_no_init"
+                @attributes << feature 
+            end
+        end
     end
 
     # def to_s_imap
@@ -178,7 +220,7 @@ class ObjectClass < BasicClass
 end
 
 class IOClass < ObjectClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :parent_attributes, :parent_methods, :attributes, :methods
     def initialize()
         super()
         @inherits =  "no_inherits"
@@ -205,13 +247,18 @@ class IOClass < ObjectClass
 
         @features += [in_int_method, in_string_method, out_int_method, out_string_method]
 
+        @parent_attributes = []
+        @parent_methods = []
         @attributes = []
         @methods = []
+
+        init_methods()
+        init_attributes()
     end
 end
 
 class IntClass < ObjectClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :parent_attributes, :parent_methods, :attributes, :methods
     def initialize()
         super()
         @inherits =  "no_inherits"
@@ -221,13 +268,18 @@ class IntClass < ObjectClass
         @superclass_line = nil
         @features += []
 
+        @parent_attributes = []
+        @parent_methods = []
         @attributes = []
         @methods = []
+
+        init_methods()
+        init_attributes()
     end
 end
 
 class StringClass < ObjectClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :parent_attributes, :parent_methods, :attributes, :methods
     def initialize()
         super()
         @inherits =  "no_inherits"
@@ -250,13 +302,18 @@ class StringClass < ObjectClass
 
         @features += [concat_method, length_method, substr_method]
 
+        @parent_attributes = []
+        @parent_methods = []
         @attributes = []
         @methods = []
+
+        init_methods()
+        init_attributes()
     end
 end
 
 class BoolClass < ObjectClass
-    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :attributes, :methods
+    attr_accessor :inherits, :name, :name_line, :superclass, :superclass_line, :features, :parent_attributes, :parent_methods, :attributes, :methods
     def initialize()
         super()
         @inherits =  "no_inherits"
@@ -266,8 +323,13 @@ class BoolClass < ObjectClass
         @superclass_line = nil
         @features += []
 
+        @parent_attributes = []
+        @parent_methods = []
         @attributes = []
         @methods = []
+
+        init_methods()
+        init_attributes()
     end
 end
 
