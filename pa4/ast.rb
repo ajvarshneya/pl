@@ -50,12 +50,36 @@ class ClassMap
 end
 
 class ImplementationMap
-    def initialize(ast)
+    def initialize(all_classes)
+        @all_classes = all_classes
+    end
+
+    def to_s
+        s = ""
+        s += "implentation_map\n"
+        s += @all_classes.length.to_s() + "\n"
+        for ast_class in @all_classes
+            s += ast_class.name + "\n"
+            s += ast_class
+        end
     end
 end
 
 class ParentMap
-    def initialize(ast)
+    def initialize(all_classes)
+        @all_classes = all_classes
+    end
+
+    def to_s
+        s - ""
+        s += "parent_map\n"
+        s += (@all_classes.length - 1).to_s() + "\n"
+        for ast_class in @all_classes
+            if ast_class.superclass != nil
+                s += ast_class.name + "\n"
+                s += ast_class.superclass + "\n"
+            end
+        end
     end
 end
 
