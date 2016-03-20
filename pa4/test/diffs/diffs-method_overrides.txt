@@ -1,0 +1,30 @@
+47a48
+> Int
+53a55
+> Int
+82a85
+> Int
+88a92
+> Int
+94a99
+> Int
+252a258
+> SELF_TYPE
+255a262
+> SELF_TYPE
+260a268
+> String
+360a369
+> Int
+369a379
+> Int
+384a395
+> Int
+393a405
+> Int
+408a421
+> SELF_TYPE
+411a425
+> SELF_TYPE
+416a431
+> String

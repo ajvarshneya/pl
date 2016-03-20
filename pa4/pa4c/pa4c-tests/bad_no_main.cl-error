@@ -1,1 +1,24 @@
+A
+main
+
+Bool
+
+IO
+in_int
+in_string
+out_int
+out_string
+
+Int
+
+Object
+abort
+copy
+type_name
+
+String
+concat
+length
+substr
+
 ERROR: 0: Type-Check: class Main not found

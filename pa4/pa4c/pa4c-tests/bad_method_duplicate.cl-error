@@ -1,1 +1,26 @@
+Bool
+
+IO
+in_int
+in_string
+out_int
+out_string
+
+Int
+
+Main
+main
+some_method
+some_method
+
+Object
+abort
+copy
+type_name
+
+String
+concat
+length
+substr
+
 ERROR: 17: Type-Check: class Main redefines method some_method

@@ -1,1 +1,24 @@
+Bool
+
+IO
+in_int
+in_string
+out_int
+out_string
+
+Int
+
+Main
+main
+
+Object
+abort
+copy
+type_name
+
+String
+concat
+length
+substr
+
 ERROR: 2: Type-Check: class Main has an attribute named self

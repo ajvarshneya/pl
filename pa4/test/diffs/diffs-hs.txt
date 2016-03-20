@@ -1,0 +1,464 @@
+8a9
+> Int
+14a16
+> Foo
+16a19
+> SELF_TYPE
+25a29
+> Foo
+33a38
+> Bar
+41a47
+> Razz
+49a56
+> Bar
+56a64
+> Int
+64a73
+> Razz
+66a76
+> SELF_TYPE
+75a86
+> Bar
+83a95
+> Razz
+91a104
+> Bar
+98a112
+> Int
+100a115
+> Int
+102a118
+> Int
+104a121
+> Int
+106a124
+> Razz
+113a132
+> Int
+115a135
+> Foo
+122a143
+> Int
+127a149
+> Int
+135a158
+> Bar
+137a161
+> SELF_TYPE
+146a171
+> Bar
+154a180
+> Bar
+161a188
+> Int
+163a191
+> Int
+165a194
+> Int
+167a197
+> Int
+169a200
+> Int
+171a203
+> Razz
+180a213
+> Int
+182a216
+> Foo
+189a224
+> Int
+191a227
+> Bar
+198a235
+> Int
+203a241
+> Int
+211a250
+> Int
+219a259
+> Int
+229a270
+> Int
+235a277
+> Foo
+237a280
+> SELF_TYPE
+246a290
+> Foo
+254a299
+> Bar
+262a308
+> Razz
+270a317
+> Bar
+277a325
+> Int
+289a338
+> Int
+295a345
+> Foo
+297a348
+> SELF_TYPE
+306a358
+> Foo
+314a367
+> Bar
+322a376
+> Razz
+330a385
+> Bar
+337a393
+> Int
+345a402
+> Razz
+347a405
+> SELF_TYPE
+356a415
+> Bar
+364a424
+> Razz
+372a433
+> Bar
+379a441
+> Int
+381a444
+> Int
+383a447
+> Int
+385a450
+> Int
+387a453
+> Razz
+394a461
+> Int
+396a464
+> Foo
+403a472
+> Int
+408a478
+> Int
+422a493
+> Bazz
+429a501
+> Foo
+436a509
+> Razz
+443a517
+> Bar
+454a529
+> Int
+460a536
+> Foo
+462a539
+> SELF_TYPE
+471a549
+> Foo
+479a558
+> Bar
+487a567
+> Razz
+495a576
+> Bar
+502a584
+> Int
+510a593
+> Razz
+512a596
+> SELF_TYPE
+521a606
+> Bar
+529a615
+> Razz
+537a624
+> Bar
+544a632
+> Int
+546a635
+> Int
+548a638
+> Int
+550a641
+> Int
+552a644
+> Razz
+559a652
+> Int
+561a655
+> Foo
+568a663
+> Int
+573a669
+> Int
+581a678
+> Bar
+583a681
+> SELF_TYPE
+592a691
+> Bar
+600a700
+> Bar
+607a708
+> Int
+609a711
+> Int
+611a714
+> Int
+613a717
+> Int
+615a720
+> Int
+617a723
+> Razz
+626a733
+> Int
+628a736
+> Foo
+635a744
+> Int
+637a747
+> Bar
+644a755
+> Int
+649a761
+> Int
+714a827
+> Int
+717a831
+> SELF_TYPE
+722a837
+> Int
+726a842
+> Int
+732a849
+> Int
+740a858
+> Int
+744a863
+> Int
+747a867
+> Int
+751a872
+> Int
+753a875
+> Int
+757a880
+> Int
+760a884
+> Int
+820a945
+> Int
+823a949
+> SELF_TYPE
+828a955
+> Int
+832a960
+> Int
+838a967
+> Int
+846a976
+> Int
+850a981
+> Int
+853a985
+> Int
+857a990
+> Int
+859a993
+> Int
+863a998
+> Int
+866a1002
+> Int
+949a1086
+> Int
+952a1090
+> SELF_TYPE
+957a1096
+> Int
+961a1101
+> Int
+967a1108
+> Int
+975a1117
+> Int
+979a1122
+> Int
+982a1126
+> Int
+986a1131
+> Int
+988a1134
+> Int
+992a1139
+> Int
+995a1143
+> Int
+1131a1280
+> String
+1134a1284
+> SELF_TYPE
+1139a1290
+> String
+1142a1294
+> String
+1224a1377
+> Int
+1227a1381
+> SELF_TYPE
+1232a1387
+> Int
+1236a1392
+> Int
+1242a1399
+> Int
+1250a1408
+> Int
+1254a1413
+> Int
+1257a1417
+> Int
+1261a1422
+> Int
+1263a1425
+> Int
+1267a1430
+> Int
+1270a1434
+> Int
+1353a1518
+> Razz
+1355a1521
+> SELF_TYPE
+1364a1531
+> Bar
+1372a1540
+> Razz
+1380a1549
+> Bar
+1389a1559
+> Int
+1391a1562
+> Int
+1393a1565
+> Int
+1395a1568
+> Int
+1397a1571
+> Razz
+1404a1579
+> Int
+1406a1582
+> Foo
+1413a1590
+> Int
+1418a1596
+> Int
+1429a1608
+> Int
+1437a1617
+> Int
+1441a1622
+> Int
+1444a1626
+> Int
+1448a1631
+> Int
+1450a1634
+> Int
+1454a1639
+> Int
+1457a1643
+> Int
+1472a1659
+> Int
+1482a1670
+> Int
+1498a1687
+> Bar
+1500a1690
+> SELF_TYPE
+1509a1700
+> Bar
+1517a1709
+> Bar
+1526a1719
+> Int
+1528a1722
+> Int
+1530a1725
+> Int
+1532a1728
+> Int
+1534a1731
+> Int
+1536a1734
+> Razz
+1545a1744
+> Int
+1547a1747
+> Foo
+1554a1755
+> Int
+1556a1758
+> Bar
+1563a1766
+> Int
+1568a1772
+> Int
+1584a1789
+> Int
+1592a1798
+> Foo
+1594a1801
+> SELF_TYPE
+1603a1811
+> Foo
+1611a1820
+> Bar
+1619a1829
+> Razz
+1627a1838
+> Bar
+1636a1848
+> Int
+1647a1860
+> Int
+1650a1864
+> SELF_TYPE
+1655a1870
+> Int
+1659a1875
+> Int
+1668a1885
+> Int
+1676a1894
+> Int
+1680a1899
+> Int
+1683a1903
+> Int
+1687a1908
+> Int
+1689a1911
+> Int
+1693a1916
+> Int
+1696a1920
+> Int
+1711a1936
+> Bazz
+1720a1946
+> Foo
+1729a1956
+> Razz
+1738a1966
+> Bar
+1748a1977
+> String
+1751a1981
+> SELF_TYPE
+1756a1987
+> String
+1759a1991
+> String

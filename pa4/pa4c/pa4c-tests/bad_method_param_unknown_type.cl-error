@@ -1,1 +1,25 @@
+Bool
+
+IO
+in_int
+in_string
+out_int
+out_string
+
+Int
+
+Main
+main
+some_method
+
+Object
+abort
+copy
+type_name
+
+String
+concat
+length
+substr
+
 ERROR: 8: Type-Check: class Main has method some_method with formal parameter of unknown type A

@@ -1,0 +1,320 @@
+106a107
+> SELF_TYPE
+109a111
+> Int
+113a116
+> Int
+117a121
+> Int
+121a126
+> Int
+125a131
+> SELF_TYPE
+132a139
+> SELF_TYPE
+134a142
+> Bool
+136a145
+> Int
+140a150
+> Int
+143a154
+> SELF_TYPE
+148a160
+> Int
+152a165
+> SELF_TYPE
+154a168
+> SELF_TYPE
+156a171
+> SELF_TYPE
+158a174
+> SELF_TYPE
+163a180
+> Int
+170a188
+> String
+176a195
+> Int
+183a203
+> String
+189a210
+> SELF_TYPE
+192a214
+> Int
+196a219
+> Int
+198a222
+> Int
+202a227
+> Int
+206a232
+> Int
+208a235
+> Int
+212a240
+> SELF_TYPE
+219a248
+> SELF_TYPE
+222a252
+> Int
+226a257
+> Int
+228a260
+> Int
+232a265
+> SELF_TYPE
+239a273
+> SELF_TYPE
+242a277
+> Int
+246a282
+> Int
+248a285
+> Int
+252a290
+> SELF_TYPE
+260a299
+> Bool
+262a302
+> Bool
+264a305
+> Int
+268a310
+> Int
+270a313
+> Complex
+277a321
+> Bool
+279a324
+> Bool
+281a327
+> Int
+285a332
+> Int
+287a335
+> Complex
+294a343
+> Bool
+296a346
+> Bool
+298a349
+> Bool
+303a355
+> Int
+310a363
+> Int
+446a500
+> SELF_TYPE
+454a509
+> Complex
+456a512
+> Complex
+463a520
+> Int
+466a524
+> Int
+469a528
+> SELF_TYPE
+472a532
+> SELF_TYPE
+474a535
+> Bool
+476a538
+> Complex
+478a541
+> Complex
+485a549
+> Complex
+487a552
+> Complex
+494a560
+> SELF_TYPE
+499a566
+> String
+502a570
+> SELF_TYPE
+507a576
+> String
+510a580
+> SELF_TYPE
+512a583
+> Bool
+514a586
+> Complex
+516a589
+> Complex
+518a592
+> Complex
+531a606
+> Complex
+533a609
+> Complex
+540a617
+> SELF_TYPE
+545a623
+> String
+548a627
+> SELF_TYPE
+553a633
+> String
+653a734
+> SELF_TYPE
+661a743
+> Complex
+663a746
+> Complex
+670a754
+> Int
+673a758
+> Int
+676a762
+> SELF_TYPE
+679a766
+> SELF_TYPE
+681a769
+> Bool
+683a772
+> Complex
+685a775
+> Complex
+692a783
+> Complex
+694a786
+> Complex
+701a794
+> SELF_TYPE
+706a800
+> String
+709a804
+> SELF_TYPE
+714a810
+> String
+717a814
+> SELF_TYPE
+719a817
+> Bool
+721a820
+> Complex
+723a823
+> Complex
+725a826
+> Complex
+738a840
+> Complex
+740a843
+> Complex
+747a851
+> SELF_TYPE
+752a857
+> String
+755a861
+> SELF_TYPE
+760a867
+> String
+793a901
+> SELF_TYPE
+796a905
+> Int
+800a910
+> Int
+804a915
+> Int
+808a920
+> Int
+812a925
+> SELF_TYPE
+822a936
+> SELF_TYPE
+824a939
+> Bool
+826a942
+> Int
+830a947
+> Int
+833a951
+> SELF_TYPE
+838a957
+> Int
+842a962
+> SELF_TYPE
+844a965
+> SELF_TYPE
+846a968
+> SELF_TYPE
+848a971
+> SELF_TYPE
+853a977
+> Int
+860a985
+> String
+866a992
+> Int
+873a1000
+> String
+882a1010
+> SELF_TYPE
+885a1014
+> Int
+889a1019
+> Int
+891a1022
+> Int
+895a1027
+> Int
+899a1032
+> Int
+901a1035
+> Int
+905a1040
+> SELF_TYPE
+915a1051
+> SELF_TYPE
+918a1055
+> Int
+922a1060
+> Int
+924a1063
+> Int
+928a1068
+> SELF_TYPE
+938a1079
+> SELF_TYPE
+941a1083
+> Int
+945a1088
+> Int
+947a1091
+> Int
+951a1096
+> SELF_TYPE
+965a1111
+> Bool
+967a1114
+> Bool
+969a1117
+> Int
+973a1122
+> Int
+975a1125
+> Complex
+982a1133
+> Bool
+984a1136
+> Bool
+986a1139
+> Int
+990a1144
+> Int
+992a1147
+> Complex
+999a1155
+> Bool
+1001a1158
+> Bool
+1003a1161
+> Bool
+1011a1170
+> Int
+1021a1181
+> Int

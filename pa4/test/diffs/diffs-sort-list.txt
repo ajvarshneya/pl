@@ -1,0 +1,444 @@
+111a112
+> Bool
+117a119
+> Cons
+125a128
+> Cons
+129a133
+> Cons
+131a136
+> Cons
+138a144
+> Int
+142a149
+> SELF_TYPE
+149a157
+> Int
+156a165
+> List
+163a173
+> List
+165a176
+> List
+167a179
+> List
+177a190
+> Int
+184a198
+> List
+186a201
+> List
+188a204
+> List
+198a215
+> Int
+206a224
+> Cons
+208a227
+> Bool
+210a230
+> Int
+214a235
+> Int
+218a240
+> Cons
+220a243
+> Cons
+227a251
+> Int
+231a256
+> SELF_TYPE
+235a261
+> Cons
+237a264
+> Cons
+244a272
+> Int
+248a277
+> List
+250a280
+> List
+257a288
+> Int
+265a297
+> Cons
+267a300
+> Cons
+274a308
+> Int
+278a313
+> List
+280a316
+> List
+287a324
+> Int
+294a332
+> Object
+297a336
+> SELF_TYPE
+302a342
+> Int
+306a347
+> SELF_TYPE
+311a353
+> String
+314a357
+> Object
+316a360
+> List
+328a373
+> SELF_TYPE
+331a377
+> Int
+335a382
+> Int
+339a387
+> List
+343a392
+> List
+347a397
+> SELF_TYPE
+483a534
+> Bool
+486a538
+> Object
+491a544
+> Bool
+497a551
+> Cons
+505a560
+> Cons
+509a565
+> Cons
+511a568
+> Cons
+518a576
+> Int
+522a581
+> SELF_TYPE
+529a589
+> Int
+532a593
+> Object
+537a599
+> Int
+544a607
+> List
+547a611
+> Object
+552a617
+> List
+559a625
+> List
+567a634
+> List
+576a644
+> List
+585a654
+> List
+593a663
+> Object
+655a726
+> List
+658a730
+> Nil
+662a735
+> Nil
+666a740
+> Object
+674a749
+> Int
+677a753
+> Object
+679a756
+> Bool
+681a759
+> Int
+685a764
+> Int
+689a769
+> Int
+692a773
+> Cons
+696a778
+> Cons
+698a781
+> Cons
+705a789
+> Int
+709a794
+> List
+713a799
+> Int
+717a804
+> Int
+719a807
+> Int
+723a812
+> Int
+726a816
+> List
+733a824
+> Object
+736a828
+> SELF_TYPE
+741a834
+> String
+744a838
+> Object
+746a841
+> List
+748a844
+> List
+750a847
+> List
+755a853
+> Int
+825a924
+> Bool
+831a931
+> Cons
+839a940
+> Cons
+843a945
+> Cons
+845a948
+> Cons
+852a956
+> Int
+856a961
+> SELF_TYPE
+863a969
+> Int
+866a973
+> Object
+871a979
+> Int
+878a987
+> List
+881a991
+> Object
+886a997
+> List
+893a1005
+> SELF_TYPE
+900a1013
+> SELF_TYPE
+908a1022
+> List
+913a1028
+> Int
+921a1037
+> Cons
+923a1040
+> Cons
+930a1048
+> Int
+934a1053
+> SELF_TYPE
+941a1061
+> Bool
+1044a1165
+> Bool
+1047a1169
+> Object
+1052a1175
+> Bool
+1064a1188
+> Cons
+1072a1197
+> Cons
+1076a1202
+> Cons
+1078a1205
+> Cons
+1085a1213
+> Int
+1089a1218
+> SELF_TYPE
+1099a1229
+> Int
+1102a1233
+> Object
+1107a1239
+> Int
+1117a1250
+> List
+1120a1254
+> Object
+1125a1260
+> List
+1135a1271
+> List
+1146a1283
+> List
+1161a1299
+> List
+1176a1315
+> List
+1187a1327
+> Object
+1214a1355
+> Bool
+1230a1372
+> SELF_TYPE
+1233a1376
+> Int
+1237a1381
+> Int
+1241a1386
+> List
+1245a1391
+> List
+1249a1396
+> SELF_TYPE
+1259a1407
+> Int
+1269a1418
+> List
+1279a1429
+> List
+1281a1432
+> List
+1283a1435
+> List
+1293a1446
+> Int
+1303a1457
+> List
+1305a1460
+> List
+1307a1463
+> List
+1317a1474
+> Int
+1331a1489
+> Cons
+1333a1492
+> Bool
+1335a1495
+> Int
+1339a1500
+> Int
+1343a1505
+> Cons
+1345a1508
+> Cons
+1352a1516
+> Int
+1356a1521
+> SELF_TYPE
+1360a1526
+> Cons
+1362a1529
+> Cons
+1369a1537
+> Int
+1373a1542
+> List
+1375a1545
+> List
+1382a1553
+> Int
+1396a1568
+> Cons
+1398a1571
+> Cons
+1405a1579
+> Int
+1409a1584
+> List
+1411a1587
+> List
+1418a1595
+> Int
+1428a1606
+> Object
+1431a1610
+> SELF_TYPE
+1436a1616
+> Int
+1440a1621
+> SELF_TYPE
+1445a1627
+> String
+1448a1631
+> Object
+1450a1634
+> List
+1469a1654
+> Bool
+1477a1663
+> SELF_TYPE
+1487a1674
+> SELF_TYPE
+1501a1689
+> List
+1506a1695
+> Int
+1520a1710
+> Cons
+1522a1713
+> Cons
+1529a1721
+> Int
+1533a1726
+> SELF_TYPE
+1543a1737
+> Bool
+1566a1761
+> List
+1569a1765
+> Nil
+1573a1770
+> Nil
+1577a1775
+> Object
+1585a1784
+> Int
+1588a1788
+> Object
+1590a1791
+> Bool
+1592a1794
+> Int
+1596a1799
+> Int
+1600a1804
+> Int
+1603a1808
+> Cons
+1607a1813
+> Cons
+1609a1816
+> Cons
+1616a1824
+> Int
+1620a1829
+> List
+1624a1834
+> Int
+1628a1839
+> Int
+1630a1842
+> Int
+1634a1847
+> Int
+1637a1851
+> List
+1647a1862
+> Object
+1650a1866
+> SELF_TYPE
+1655a1872
+> String
+1658a1876
+> Object
+1660a1879
+> List
+1662a1882
+> List
+1664a1885
+> List
+1669a1891
+> Int

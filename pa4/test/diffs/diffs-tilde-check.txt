@@ -1,0 +1,12 @@
+172a173
+> SELF_TYPE
+177a179
+> Int
+179a182
+> Int
+277a281
+> SELF_TYPE
+282a287
+> Int
+284a290
+> Int

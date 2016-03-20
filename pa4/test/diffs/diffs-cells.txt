@@ -1,0 +1,452 @@
+105a106
+> SELF_TYPE
+108a110
+> String
+112a115
+> String
+116a120
+> SELF_TYPE
+123a128
+> SELF_TYPE
+126a132
+> SELF_TYPE
+131a138
+> String
+133a141
+> String
+140a149
+> String
+143a153
+> SELF_TYPE
+150a161
+> Int
+152a164
+> String
+163a176
+> String
+165a179
+> String
+172a187
+> Int
+176a192
+> Int
+183a200
+> String
+185a203
+> Bool
+187a206
+> Int
+191a211
+> Int
+194a215
+> String
+199a221
+> Int
+201a224
+> Int
+206a230
+> Int
+209a234
+> String
+214a240
+> Int
+216a243
+> Int
+220a248
+> Int
+227a256
+> String
+229a259
+> Bool
+231a262
+> Int
+235a267
+> Int
+237a270
+> Int
+242a276
+> Int
+245a280
+> String
+250a286
+> Int
+253a290
+> String
+258a296
+> Int
+260a299
+> Int
+264a304
+> Int
+271a312
+> String
+273a315
+> Bool
+275a318
+> Int
+277a321
+> Int
+279a324
+> Int
+281a327
+> Bool
+283a330
+> String
+288a336
+> Int
+292a341
+> String
+295a345
+> Int
+298a349
+> Int
+301a353
+> Int
+303a356
+> Bool
+305a359
+> String
+310a365
+> Int
+314a370
+> String
+317a374
+> Int
+320a378
+> Int
+323a382
+> Int
+325a385
+> Bool
+327a388
+> String
+332a394
+> Int
+336a399
+> String
+339a403
+> Int
+342a407
+> Int
+345a411
+> Int
+348a415
+> String
+351a419
+> String
+357a426
+> SELF_TYPE
+365a435
+> SELF_TYPE
+373a444
+> Int
+378a450
+> SELF_TYPE
+386a459
+> SELF_TYPE
+389a463
+> Object
+391a466
+> Bool
+393a469
+> Int
+397a474
+> Int
+401a479
+> Int
+404a483
+> String
+408a488
+> String
+410a491
+> String
+417a499
+> String
+422a505
+> Int
+426a510
+> Int
+430a515
+> Int
+432a518
+> Int
+436a523
+> Int
+439a527
+> String
+443a532
+> String
+447a537
+> SELF_TYPE
+553a644
+> SELF_TYPE
+556a648
+> CellularAutomaton
+560a653
+> CellularAutomaton
+562a656
+> CellularAutomaton
+569a664
+> String
+572a668
+> CellularAutomaton
+574a671
+> CellularAutomaton
+581a679
+> Object
+589a688
+> Int
+592a692
+> Object
+594a695
+> Bool
+596a698
+> Int
+599a702
+> Int
+603a707
+> Int
+606a711
+> CellularAutomaton
+608a714
+> CellularAutomaton
+615a722
+> CellularAutomaton
+617a725
+> CellularAutomaton
+624a733
+> Int
+628a738
+> Int
+630a741
+> Int
+634a746
+> Int
+637a750
+> SELF_TYPE
+747a861
+> SELF_TYPE
+750a865
+> String
+754a870
+> String
+758a875
+> SELF_TYPE
+768a886
+> SELF_TYPE
+771a890
+> SELF_TYPE
+776a896
+> String
+778a899
+> String
+785a907
+> String
+788a911
+> SELF_TYPE
+798a922
+> Int
+800a925
+> String
+817a943
+> String
+819a946
+> String
+826a954
+> Int
+830a959
+> Int
+843a973
+> String
+845a976
+> Bool
+847a979
+> Int
+851a984
+> Int
+854a988
+> String
+859a994
+> Int
+861a997
+> Int
+866a1003
+> Int
+869a1007
+> String
+874a1013
+> Int
+876a1016
+> Int
+880a1021
+> Int
+893a1035
+> String
+895a1038
+> Bool
+897a1041
+> Int
+901a1046
+> Int
+903a1049
+> Int
+908a1055
+> Int
+911a1059
+> String
+916a1065
+> Int
+919a1069
+> String
+924a1075
+> Int
+926a1078
+> Int
+930a1083
+> Int
+943a1097
+> String
+945a1100
+> Bool
+947a1103
+> Int
+949a1106
+> Int
+951a1109
+> Int
+953a1112
+> Bool
+955a1115
+> String
+960a1121
+> Int
+964a1126
+> String
+967a1130
+> Int
+970a1134
+> Int
+973a1138
+> Int
+975a1141
+> Bool
+977a1144
+> String
+982a1150
+> Int
+986a1155
+> String
+989a1159
+> Int
+992a1163
+> Int
+995a1167
+> Int
+997a1170
+> Bool
+999a1173
+> String
+1004a1179
+> Int
+1008a1184
+> String
+1011a1188
+> Int
+1014a1192
+> Int
+1017a1196
+> Int
+1020a1200
+> String
+1023a1204
+> String
+1032a1214
+> SELF_TYPE
+1040a1223
+> SELF_TYPE
+1048a1232
+> Int
+1053a1238
+> SELF_TYPE
+1061a1247
+> SELF_TYPE
+1064a1251
+> Object
+1066a1254
+> Bool
+1068a1257
+> Int
+1072a1262
+> Int
+1076a1267
+> Int
+1079a1271
+> String
+1083a1276
+> String
+1085a1279
+> String
+1092a1287
+> String
+1097a1293
+> Int
+1101a1298
+> Int
+1105a1303
+> Int
+1107a1306
+> Int
+1111a1311
+> Int
+1114a1315
+> String
+1118a1320
+> String
+1122a1325
+> SELF_TYPE
+1141a1345
+> SELF_TYPE
+1144a1349
+> CellularAutomaton
+1148a1354
+> CellularAutomaton
+1150a1357
+> CellularAutomaton
+1157a1365
+> String
+1160a1369
+> CellularAutomaton
+1162a1372
+> CellularAutomaton
+1169a1380
+> Object
+1177a1389
+> Int
+1180a1393
+> Object
+1182a1396
+> Bool
+1184a1399
+> Int
+1187a1403
+> Int
+1191a1408
+> Int
+1194a1412
+> CellularAutomaton
+1196a1415
+> CellularAutomaton
+1203a1423
+> CellularAutomaton
+1205a1426
+> CellularAutomaton
+1212a1434
+> Int
+1216a1439
+> Int
+1218a1442
+> Int
+1222a1447
+> Int
+1225a1451
+> SELF_TYPE

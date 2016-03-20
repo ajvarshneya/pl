@@ -1,13 +1,63 @@
 require './ast'
 require './ast_gen'
 
-def type_check(ast)
-end
-
+# Prints error message and exits
 def type_error(line_number, message)
 	puts "ERROR: #{line_number}: Type-Check: #{message}"
 	exit
 end
+
+# Determines if there's a cycle by traversing tree from root "Object" node
+def check_cycle(class_map, inheritance_graph)
+	visited = []
+	check_cycle_visit("Object", inheritance_graph, visited)
+
+	# Get list of class names
+	classes = []
+
+	for ast_class in class_map.all_classes
+		classes << ast_class.name
+	end
+
+	# If contents are not the same, we couldn't reach something from Object, so there's a cycle
+	cycle = classes.sort - visited.sort
+	if cycle != []
+		line_number = 0
+		path = ""
+		for class_name in cycle
+			path += class_name + " "
+		end
+		message = "inheritance cycle: #{path}"
+		type_error(line_number, message)		
+	end
+end
+
+# Traverses subtree to determine if there is a cycle
+def check_cycle_visit(node, inheritance_graph, visited)
+	visited << node
+	if inheritance_graph[node]
+		for child in inheritance_graph[node]
+			if not visited.include? child.name
+				check_cycle_visit(child.name, inheritance_graph, visited)
+			end
+		end
+	end
+end
+
+# Checks that no class is defined more than once
+def check_class_redefined(class_map)
+	seen = {}
+	for ast_class in class_map.all_classes.sort_by{|x| x.name_line.to_i}
+		if seen.has_key?(ast_class.name)
+			line_number = ast_class.name_line
+			message = "class #{ast_class.name} redefined"
+			type_error(line_number, message)
+		else
+			seen[ast_class.name] = 1
+		end
+	end
+end
+
 
 # Checks that there is a Main class
 def check_class_main(class_map)
@@ -36,63 +86,7 @@ def check_class_self(class_map)
 	end
 end
 
-# Checks that no class is defined more than once
-def check_class_redefined(class_map)
-	seen = {}
-	for ast_class in class_map.all_classes.sort_by{|x| x.name_line.to_i}
-		if seen.has_key?(ast_class.name)
-			line_number = ast_class.name_line
-			message = "class #{ast_class.name} redefined"
-			type_error(line_number, message)
-		else
-			seen[ast_class.name] = 1
-		end
-	end
-end
-
-# Determines if there's a cycle by traversing tree from root "Object" node
-def check_cycle(class_map, inheritance_graph)
-	visited = []
-	check_cycle_visit("Object", inheritance_graph, visited)
-
-	# Get list of class names
-	classes = []
-
-	for ast_class in class_map.all_classes
-		classes << ast_class.name
-	end
-
-	# puts
-	# puts classes
-	# puts
-	# puts visited
-	# puts
-
-	# If contents are not the same, we couldn't reach something from Object, so there's a cycle
-	cycle = classes.sort - visited.sort
-	if cycle != []
-		line_number = 0
-		path = ""
-		for class_name in cycle
-			path += class_name + " "
-		end
-		message = "inheritance cycle: #{path}"
-		type_error(line_number, message)		
-	end
-end
-
-# Traverses subtree
-def check_cycle_visit(node, inheritance_graph, visited)
-	visited << node
-	if inheritance_graph[node]
-		for child in inheritance_graph[node]
-			if not visited.include? child.name
-				check_cycle_visit(child.name, inheritance_graph, visited)
-			end
-		end
-	end
-end
-
+# Checks that the class is defined and doesn't inherit from a constant
 def check_class_inherits(class_map, class_lut)
 	# Check that the superclass isnt a constant
 	for ast_class in class_map.classes
@@ -117,13 +111,13 @@ def check_class_inherits(class_map, class_lut)
 	end
 end
 
-# Verifies that main method is defined
+# Checks that there is a main method
 def check_method_main(class_map)
 	has_main = false
 	has_main_no_params = false
 	for ast_class in class_map.classes
 		if ast_class.name == "Main"
-			for feature in ast_class.features
+			for feature in ast_class.methods + ast_class.parent_methods
 				if feature.name == "main"
 					has_main = true
 					if feature.formals == []
@@ -134,12 +128,14 @@ def check_method_main(class_map)
 		end
 	end
 
-	if not has_main_no_params and not has_main
+	if not has_main
 		# Doesn't have main
 		line_number = 0
 		message = "class Main method main not found"
 		type_error(line_number, message)
-	elsif not has_main_no_params
+	end
+
+	if not has_main_no_params
 		# Has main, but nonzero parameters
 		line_number = 0
 		message = "class Main method main with 0 parameters not found"
@@ -147,6 +143,7 @@ def check_method_main(class_map)
 	end
 end
 
+# Checks that overridden methods have valid number/types of formals and return types
 def check_method_override(ast_class_name, method, parent_methods)
 	# Get methods from ancestors with the same name
 	duplicates = parent_methods.select{|x| x.name == method.name}
@@ -376,6 +373,11 @@ def flatten_parent_features(ast_class_name, class_lut, inheritance_graph, parent
 	attributes = ast_class.attributes
 	methods = ast_class.methods
 
+	# Set class field of methods (used by implementation map)
+	for method in methods
+		method.associated_class = ast_class_name
+	end
+
 	# Recurse on children
 	if inheritance_graph.has_key? ast_class_name
 		for child in inheritance_graph[ast_class_name]
@@ -460,6 +462,7 @@ def main()
 	
 	# Init class map, look-up table, inheritance graph
 	class_map = ClassMap.new(ast.classes)
+
 	class_lut = get_class_lut(class_map)
 	inheritance_graph = get_inheritance_graph(class_map)
 
@@ -467,6 +470,14 @@ def main()
 	check_class_redefined(class_map)
 	check_class_inherits(class_map, class_lut)
 	check_cycle(class_map, inheritance_graph)
+
+	for ast_class in class_map.all_classes
+		puts ast_class.name
+		for method in ast_class.methods
+			puts method.name
+		end
+		puts
+	end
 
 	# Flatten features across the inheritance tree
 	flatten_parent_features("Object", class_lut, inheritance_graph, [], [])
@@ -484,8 +495,22 @@ def main()
 	# Check that there is a main method
 	check_method_main(class_map)
 
-	puts class_map.to_s()
-	# write_output(filename, class_map)
+	# Init maps
+	implementation_map = ImplementationMap.new(class_map.all_classes)
+	parent_map = ParentMap.new(class_map.all_classes)
+
+	write_output(filename, class_map)
+	# puts class_map.to_s()
+	# puts implementation_map.to_s()
+	# puts parent_map.to_s()
+	# puts ast.to_s()
+
+	# output = File.open("#{filename}-type", "w")
+	# output << class_map.to_s()
+	# output << implementation_map.to_s()
+	# output << parent_map.to_s()
+	# output << ast.to_s()
+	# output.close()
 end
 
 if __FILE__ == $PROGRAM_NAME

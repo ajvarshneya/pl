@@ -1,0 +1,25 @@
+1,24d0
+< Bool
+< 
+< IO
+< in_int
+< in_string
+< out_int
+< out_string
+< 
+< Int
+< 
+< Main
+< main
+< method
+< 
+< Object
+< abort
+< copy
+< type_name
+< 
+< String
+< concat
+< length
+< substr
+< 

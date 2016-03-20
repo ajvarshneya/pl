@@ -1,0 +1,236 @@
+79a80
+> Bool
+84a86
+> Int
+91a94
+> List
+99a103
+> List
+101a106
+> Cons
+108a114
+> Int
+112a119
+> SELF_TYPE
+121a129
+> SELF_TYPE
+124a133
+> Int
+128a138
+> Int
+132a143
+> List
+136a148
+> List
+140a153
+> SELF_TYPE
+246a260
+> Bool
+251a266
+> Int
+254a270
+> Object
+259a276
+> Int
+265a283
+> SELF_TYPE
+268a287
+> Object
+273a293
+> SELF_TYPE
+281a302
+> List
+283a305
+> Cons
+290a313
+> Int
+294a318
+> SELF_TYPE
+355a380
+> Object
+357a383
+> Bool
+359a386
+> List
+366a394
+> SELF_TYPE
+371a400
+> String
+374a404
+> Object
+377a408
+> SELF_TYPE
+382a414
+> Int
+384a417
+> List
+391a425
+> SELF_TYPE
+396a431
+> String
+399a435
+> Object
+404a441
+> List
+406a444
+> List
+416a455
+> Object
+419a459
+> List
+423a464
+> List
+425a467
+> List
+427a470
+> List
+429a473
+> List
+431a476
+> List
+433a479
+> List
+440a487
+> Int
+446a494
+> Int
+452a501
+> Int
+458a508
+> Int
+464a515
+> Int
+467a519
+> Object
+469a522
+> Bool
+471a525
+> Bool
+473a528
+> List
+480a536
+> List
+483a540
+> Object
+488a546
+> List
+492a551
+> List
+496a556
+> List
+498a559
+> List
+602a664
+> Bool
+610a673
+> Int
+613a677
+> Object
+618a683
+> Int
+627a693
+> SELF_TYPE
+630a697
+> Object
+635a703
+> SELF_TYPE
+649a718
+> List
+651a721
+> Cons
+658a729
+> Int
+662a734
+> SELF_TYPE
+688a761
+> Bool
+696a770
+> Int
+706a781
+> List
+724a800
+> SELF_TYPE
+727a804
+> Int
+731a809
+> Int
+735a814
+> List
+739a819
+> List
+743a824
+> SELF_TYPE
+768a850
+> Object
+770a853
+> Bool
+772a856
+> List
+779a864
+> SELF_TYPE
+784a870
+> String
+787a874
+> Object
+790a878
+> SELF_TYPE
+795a884
+> Int
+797a887
+> List
+804a895
+> SELF_TYPE
+809a901
+> String
+812a905
+> Object
+817a911
+> List
+819a914
+> List
+832a928
+> Object
+835a932
+> List
+839a937
+> List
+841a940
+> List
+843a943
+> List
+845a946
+> List
+847a949
+> List
+849a952
+> List
+856a960
+> Int
+862a967
+> Int
+868a974
+> Int
+874a981
+> Int
+880a988
+> Int
+883a992
+> Object
+885a995
+> Bool
+887a998
+> Bool
+889a1001
+> List
+896a1009
+> List
+899a1013
+> Object
+904a1019
+> List
+908a1024
+> List
+912a1029
+> List
+914a1032
+> List

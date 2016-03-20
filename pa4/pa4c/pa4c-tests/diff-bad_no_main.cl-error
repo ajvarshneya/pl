@@ -1,0 +1,24 @@
+1,23d0
+< A
+< main
+< 
+< Bool
+< 
+< IO
+< in_int
+< in_string
+< out_int
+< out_string
+< 
+< Int
+< 
+< Object
+< abort
+< copy
+< type_name
+< 
+< String
+< concat
+< length
+< substr
+< 

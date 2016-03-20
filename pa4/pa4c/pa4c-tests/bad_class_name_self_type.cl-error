@@ -1,1 +1,26 @@
+Bool
+
+IO
+in_int
+in_string
+out_int
+out_string
+
+Int
+
+Main
+main
+
+Object
+abort
+copy
+type_name
+
+SELF_TYPE
+
+String
+concat
+length
+substr
+
 ERROR: 9: Type-Check: class named SELF_TYPE

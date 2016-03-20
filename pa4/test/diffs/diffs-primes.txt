@@ -1,0 +1,244 @@
+14a15
+> Int
+17a19
+> SELF_TYPE
+22a25
+> String
+25a29
+> Int
+31a36
+> Int
+41a47
+> Int
+47a54
+> Object
+49a57
+> Bool
+51a60
+> Object
+54a64
+> Int
+58a69
+> Int
+60a72
+> Int
+64a77
+> Int
+67a81
+> Int
+71a86
+> Int
+74a90
+> Object
+76a93
+> Bool
+78a96
+> Bool
+80a99
+> Int
+84a104
+> Int
+86a107
+> Int
+90a112
+> Int
+94a117
+> Bool
+96a120
+> Bool
+98a123
+> Bool
+100a126
+> Int
+102a129
+> Int
+106a134
+> Int
+108a137
+> Int
+112a142
+> Int
+114a145
+> Int
+118a150
+> Int
+122a155
+> Int
+125a159
+> Bool
+127a162
+> Bool
+129a165
+> Int
+133a170
+> Int
+135a173
+> Int
+139a178
+> Int
+142a182
+> Object
+144a185
+> Bool
+146a188
+> Int
+150a193
+> Int
+152a196
+> Int
+156a201
+> Int
+160a206
+> SELF_TYPE
+163a210
+> Int
+167a215
+> Int
+171a220
+> SELF_TYPE
+176a226
+> Int
+180a231
+> SELF_TYPE
+185a237
+> String
+188a241
+> Int
+191a245
+> Object
+193a248
+> Bool
+195a251
+> Int
+199a256
+> Int
+203a261
+> Object
+205a264
+> String
+211a271
+> String
+375a436
+> Int
+473a535
+> Int
+481a544
+> Int
+484a548
+> SELF_TYPE
+489a554
+> String
+492a558
+> Int
+500a567
+> Int
+514a582
+> Int
+522a591
+> Object
+524a594
+> Bool
+526a597
+> Object
+529a601
+> Int
+533a606
+> Int
+535a609
+> Int
+539a614
+> Int
+542a618
+> Int
+546a623
+> Int
+549a627
+> Object
+551a630
+> Bool
+553a633
+> Bool
+555a636
+> Int
+559a641
+> Int
+561a644
+> Int
+565a649
+> Int
+569a654
+> Bool
+571a657
+> Bool
+573a660
+> Bool
+575a663
+> Int
+577a666
+> Int
+581a671
+> Int
+583a674
+> Int
+587a679
+> Int
+589a682
+> Int
+593a687
+> Int
+597a692
+> Int
+600a696
+> Bool
+602a699
+> Bool
+604a702
+> Int
+608a707
+> Int
+610a710
+> Int
+614a715
+> Int
+617a719
+> Object
+619a722
+> Bool
+621a725
+> Int
+625a730
+> Int
+627a733
+> Int
+631a738
+> Int
+635a743
+> SELF_TYPE
+638a747
+> Int
+642a752
+> Int
+646a757
+> SELF_TYPE
+651a763
+> Int
+655a768
+> SELF_TYPE
+660a774
+> String
+663a778
+> Int
+666a782
+> Object
+668a785
+> Bool
+670a788
+> Int
+674a793
+> Int
+678a798
+> Object
+680a801
+> String
+686a808
+> String

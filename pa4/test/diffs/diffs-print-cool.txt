@@ -1,0 +1,64 @@
+172a173
+> SELF_TYPE
+175a177
+> SELF_TYPE
+177a180
+> SELF_TYPE
+182a186
+> String
+184a189
+> String
+186a192
+> Object
+196a203
+> Int
+199a207
+> Int
+205a214
+> String
+207a217
+> String
+209a220
+> Bool
+211a223
+> SELF_TYPE
+221a234
+> Int
+224a238
+> Int
+227a242
+> SELF_TYPE
+232a248
+> String
+330a347
+> SELF_TYPE
+333a351
+> SELF_TYPE
+335a354
+> SELF_TYPE
+340a360
+> String
+342a363
+> String
+344a366
+> Object
+354a377
+> Int
+357a381
+> Int
+363a388
+> String
+365a391
+> String
+367a394
+> Bool
+369a397
+> SELF_TYPE
+379a408
+> Int
+382a412
+> Int
+385a416
+> SELF_TYPE
+390a422
+> String
