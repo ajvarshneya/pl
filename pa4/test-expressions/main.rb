@@ -422,12 +422,43 @@ def get_class_lut(class_map)
 	return class_lut
 end
 
-# def check_assign(expr)
+def check_assign(expr)
+	type = get_object_context(expr.var)
+	type1 = check_expression(expr.rhs)
+	if not conforms(type1, type)
+		line_number = expr.lineno
+		message = "#{type1} does not conform to #{type} in assignment"
+		type_error(line_number, message)
+	end
+	expr.static_type = type1
+end
+
 # def check_dynamic_dispatch(expr)
 # def check_static_dispatch(expr)
 # def check_self_dispatch(expr)
-# def check_if(expr)
-# def check_while(expr)
+def check_if(expr)
+	type1 = check_expression(expr.predicate)
+	if type1 != "Bool"
+		line_number = expr.lineno
+		message = "conditional has type #{type1} instead of Bool"
+		type_error(line_number, message)
+	end
+	type2 = check_expression(expr.thn)
+	type3 = check_expression(expr.els)
+	expr.static_type = lub(type2, type3)
+end
+
+def check_while(expr)
+	type1 = check_expression(expr.predicate)
+	if type1 != "Bool"
+		line_number = expr.lineno
+		message = "conditional has type #{type1} instead of Bool"
+		type_error(line_number, message)
+	end
+	type2 = check_expression(expr.body)
+	expr.static_type = "Object"
+end
+
 def check_block(expr)
 	type = nil
 	for e in expr.body
@@ -445,8 +476,15 @@ def check_block(expr)
 end
 # def check_let(expr)
 # def check_case(expr)
-# def check_new(expr)
-# def check_is_void(expr)
+def check_new(expr)
+	expr.static_type = expr.type
+end
+
+def check_is_void(expr)
+	check_expression(expr.expr)
+	expr.static_type = "Bool"
+end
+
 def check_bin_op(expr)
 	check_expression(expr.e1)
 	check_expression(expr.e2)
@@ -454,16 +492,16 @@ def check_bin_op(expr)
 end
 
 def check_bool_op(expr)
-	typ1 = check_expression(expr.e1)
-	typ2 = check_expression(expr.e2)
+	type1 = check_expression(expr.e1)
+	type2 = check_expression(expr.e2)
 
-	if typ1 == "Bool" or
-		typ1 == "Int" or
-		typ1 == "String" or
-		typ2 == "Bool" or
-		typ2 == "Int" or
-		typ2 == "String"
-		if typ1 != typ2
+	if type1 == "Bool" or
+		type1 == "Int" or
+		type1 == "String" or
+		type2 == "Bool" or
+		type2 == "Int" or
+		type2 == "String"
+		if type1 != type2
 			line_number = expr.lineno
 			message = "Attribute expression type #{body_type} does not conform to attribute type #{attribute.type}"
 			type_error(line_number, message)
@@ -507,20 +545,20 @@ def check_expression(expr)
 	# 	check_static_dispatch(expr)
 	# elsif expr.instance_of?(ASTSelfDispatch)
 	# 	check_self_dispatch(expr)
-	# elsif expr.instance_of?(ASTIf)
-	# 	check_if(expr)
-	# elsif expr.instance_of?(ASTWhile)
-	# 	check_while(expr)
+	elsif expr.instance_of?(ASTIf)
+		check_if(expr)
+	elsif expr.instance_of?(ASTWhile)
+		check_while(expr)
 	elsif expr.instance_of?(ASTBlock)
 		check_block(expr)
 	# elsif expr.instance_of?(ASTLet)
 	# 	check_let(expr)
 	# elsif expr.instance_of?(ASTCase)
 	# 	check_case(expr)
-	# elsif expr.instance_of?(ASTNew)
-	# 	check_new(expr)
-	# elsif expr.instance_of?(ASTIsVoid)
-	# 	check_is_void(expr)
+	elsif expr.instance_of?(ASTNew)
+		check_new(expr)
+	elsif expr.instance_of?(ASTIsVoid)
+		check_is_void(expr)
 	elsif expr.instance_of?(ASTBinOp)
 		check_bin_op(expr)
 	elsif expr.instance_of?(ASTBoolOp)
@@ -554,13 +592,17 @@ def check_expressions(class_map)
 			extend_object_context(attribute.name, attribute.type)
 		end
 
+		extend_object_context("self", "SELF_TYPE")
+
 		# Typecheck attribute expressions in this class
 		for attribute in ast_class.attributes
-			body_type = check_expression(attribute.expr)
-			if not conforms(body_type, attribute.type)
-				line_number = attribute.type_line
-				message = "#{body_type} does not conform to #{attribute.type} in initialized attribute"
-				type_error(line_number, message)
+			if attribute.kind == "attribute_init"
+				body_type = check_expression(attribute.expr)
+				if not conforms(body_type, attribute.type)
+					line_number = attribute.type_line
+					message = "#{body_type} does not conform to #{attribute.type} in initialized attribute"
+					type_error(line_number, message)
+				end
 			end
 		end
 
@@ -579,6 +621,27 @@ def check_expressions(class_map)
 		end
 
 		end_scope()
+	end
+end
+
+def lub(type1, type2)
+	# Get path to root from type1
+	path = []
+	while true
+		path << type1
+		if type1 == "Object"
+			break
+		else
+			type1 = $p_map[type1]
+		end
+	end
+
+	while true
+		if path.include? type2
+			return type2
+		else
+			type2 = $p_map[type2]
+		end
 	end
 end
 
@@ -627,7 +690,7 @@ def extend_object_context(identifier, type)
 end
 
 def get_object_context(identifier)
-	for symbol_table in $symbol_tables.reversed()
+	for symbol_table in $symbol_tables.reverse()
 		if symbol_table.include? identifier
 			return symbol_table[identifier]
 		end
