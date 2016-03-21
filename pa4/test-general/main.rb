@@ -58,7 +58,6 @@ def check_class_redefined(class_map)
 	end
 end
 
-
 # Checks that there is a Main class
 def check_class_main(class_map)
 	has_main = false
@@ -159,17 +158,17 @@ def check_method_override(ast_class_name, method, parent_methods)
 
 		# Check that the formals have the same types
 		for fml1, fml2 in duplicate.formals.zip(method.formals)
-			if fml1.typ != fml2.typ
-				line_number = fml2.typ_line
+			if fml1.type != fml2.type
+				line_number = fml2.type_line
 				message = "class #{ast_class_name} redefines method #{method.name} and changes type of formal #{fml2.name}"
 				type_error(line_number, message)
 			end
 		end
 
 		# Check that the formals have the same return types
-		if duplicate.typ != method.typ
-			line_number = method.typ_line
-			message = "class #{ast_class_name} redefines method #{method.name} and changes return type (from #{duplicate.typ} to #{method.typ})"
+		if duplicate.type != method.type
+			line_number = method.type_line
+			message = "class #{ast_class_name} redefines method #{method.name} and changes return type (from #{duplicate.type} to #{method.type})"
 			type_error(line_number, message)
 		end
 	end
@@ -177,9 +176,9 @@ end
 
 # Check that formal has a defined type, note that it CANNOT be SELF_TYPE
 def check_formal_type(ast_class_name, method_name, formal, class_lut)
-	if not class_lut.include? formal.typ
-		line_number = formal.typ_line
-		message = "class #{ast_class_name} has method #{method_name} with formal parameter of unknown type #{formal.typ}"
+	if not class_lut.include? formal.type
+		line_number = formal.type_line
+		message = "class #{ast_class_name} has method #{method_name} with formal parameter of unknown type #{formal.type}"
 		type_error(line_number, message)			
 	end
 end
@@ -229,9 +228,9 @@ end
 
 # Checks that the method has a defined return type
 def check_method_return(ast_class_name, method, class_lut)
-	if not (class_lut.include? method.typ or method.typ == "SELF_TYPE")
-		line_number = method.typ_line
-		message = "class #{ast_class_name} has method #{method.name} with unknown return type #{method.typ}"
+	if not (class_lut.include? method.type or method.type == "SELF_TYPE")
+		line_number = method.type_line
+		message = "class #{ast_class_name} has method #{method.name} with unknown return type #{method.type}"
 		type_error(line_number, message)			
 	end
 end
@@ -287,9 +286,9 @@ end
 
 # Checks that attribute has a defined type
 def check_attribute_type(ast_class_name, attribute, class_lut)
-	if not (class_lut.include? attribute.typ or attribute.typ == "SELF_TYPE")
-		line_number = attribute.typ_line
-		message = "class #{ast_class_name} has attribute #{attribute.name} with unknown type #{attribute.typ}"
+	if not (class_lut.include? attribute.type or attribute.type == "SELF_TYPE")
+		line_number = attribute.type_line
+		message = "class #{ast_class_name} has attribute #{attribute.name} with unknown type #{attribute.type}"
 		type_error(line_number, message)			
 	end
 end
@@ -423,6 +422,163 @@ def get_class_lut(class_map)
 	return class_lut
 end
 
+def check_expression(expr)
+	# if expr.instance_of?(ASTAssign)
+	# end
+	# if expr.instance_of?(ASTDynamicDispatch)
+	# end
+	# if expr.instance_of?(ASTStaticDispatch)
+	# end
+	# if expr.instance_of?(ASTSelfDispatch)
+	# end
+	# if expr.instance_of?(ASTIf)
+	# end
+	# if expr.instance_of?(ASTWhile)
+	# end
+	# if expr.instance_of?(ASTBlock)
+	# end
+	# if expr.instance_of?(ASTLet)
+	# end
+	# if expr.instance_of?(ASTCase)
+	# end
+	# if expr.instance_of?(ASTNew)
+	# end
+	# if expr.instance_of?(ASTIsVoid)
+	# end
+	# if expr.instance_of?(ASTBinOp)
+	# end
+	# if expr.instance_of?(ASTBoolOp)
+	# end
+	# if expr.instance_of?(ASTNot)
+	# end
+	# if expr.instance_of?(ASTNegate)
+	# end
+	if expr.instance_of?(ASTInteger)
+		expr.static_type = "Int"
+	end
+	if expr.instance_of?(ASTString)
+		expr.static_type = "String"
+	end
+	if expr.instance_of?(ASTBoolean)
+		expr.static_type = "Bool"
+	end
+	# if expr.instance_of?(ASTIdentifier)
+	# end
+	# if expr.instance_of?(ASTInternal)
+	# end
+	return expr.static_type
+end
+
+def check_expressions(class_map)
+	for ast_class in class_map.classes
+		set_class_context(ast_class.name)
+		
+		# New scope
+		new_scope()
+
+		# Add attributes to object environment
+		for attribute in ast_class.attributes
+			extend_object_context(attribute.name, attribute.type)
+		end
+
+		# Typecheck attribute expressions in this class
+		for attribute in ast_class.attributes
+			body_type = check_expression(attribute.expr)
+			body_type = "Int"
+			if not conforms(body_type, attribute.type)
+				line_number = attribute.type_line
+				message = "Attribute expression type #{body_type} does not conform to attribute type #{attribute.type}"
+				type_error(line_number, message)
+			end
+		end
+
+		# Typecheck method expressions in this class
+		for method in ast_class.methods
+			new_scope()
+			body_type = check_expression(method.expr)
+			body_type = "Int"
+			if not conforms(body_type, method.type)
+				line_number = method.type_line
+				message = "Method expression type #{body_type} does not conform to method type #{method.type}"
+				type_error(line_number, message)
+			end
+			end_scope()
+		end
+
+		end_scope()
+	end
+end
+
+# Returns true if type1 conforms to type2 (i.e. type1 <= type2), otherwise returns false
+def conforms(type1, type2)
+	while true
+		if type1 == type2
+			return true
+		end
+
+		if (type1 == "Object")
+			break
+		else
+			type1 = $p_map[type1]
+		end
+	end
+
+	return false
+end
+
+def set_class_context(identifier)
+	$class_context = identifier
+end
+
+def get_class_context()
+	return $class_context
+end
+
+def get_method_context(ast_class_name, method_name)
+	methods = $i_map[ast_class_name]
+	selection = methods.select{|x| x.name = method_name}
+
+	# Throw error if it doesn't exist
+	if selection.length() < 1
+		line_number = 0 # change this later
+		message = "Method not found."
+		type_error(line_number, message)		
+	end
+	method = selection[0]
+	return method
+end
+
+def extend_object_context(identifier, type)
+	symbol_table = $symbol_tables.last()
+	symbol_table[identifier] = type
+end
+
+def get_object_context(identifier)
+	for symbol_table in $symbol_tables.reversed()
+		if symbol_table.include? identifier
+			return symbol_table[identifier]
+		end
+	end
+
+	puts "ERROR: Symbol #{identifier} not in object environment."
+end
+
+def new_scope()
+	$symbol_tables += [{}]
+end
+
+def end_scope()
+	$symbol_tables.pop()
+end
+
+def init_type_env(class_map, implementation_map, parent_map, inheritance_graph)
+	$symbol_tables = []
+	$i_map = implementation_map.map
+	$p_map = parent_map.map
+	$i_graph = inheritance_graph
+	$class_context = nil
+end
+
 ### I/O Functions ###
 def write_output(filename, out)
 	output = File.open("#{filename}-type", "w")
@@ -490,6 +646,11 @@ def main()
 	# Init maps
 	implementation_map = ImplementationMap.new(class_map.all_classes)
 	parent_map = ParentMap.new(class_map.all_classes)
+
+	init_type_env(class_map, implementation_map, parent_map, inheritance_graph)
+
+	# Typecheck expressions
+	# check_expressions(class_map)
 
 	puts class_map.to_s()
 	puts implementation_map.to_s()

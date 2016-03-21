@@ -6,7 +6,7 @@ do
 	cool $FILE --parse --out misc/${FILE%%.*}
 	cool $FILE --type --out misc/ref-${FILE%%.*}
 	ruby main.rb misc/$FILE-ast > misc/$FILE-type
-	diff misc/$FILE-type misc/ref-$FILE-type > diffs/diffs-${FILE%%.*}.txt
+	diff misc/$FILE-type misc/ref-$FILE-type > diffs/${FILE%%.*}.diff
 	# cat $FILE-type
 	# cat diffs-${FILE%%.*}.txt
 done

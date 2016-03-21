@@ -170,7 +170,6 @@ main
 0
 Main
 4
-SELF_TYPE
 identifier
 4
 self
@@ -270,7 +269,6 @@ main
 2
 Object
 4
-SELF_TYPE
 identifier
 4
 self

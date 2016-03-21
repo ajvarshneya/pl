@@ -26,7 +26,7 @@ class ClassMap
                     # initializer \n attribute name \n type \n expr
                     attributes += "initializer\n"
                     attributes += attribute.name + "\n"
-                    attributes += attribute.typ + "\n"
+                    attributes += attribute.type + "\n"
                     attributes += attribute.expr.to_s()
                 end
 
@@ -35,7 +35,7 @@ class ClassMap
                     # no_initializer \n attribute name \n type \n
                     attributes += "no_initializer\n"
                     attributes += attribute.name + "\n"
-                    attributes += attribute.typ + "\n"
+                    attributes += attribute.type + "\n"
                 end
             end
             # number of attributes \n
@@ -49,22 +49,16 @@ class ClassMap
 end
 
 class ImplementationMap
-    attr_accessor :all_classes, :classes, :basic_classes
-    def initialize(classes, basic_classes, all_classes)
-        @classes = classes
-        @basic_classes = basic_classes
+    attr_accessor :all_classes, :map
+    def initialize(all_classes)
         @all_classes = all_classes
+        init_map()
     end
 
-    def to_s()
-        # implementation_map \n
-        s = "implementation_map\n"
-        # number of classes \n
-        s += @all_classes.length.to_s() + "\n"
-        for ast_class in @all_classes
-            # class name \n
-            s += ast_class.name + "\n"
+    def init_map()
+        @map = {}
 
+        for ast_class in @all_classes
             # get methods
             methods_to_print = []
             for method in (ast_class.parent_methods + ast_class.methods)
@@ -82,10 +76,22 @@ class ImplementationMap
                 end
             end
 
+            # map class name to list of methods
+            @map[ast_class.name] = methods_to_print
+        end
+    end
 
-            s += methods_to_print.length.to_s() + "\n"
-
-            for method in methods_to_print
+    def to_s()
+        # implementation_map \n
+        s = "implementation_map\n"
+        # number of classes \n
+        s += @all_classes.length.to_s() + "\n"
+        for ast_class_name in @map.keys.sort()
+            # class name \n
+            s += ast_class_name + "\n"
+            # number of methods \n
+            s += @map[ast_class_name].length.to_s() + "\n"
+            for method in @map[ast_class_name]
                 # name of method \n
                 s += method.name + "\n"
                 # number of formals \n
@@ -98,35 +104,38 @@ class ImplementationMap
                 s += method.associated_class + "\n"
                 # method body expression
                 s += method.expr.to_s()
-            end 
+            end
         end
         return s
-    end
-
-    def to_s_helper()
-
     end
 end
 
 class ParentMap
-    attr_accessor :all_classes
+    attr_accessor :all_classes, :map
     def initialize(all_classes)
         @all_classes = all_classes
+        init_map()
+    end
+
+    def init_map()
+        @map = {}
+        for ast_class in @all_classes
+            if ast_class.name != "Object"
+                if ast_class.superclass != nil
+                    @map[ast_class.name] = ast_class.superclass
+                else
+                    @map[ast_class.name] = "Object"
+                end
+            end
+        end
     end
 
     def to_s()
         s = "parent_map\n"
         s += (@all_classes.length - 1).to_s() + "\n"
-        for ast_class in @all_classes
-            if ast_class.name != "Object"
-                if ast_class.superclass != nil
-                    s += ast_class.name + "\n"
-                    s += ast_class.superclass + "\n"
-                else
-                    s += ast_class.name + "\n"
-                    s += "Object\n"
-                end
-            end
+        for ast_class_name in @map.keys.sort()
+            s += ast_class_name + "\n"
+            s += @map[ast_class_name] + "\n"
         end
         return s
     end
@@ -367,14 +376,14 @@ class BoolClass < BasicClass
 end
 
 class ASTFeature
-    attr_accessor :kind, :name, :name_line, :formals, :typ, :typ_line, :expr, :associated_class
-    def initialize(kind, name, name_line, formals, typ, typ_line, expr)
+    attr_accessor :kind, :name, :name_line, :formals, :type, :type_line, :expr, :associated_class
+    def initialize(kind, name, name_line, formals, type, type_line, expr)
         @kind = kind 
         @name = name 
         @name_line = name_line 
         @formals = formals 
-        @typ = typ 
-        @typ_line = typ_line 
+        @type = type 
+        @type_line = type_line 
         @expr = expr
         @associated_class = nil
     end
@@ -390,8 +399,8 @@ class ASTFeature
             for formal in @formals
                 s += formal.to_s()
             end
-            s += @typ_line.to_s() + "\n"
-            s += @typ + "\n"
+            s += @type_line.to_s() + "\n"
+            s += @type + "\n"
             s += @expr.to_s()
         end
 
@@ -401,8 +410,8 @@ class ASTFeature
             s += @name_line.to_s() + "\n"
             s += @name + "\n"
             s += @formals.length().to_s() + "\n"
-            s += @typ_line.to_s() + "\n"
-            s += @typ + "\n"
+            s += @type_line.to_s() + "\n"
+            s += @type + "\n"
             s += @expr.to_s()
         end
 
@@ -411,8 +420,8 @@ class ASTFeature
             s += "attribute_init" + "\n"
             s += @name_line.to_s() + "\n"
             s += @name + "\n"
-            s += @typ_line.to_s() + "\n"
-            s += @typ + "\n"
+            s += @type_line.to_s() + "\n"
+            s += @type + "\n"
             s += @expr.to_s()
         end
 
@@ -421,20 +430,20 @@ class ASTFeature
             s += "attribute_no_init" + "\n"
             s += @name_line.to_s() + "\n"
             s += @name + "\n"
-            s += @typ_line.to_s() + "\n"
-            s += @typ + "\n"
+            s += @type_line.to_s() + "\n"
+            s += @type + "\n"
         end
         return s
     end
 end
 
 class ASTFormal
-    attr_accessor :name, :name_line, :typ, :typ_line
-    def initialize(name, name_line, typ, typ_line)
+    attr_accessor :name, :name_line, :type, :type_line
+    def initialize(name, name_line, type, type_line)
        @name = name 
        @name_line = name_line 
-       @typ = typ 
-       @typ_line = typ_line
+       @type = type 
+       @type_line = type_line
     end
 
     def name
@@ -445,30 +454,30 @@ class ASTFormal
         # name:identifier \n type:identifier
         s = @name_line.to_s() + "\n"
         s += @name + "\n"
-        s += @typ_line.to_s() + "\n"
-        s += @typ + "\n"
+        s += @type_line.to_s() + "\n"
+        s += @type + "\n"
         return s
     end
 
 end
 
 class ASTExpression
+    attr_accessor :static_type
 end
 
 class ASTAssign < ASTExpression
-    attr_accessor :lineno, :var, :var_line, :rhs, :expr_typ
+    attr_accessor :lineno, :var, :var_line, :rhs
     def initialize(lineno, var, var_line, rhs)
         @lineno = lineno
         @var = var
         @var_line = var_line
         @rhs = rhs
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # assign \n var:identifier rhs:exp
@@ -481,20 +490,19 @@ class ASTAssign < ASTExpression
 end
 
 class ASTDynamicDispatch < ASTExpression
-    attr_accessor :lineno, :expr, :method, :method_line, :args, :expr_typ
+    attr_accessor :lineno, :expr, :method, :method_line, :args
     def initialize(lineno, expr, method, method_line, args)
         @lineno = lineno
         @expr = expr
         @method = method
         @method_line = method_line
         @args = args
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # dynamic_dispatch \n e:exp method:identifier args:exp-list
@@ -511,29 +519,28 @@ class ASTDynamicDispatch < ASTExpression
 end
 
 class ASTStaticDispatch < ASTExpression
-    attr_accessor :lineno, :expr, :typ, :typ_line, :method, :method_line, :args, :expr_typ
-    def initialize(lineno, expr, typ, typ_line, method, method_line, args)
+    attr_accessor :lineno, :expr, :type, :type_line, :method, :method_line, :args
+    def initialize(lineno, expr, type, type_line, method, method_line, args)
         @lineno = lineno
         @expr = expr
-        @typ = typ
-        @typ_line = typ_line
+        @type = type
+        @type_line = type_line
         @method = method
         @method_line = method_line
         @args = args
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # static_dispatch \n e:exp type:identifier method:identifier args:exp-list
         s += "static_dispatch" + "\n"
         s += @expr.to_s()
-        s += @typ_line.to_s() + "\n"
-        s += @typ + "\n"
+        s += @type_line.to_s() + "\n"
+        s += @type + "\n"
         s += @method_line.to_s() + "\n"
         s += @method.to_s() + "\n"
         s += @args.length().to_s() + "\n"
@@ -545,19 +552,18 @@ class ASTStaticDispatch < ASTExpression
 end
 
 class ASTSelfDispatch < ASTExpression
-    attr_accessor :lineno, :method, :method_line, :args, :expr_typ
+    attr_accessor :lineno, :method, :method_line, :args
     def initialize(lineno, method, method_line, args)
         @lineno = lineno
         @method = method
         @method_line = method_line
         @args = args
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # self_dispatch \n method:identifier args:exp-list
@@ -573,19 +579,18 @@ class ASTSelfDispatch < ASTExpression
 end
 
 class ASTIf < ASTExpression
-    attr_accessor :lineno, :predicate, :thn, :els, :expr_typ
+    attr_accessor :lineno, :predicate, :thn, :els
     def initialize(lineno, predicate, thn, els)
        @lineno = lineno
        @predicate = predicate
        @thn = thn
        @els = els
-       @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # if \n predicate:exp then:exp else:exp
@@ -598,18 +603,17 @@ class ASTIf < ASTExpression
 end
 
 class ASTWhile < ASTExpression
-    attr_accessor :lineno, :predicate, :body, :expr_typ
+    attr_accessor :lineno, :predicate, :body
     def initialize(lineno, predicate, body)
        @lineno = lineno
        @predicate = predicate
        @body = body
-       @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # while \n predicate:exp body:exp
@@ -621,17 +625,16 @@ class ASTWhile < ASTExpression
 end
 
 class ASTBlock < ASTExpression
-    attr_accessor :lineno, :body, :expr_typ
+    attr_accessor :lineno, :body
     def initialize(lineno, body)
        @lineno = lineno
        @body = body
-       @expr_typ = nil
    	end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # block \n body:exp-list
@@ -645,12 +648,12 @@ class ASTBlock < ASTExpression
 end
 
 class ASTBinding
-    def initialize(kind, var, var_line, typ, typ_line, expr)
+    def initialize(kind, var, var_line, type, type_line, expr)
         @kind = kind
         @var = var
         @var_line = var_line
-        @typ = typ
-        @typ_line = typ_line
+        @type = type
+        @type_line = type_line
         @expr = expr
     end
 
@@ -661,8 +664,8 @@ class ASTBinding
             s += "let_binding_init" + "\n"
             s += @var_line.to_s() + "\n"
             s += @var + "\n"
-            s += @typ_line.to_s() + "\n"
-            s += @typ + "\n"
+            s += @type_line.to_s() + "\n"
+            s += @type + "\n"
             s += @expr.to_s()
         end
 
@@ -671,8 +674,8 @@ class ASTBinding
             s += "let_binding_no_init" + "\n"
             s += @var_line.to_s() + "\n"
             s += @var + "\n"
-            s += @typ_line.to_s() + "\n"
-            s += @typ + "\n"
+            s += @type_line.to_s() + "\n"
+            s += @type + "\n"
         end
 
         return s
@@ -680,18 +683,17 @@ class ASTBinding
 end
 
 class ASTLet < ASTExpression
-    attr_accessor :lineno, :bindings, :expr, :expr_typ
+    attr_accessor :lineno, :bindings, :expr
     def initialize(lineno, bindings, expr)
         @lineno = lineno
         @bindings = bindings
         @expr = expr
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # let \n binding-list
@@ -706,11 +708,11 @@ class ASTLet < ASTExpression
 end
 
 class ASTCaseElement
-    def initialize(var, var_line, typ, typ_line, body)
+    def initialize(var, var_line, type, type_line, body)
         @var = var
         @var_line = var_line
-        @typ = typ
-        @typ_line = typ_line
+        @type = type
+        @type_line = type_line
         @body = body
     end
 
@@ -718,26 +720,25 @@ class ASTCaseElement
         # variable:identifier type:identifier body:exp
         s = @var_line.to_s() + "\n"
         s += @var + "\n"
-        s += @typ_line.to_s() + "\n"
-        s += @typ + "\n"
+        s += @type_line.to_s() + "\n"
+        s += @type + "\n"
         s += @body.to_s()
         return s
     end
 end
 
 class ASTCase < ASTExpression
-    attr_accessor :lineno, :expr, :cases, :expr_typ
+    attr_accessor :lineno, :expr, :cases
     def initialize(lineno, expr, cases)
         @lineno = lineno
         @expr = expr
         @cases = cases
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # case \n expr cases-list
@@ -752,40 +753,38 @@ class ASTCase < ASTExpression
 end
 
 class ASTNew < ASTExpression
-    attr_accessor :lineno, :typ, :typ_line, :expr_typ
-    def initialize(lineno, typ, typ_line)
+    attr_accessor :lineno, :type, :type_line
+    def initialize(lineno, type, type_line)
         @lineno = lineno
-        @typ = typ
-        @typ_line = typ_line
-        @expr_typ = nil
+        @type = type
+        @type_line = type_line
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # new \n class:identifier
         s += "new" + "\n"
-        s += @typ_line.to_s() + "\n"
-        s += @typ + "\n"
+        s += @type_line.to_s() + "\n"
+        s += @type + "\n"
         return s
     end
 end
 
 class ASTIsVoid < ASTExpression
-    attr_accessor :lineno, :expr, :expr_typ
+    attr_accessor :lineno, :expr
     def initialize(lineno, expr)
         @lineno = lineno
         @expr = expr
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # isvoid \n e:exp
@@ -796,19 +795,18 @@ class ASTIsVoid < ASTExpression
 end
 
 class ASTBinOp < ASTExpression
-    attr_accessor :lineno, :operation, :e1, :e2, :expr_typ
+    attr_accessor :lineno, :operation, :e1, :e2
     def initialize(lineno, operation, e1, e2)
         @lineno = lineno
         @operation = operation
         @e1 = e1
         @e2 = e2
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # op \n x:exp y:exp
@@ -820,19 +818,18 @@ class ASTBinOp < ASTExpression
 end
 
 class ASTBoolOp < ASTExpression
-    attr_accessor :lineno, :operation, :e1, :e2, :expr_typ
+    attr_accessor :lineno, :operation, :e1, :e2
     def initialize(lineno, operation, e1, e2)
         @lineno = lineno
         @operation = operation
         @e1 = e1
         @e2 = e2
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # op \n x:exp y:exp
@@ -844,17 +841,16 @@ class ASTBoolOp < ASTExpression
 end
 
 class ASTNot < ASTExpression
-    attr_accessor :lineno, :expr, :expr_typ
+    attr_accessor :lineno, :expr
     def initialize(lineno, expr)
         @lineno = lineno
         @expr = expr
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # not \n x:exp
@@ -865,17 +861,16 @@ class ASTNot < ASTExpression
 end
 
 class ASTNegate < ASTExpression
-    attr_accessor :lineno, :expr, :expr_typ
+    attr_accessor :lineno, :expr
     def initialize(lineno, expr)
         @lineno = lineno
         @expr = expr
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # not \n x:exp
@@ -886,17 +881,16 @@ class ASTNegate < ASTExpression
 end
 
 class ASTInteger < ASTExpression
-    attr_accessor :lineno, :constant, :expr_typ
+    attr_accessor :lineno, :constant
     def initialize(lineno, constant)
         @lineno = lineno
         @constant = constant
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # integer \n the_integer_constant \n
@@ -907,17 +901,16 @@ class ASTInteger < ASTExpression
 end
 
 class ASTString < ASTExpression
-    attr_accessor :lineno, :constant, :expr_typ
+    attr_accessor :lineno, :constant
     def initialize(lineno, constant)
         @lineno = lineno
         @constant = constant
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # string \n the_string_constant \n
@@ -928,17 +921,16 @@ class ASTString < ASTExpression
 end
 
 class ASTBoolean < ASTExpression
-    attr_accessor :lineno, :constant, :expr_typ
+    attr_accessor :lineno, :constant
     def initialize(lineno, constant)
         @lineno = lineno
         @constant = constant
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # true | false \n
@@ -948,18 +940,17 @@ class ASTBoolean < ASTExpression
 end
 
 class ASTIdentifier < ASTExpression
-    attr_accessor :lineno, :name, :name_line, :expr_typ
+    attr_accessor :lineno, :name, :name_line
     def initialize(lineno, name, name_line)
         @lineno = lineno
         @name = name
         @name_line = name_line
-        @expr_typ = nil
     end
 
     def to_s()
         s = @lineno.to_s() + "\n"
-        if @expr_typ != nil
-            s += expr_typ + "\n"
+        if @static_type != nil
+            s += @static_type + "\n"
         end
 
         # identifier \n variable:identifier
@@ -971,15 +962,15 @@ class ASTIdentifier < ASTExpression
 end
 
 class ASTInternal < ASTExpression
-    attr_accessor :expr_typ, :class_method
-    def initialize(expr_typ, class_method)
-        @expr_typ = expr_typ
+    attr_accessor :expr_type, :class_method
+    def initialize(expr_type, class_method)
+        @expr_type = expr_type
         @class_method = class_method
     end
 
     def to_s()
         s = "0\n"
-        s += @expr_typ + "\n"
+        s += @expr_type + "\n"
         s += "internal\n"
         s += @class_method.to_s() + "\n"
         return s
