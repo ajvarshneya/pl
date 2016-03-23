@@ -278,11 +278,11 @@ class ObjectClass < BasicClass
         
         copy_body = ASTInternal.new("SELF_TYPE", "Object.copy")
         copy_formals = []
-        copy_method = ASTFeature.new("method", "copy", "0", copy_formals, "Object", "0", copy_body)
+        copy_method = ASTFeature.new("method", "copy", "0", copy_formals, "SELF_TYPE", "0", copy_body)
 
         type_name_body = ASTInternal.new("String", "Object.type_name")
         type_name_formals = []
-        type_name_method = ASTFeature.new("method", "type_name", "0", type_name_formals, "Object", "0", type_name_body)
+        type_name_method = ASTFeature.new("method", "type_name", "0", type_name_formals, "String", "0", type_name_body)
 
         @features = [abort_method, copy_method, type_name_method]
         super()
@@ -300,19 +300,19 @@ class IOClass < BasicClass
 
         in_int_body = ASTInternal.new("Int", "IO.in_int")
         in_int_formals = []
-        in_int_method = ASTFeature.new("method", "in_int", "0", in_int_formals, "Object", "0", in_int_body)
+        in_int_method = ASTFeature.new("method", "in_int", "0", in_int_formals, "Int", "0", in_int_body)
 
         in_string_body = ASTInternal.new("String", "IO.in_string")
         in_string_formals = []
-        in_string_method = ASTFeature.new("method", "in_string", "0", in_string_formals, "Object", "0", in_string_body)
+        in_string_method = ASTFeature.new("method", "in_string", "0", in_string_formals, "String", "0", in_string_body)
         
         out_int_body = ASTInternal.new("SELF_TYPE", "IO.out_int")
         out_int_formals = [ASTFormal.new("x", "0", "Int", "0")]
-        out_int_method = ASTFeature.new("method_formals", "out_int", "0", out_int_formals, "Object", "0", out_int_body)
+        out_int_method = ASTFeature.new("method_formals", "out_int", "0", out_int_formals, "SELF_TYPE", "0", out_int_body)
         
         out_string_body = ASTInternal.new("SELF_TYPE", "IO.out_string")
         out_string_formals = [ASTFormal.new("x", "0", "String", "0")]
-        out_string_method = ASTFeature.new("method_formals", "out_string", "0", out_string_formals, "Object", "0", out_string_body)
+        out_string_method = ASTFeature.new("method_formals", "out_string", "0", out_string_formals, "SELF_TYPE", "0", out_string_body)
 
         @features = [in_int_method, in_string_method, out_int_method, out_string_method]
         super()
@@ -648,6 +648,7 @@ class ASTBlock < ASTExpression
 end
 
 class ASTBinding
+    attr_accessor :kind, :var, :var_line, :type, :type_line, :expr
     def initialize(kind, var, var_line, type, type_line, expr)
         @kind = kind
         @var = var
@@ -708,6 +709,7 @@ class ASTLet < ASTExpression
 end
 
 class ASTCaseElement
+    attr_accessor :var, :var_line, :type, :type_line, :body
     def initialize(var, var_line, type, type_line, body)
         @var = var
         @var_line = var_line

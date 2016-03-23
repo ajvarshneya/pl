@@ -27,7 +27,7 @@ def check_cycle(class_map, inheritance_graph)
 		for class_name in cycle
 			path += class_name + " "
 		end
-		message = "inheritance cycle: #{path}"
+		message = "inheritance cycle: #{path.reverse}"
 		type_error(line_number, message)		
 	end
 end
@@ -423,7 +423,13 @@ def get_class_lut(class_map)
 end
 
 def check_assign(expr)
-	type = get_object_context(expr.var)
+	if (expr.var == "self")
+		line_number = expr.lineno
+		message = "cannot assign to self"
+		type_error(line_number, message)
+	end
+
+	type = get_object_context(expr.var, expr.lineno)
 	type1 = check_expression(expr.rhs)
 	if not conforms(type1, type)
 		line_number = expr.lineno
@@ -433,9 +439,122 @@ def check_assign(expr)
 	expr.static_type = type1
 end
 
-# def check_dynamic_dispatch(expr)
-# def check_static_dispatch(expr)
-# def check_self_dispatch(expr)
+def check_dynamic_dispatch(expr)
+	type0 = check_expression(expr.expr)
+
+	# Typecheck arguments
+	arg_types = []
+	for e in  expr.args
+		arg_types << check_expression(e)
+	end
+
+	type = nil
+	if type0 == "SELF_TYPE"
+		type = get_class_context()
+	else
+		type = type0
+	end
+
+	# Check that length of formal and actual parameters are equal
+	method = get_method_context(type, expr.method, expr.method_line)
+	if arg_types.length() != method.formals.length()
+		line_number = expr.lineno
+		message = "wrong number of actual arguments (#{arg_types.length()} vs. #{method.formals.length()})"
+		type_error(line_number, message)
+	end
+
+	# Check that formal and actual parameters have the same types
+	arg_num = 0
+	for arg_type, fml in arg_types.zip(method.formals)
+		arg_num += 1
+		if not conforms(arg_type, fml.type)
+			line_number = expr.lineno
+			message = "argument \##{arg_num} type #{arg_type} does not conform to formal type #{fml.type}"
+			type_error(line_number, message)
+		end
+	end
+
+	# Set static type to be return type of method
+	if method.type == "SELF_TYPE"
+		expr.static_type = type0
+	else
+		expr.static_type = method.type
+	end
+end
+
+def check_static_dispatch(expr)
+	type0 = check_expression(expr.expr)
+
+	# Check types of formals
+	arg_types = []
+	for e in  expr.args
+		arg_types << check_expression(e)
+	end
+
+	# Check that expression type conforms to static type
+	if not conforms(type0, expr.type)
+		line_number = expr.lineno
+		message = "#{type0} does not conform to #{expr.type} in static dispatch"
+		type_error(line_number, message)
+	end
+
+	# Check that length of formal and actual parameters are equal
+	method = get_method_context(expr.type, expr.method, expr.method_line)
+	if arg_types.length() != method.formals.length()
+		line_number = expr.lineno
+		message = "wrong number of actual arguments (#{arg_types.length()} vs. #{method.formals.length()})"
+		type_error(line_number, message)
+	end
+
+	# Check that formal and actual parameters have the same types
+	arg_num = 0
+	for arg_type, fml in arg_types.zip(method.formals)
+		arg_num += 1
+		if not conforms(arg_type, fml.type)
+			line_number = expr.lineno
+			message = "argument \##{arg_num} type #{arg_type} does not conform to formal type #{fml.type}"
+			type_error(line_number, message)
+		end
+	end
+
+	# Set static type to be return type of method
+	if method.type == "SELF_TYPE"
+		expr.static_type = type0
+	else
+		expr.static_type = method.type
+	end
+end
+
+def check_self_dispatch(expr)
+	arg_types = []
+	for e in expr.args
+		arg_types << check_expression(e)
+	end
+
+	type = get_class_context()
+
+	# Check that length of formal and actual parameters are equal
+	method = get_method_context(type, expr.method, expr.method_line)
+	if arg_types.length() != method.formals.length()
+		line_number = expr.lineno
+		message = "wrong number of actual arguments (#{arg_types.length()} vs. #{method.formals.length()})"
+		type_error(line_number, message)
+	end
+
+	# Check that formal and actual parameters have the same types
+	arg_num = 0
+	for arg_type, fml in arg_types.zip(method.formals)
+		arg_num += 1
+		if not conforms(arg_type, fml.type)
+			line_number = expr.lineno
+			message = "argument \##{arg_num} type #{arg_type} does not conform to formal type #{fml.type}"
+			type_error(line_number, message)
+		end
+	end
+
+	expr.static_type = method.type
+end
+
 def check_if(expr)
 	type1 = check_expression(expr.predicate)
 	if type1 != "Bool"
@@ -452,7 +571,7 @@ def check_while(expr)
 	type1 = check_expression(expr.predicate)
 	if type1 != "Bool"
 		line_number = expr.lineno
-		message = "conditional has type #{type1} instead of Bool"
+		message = "predicate has type #{type1} instead of Bool"
 		type_error(line_number, message)
 	end
 	type2 = check_expression(expr.body)
@@ -465,18 +584,113 @@ def check_block(expr)
 		type = check_expression(e)
 	end
 
-	# Parser should catch this...
-	if type == nil
-		line_number = expr.lineno
-		message = "Empty block"
-		type_error(line_number, message)
+	expr.static_type = type
+end
+
+def check_let(expr)
+	# New scope for let bindings
+	new_scope()
+	for binding in expr.bindings
+		# Check if binding variable is self
+		if binding.var == "self"
+			line_number = binding.var_line
+			message = "binding self in a let is not allowed"
+			type_error(line_number, message)	
+		end
+
+		# Check if binding type is defined
+		if not $p_map.has_key? binding.type and 
+			binding.type != "Object" and
+			binding.type != "SELF_TYPE"
+
+			line_number = binding.type_line
+			message = "unknown type #{binding.type}"
+			type_error(line_number, message)
+		end
+
+		if binding.kind == "let_binding_init"
+			# typecheck assigned expression
+			type0 = binding.type
+			type1 = check_expression(binding.expr)
+			if not conforms(type1, type0)
+				line_number = expr.lineno
+				message = "initializer type #{type1} does not conform to type #{type0}"
+				type_error(line_number, message)
+			end
+
+			# extend context
+			extend_object_context(binding.var, binding.type)
+		else
+			extend_object_context(binding.var, binding.type)
+		end
+	end
+
+	# typecheck let expression
+	type = check_expression(expr.expr)
+	expr.static_type = type
+
+	end_scope()
+end
+
+def check_case(expr)
+	type0 = check_expression(expr.expr)
+
+	formal_case_types = []
+	actual_case_types = []
+	for ast_case in expr.cases
+		new_scope()
+		# Check if self is case variable
+		if ast_case.var == "self"
+			line_number = ast_case.var_line
+			message = "binding self in a case expression is not allowed"
+			type_error(line_number, message)	
+		end
+
+		# Check if case type is SELF_TYPE
+		if ast_case.type == "SELF_TYPE"
+			line_number = ast_case.type_line
+			message = "using SELF_TYPE as a case branch type is not allowed"
+			type_error(line_number, message)	
+		end
+
+		# Check if case type is defined
+		if not $p_map.has_key? ast_case.type and ast_case.type != "Object"
+			line_number = ast_case.var_line
+			message = "unknown type #{ast_case.type}"
+			type_error(line_number, message)
+		end
+
+		extend_object_context(ast_case.var, ast_case.type)
+
+		# Check types are unique
+		if formal_case_types.include? ast_case.type
+			line_number = ast_case.var_line
+			message = "case branch type #{ast_case.type} is bound twice"
+			type_error(line_number, message)
+		end
+		formal_case_types << ast_case.type
+		actual_case_types << check_expression(ast_case.body)
+
+		end_scope()
+	end
+
+	type = actual_case_types[0]
+	for case_type in actual_case_types
+		type = lub(type, case_type)
 	end
 
 	expr.static_type = type
 end
-# def check_let(expr)
-# def check_case(expr)
+
 def check_new(expr)
+	if not $p_map.has_key? expr.type and 
+		expr.type != "SELF_TYPE" and 
+		expr.type != "Object"
+
+		line_number = expr.type_line
+		message = "unknown type #{expr.type}"
+		type_error(line_number, message)
+	end
 	expr.static_type = expr.type
 end
 
@@ -486,8 +700,13 @@ def check_is_void(expr)
 end
 
 def check_bin_op(expr)
-	check_expression(expr.e1)
-	check_expression(expr.e2)
+	type1 = check_expression(expr.e1)
+	type2 = check_expression(expr.e2)
+	if type1 != "Int" or type2 != "Int"
+		line_number = expr.lineno
+		message = "arithmetic on #{type1} #{type2} instead of Ints"
+		type_error(line_number, message)
+	end
 	expr.static_type = "Int"
 end
 
@@ -503,7 +722,7 @@ def check_bool_op(expr)
 		type2 == "String"
 		if type1 != type2
 			line_number = expr.lineno
-			message = "Attribute expression type #{body_type} does not conform to attribute type #{attribute.type}"
+			message = "comparison between #{type1} and #{type2}"
 			type_error(line_number, message)
 		end
 	end
@@ -511,12 +730,22 @@ def check_bool_op(expr)
 end
 
 def check_not(expr)
-	check_expression(expr.expr)
+	type = check_expression(expr.expr)
+	if type != "Bool"
+		line_number = expr.lineno
+		message = "not applied to type #{type} instead of Bool"
+		type_error(line_number, message)
+	end
 	expr.static_type = "Bool"
 end
 
 def check_negate(expr)
-	check_expression(expr.expr)
+	type = check_expression(expr.expr)
+	if type != "Int"
+		line_number = expr.lineno
+		message = "negate applied to type #{type} instead of Int"
+		type_error(line_number, message)
+	end
 	expr.static_type = "Int" 
 end
 
@@ -533,28 +762,28 @@ def check_boolean(expr)
 end
 
 def check_identifier(expr)
-	expr.static_type = get_object_context(expr.name)
+	expr.static_type = get_object_context(expr.name, expr.lineno)
 end
 
 def check_expression(expr)
 	if expr.instance_of?(ASTAssign)
 		check_assign(expr)
-	# elsif expr.instance_of?(ASTDynamicDispatch)
-	# 	check_dynamic_dispatch(expr)
-	# elsif expr.instance_of?(ASTStaticDispatch)
-	# 	check_static_dispatch(expr)
-	# elsif expr.instance_of?(ASTSelfDispatch)
-	# 	check_self_dispatch(expr)
+	elsif expr.instance_of?(ASTDynamicDispatch)
+		check_dynamic_dispatch(expr)
+	elsif expr.instance_of?(ASTStaticDispatch)
+		check_static_dispatch(expr)
+	elsif expr.instance_of?(ASTSelfDispatch)
+		check_self_dispatch(expr)
 	elsif expr.instance_of?(ASTIf)
 		check_if(expr)
 	elsif expr.instance_of?(ASTWhile)
 		check_while(expr)
 	elsif expr.instance_of?(ASTBlock)
 		check_block(expr)
-	# elsif expr.instance_of?(ASTLet)
-	# 	check_let(expr)
-	# elsif expr.instance_of?(ASTCase)
-	# 	check_case(expr)
+	elsif expr.instance_of?(ASTLet)
+		check_let(expr)
+	elsif expr.instance_of?(ASTCase)
+		check_case(expr)
 	elsif expr.instance_of?(ASTNew)
 		check_new(expr)
 	elsif expr.instance_of?(ASTIsVoid)
@@ -584,22 +813,22 @@ def check_expressions(class_map)
 	for ast_class in class_map.classes
 		set_class_context(ast_class.name)
 		
-		# New scope
+		# New scope for attributes
 		new_scope()
 
 		# Add attributes to object environment
-		for attribute in ast_class.attributes
+		for attribute in ast_class.parent_attributes + ast_class.attributes
 			extend_object_context(attribute.name, attribute.type)
 		end
 
 		extend_object_context("self", "SELF_TYPE")
 
 		# Typecheck attribute expressions in this class
-		for attribute in ast_class.attributes
+		for attribute in ast_class.parent_attributes + ast_class.attributes
 			if attribute.kind == "attribute_init"
 				body_type = check_expression(attribute.expr)
 				if not conforms(body_type, attribute.type)
-					line_number = attribute.type_line
+					line_number = attribute.name_line
 					message = "#{body_type} does not conform to #{attribute.type} in initialized attribute"
 					type_error(line_number, message)
 				end
@@ -607,16 +836,28 @@ def check_expressions(class_map)
 		end
 
 		# Typecheck method expressions in this class
-		for method in ast_class.methods
+		for method in ast_class.parent_methods + ast_class.methods
+			# New scope for method
 			new_scope()
+
+			extend_object_context("self", "SELF_TYPE")
+
+			# Add formal parameters to scope
+			for formal in method.formals
+				extend_object_context(formal.name, formal.type)
+			end
+
+			# Typecheck expression body
 			body_type = check_expression(method.expr)
+
 			if body_type != nil
 				if not conforms(body_type, method.type)
-					line_number = method.type_line
-					message = "Method expression type #{body_type} does not conform to method type #{method.type}"
+					line_number = method.name_line
+					message = "#{body_type} does not conform to #{method.type} in method #{method.name}"
 					type_error(line_number, message)
 				end
 			end
+
 			end_scope()
 		end
 
@@ -625,41 +866,72 @@ def check_expressions(class_map)
 end
 
 def lub(type1, type2)
-	# Get path to root from type1
-	path = []
-	while true
-		path << type1
-		if type1 == "Object"
-			break
-		else
-			type1 = $p_map[type1]
-		end
+	if type1 == "SELF_TYPE" and type2 == "SELF_TYPE"
+		return "SELF_TYPE"
 	end
 
-	while true
-		if path.include? type2
-			return type2
-		else
-			type2 = $p_map[type2]
+	if type1 == "SELF_TYPE" and type2 != "SELF_TYPE"
+		return lub(get_class_context(), type2)
+	end
+
+	if type1 != "SELF_TYPE" and type2 == "SELF_TYPE"
+		return lub(type1, get_class_context)
+	end
+
+	if type1 != "SELF_TYPE" and type2 != "SELF_TYPE"
+		# (T, T')
+		# Get path to root from type1
+		path = []
+		while true
+			path << type1
+			if type1 == "Object"
+				break
+			else
+				type1 = $p_map[type1]
+			end
+		end
+
+		# Return the first type that is in the path
+		while true
+			if path.include? type2
+				return type2
+			else
+				type2 = $p_map[type2]
+			end
 		end
 	end
 end
 
 # Returns true if type1 conforms to type2 (i.e. type1 <= type2), otherwise returns false
 def conforms(type1, type2)
-	while true
-		if type1 == type2
-			return true
-		end
-
-		if (type1 == "Object")
-			break
-		else
-			type1 = $p_map[type1]
-		end
+	if type1 == "SELF_TYPE" and type2 == "SELF_TYPE"
+		return true
 	end
 
-	return false
+	if type1 == "SELF_TYPE" and type2 != "SELF_TYPE"
+		return conforms(get_class_context(), type2)
+	end
+
+	if type1 != "SELF_TYPE" and type2 == "SELF_TYPE"
+		return false
+	end
+
+	if type1 != "SELF_TYPE" and type2 != "SELF_TYPE"
+		# (T, T')
+		while true
+			if type1 == type2
+				return true
+			end
+
+			if (type1 == "Object")
+				break
+			else
+				type1 = $p_map[type1]
+			end
+		end
+
+		return false
+	end
 end
 
 def set_class_context(identifier)
@@ -670,14 +942,19 @@ def get_class_context()
 	return $class_context
 end
 
-def get_method_context(ast_class_name, method_name)
-	methods = $i_map[ast_class_name]
-	selection = methods.select{|x| x.name = method_name}
+def get_method_context(ast_class_name, method_name, lineno)
+	if ast_class_name == "SELF_TYPE"
+		methods = $i_map[get_class_context()]
+	else
+		methods = $i_map[ast_class_name]
+	end
+
+	selection = methods.select{|x| x.name == method_name}
 
 	# Throw error if it doesn't exist
 	if selection.length() < 1
-		line_number = 0 # change this later
-		message = "Method not found."
+		line_number = lineno
+		message = "unknown method #{method_name} in dispatch on #{ast_class_name}"
 		type_error(line_number, message)		
 	end
 	method = selection[0]
@@ -689,14 +966,17 @@ def extend_object_context(identifier, type)
 	symbol_table[identifier] = type
 end
 
-def get_object_context(identifier)
+def get_object_context(identifier, lineno)
 	for symbol_table in $symbol_tables.reverse()
 		if symbol_table.include? identifier
 			return symbol_table[identifier]
 		end
 	end
 
-	puts "ERROR: Symbol #{identifier} not in object environment."
+	line_number = lineno
+	message = "unbound identifier #{identifier}"
+	type_error(line_number, message)		
+
 end
 
 def new_scope()
