@@ -183,6 +183,8 @@ def tac_if(ast_if):
 	els = tac_expression(ast_if.els)
 	tacs_append(TACAssign(assignee, els))
 	tacs_append(TACJmp(fi_label))
+
+	# fi
 	tacs_append(TACLabel(fi_label))
 
 	return assignee

@@ -193,34 +193,34 @@ def write_output(filename, asm):
 def main():
 	# Deserialize AST
 	filename = sys.argv[1] 	# .cl-type file
-	print "Reading input ..."
+	# print "Reading input ..."
 	raw_ast = read_input(filename) 	# Read AST from file
-	print "Generating AST object ..."
+	# print "Generating AST object ..."
 	ast = generate_ast(raw_ast) # Generate AST object
-	print "Generating TAC ..."
+	# print "Generating TAC ..."
 	tacs = tac_ast(ast) # Generate TAC instructions from AST object
-	for tac in tacs:
-		print tac
-	print "TAC generated!"
-	print "Generating basic blocks ..."
+	# for tac in tacs:
+		# print tac
+	# print "TAC generated!"
+	# print "Generating basic blocks ..."
 	blocks = make_bbs(tacs) # Generate basic blocks from TAC instructions
 
-	print "Eliminating dead code ..."
+	# print "Eliminating dead code ..."
 	# Eliminate deadcode, compute liveness information
-	blocks = dead_code(blocks)
+	# blocks = dead_code(blocks)
 	# print "Computing liveness information ..."
-	# blocks = liveness(blocks)
+	blocks = liveness(blocks)
 
 	# Register allocation
-	print "Allocating registers ..."
+	# print "Allocating registers ..."
 	allocate_registers(blocks) # Get coloring
 
 	# Generate assembly
-	print "Generating assembly ..."
+	# print "Generating assembly ..."
 	asm = gen_asm(blocks, coloring, spilled_registers)
 
 	# Write to output
-	print "Writing assembly to output ..."
+	# print "Writing assembly to output ..."
 	write_output(filename, asm)
 
 if __name__ == '__main__':

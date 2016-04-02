@@ -46,10 +46,10 @@ def kill_dead_code(block):
  		if isinstance(inst, TACBt) or isinstance(inst, TACReturn):
  			live_set.add(inst.val)
 
- 		if isinstance(inst, TACStore):
+ 		elif isinstance(inst, TACStore):
  			live_set.add(inst.val)
 
- 		if isinstance(inst, TACLoad):
+ 		elif isinstance(inst, TACLoad):
  			live_set.discard(inst.val)
 
  		# Assignee cases, remove assignee from live set
@@ -84,10 +84,10 @@ def percolate(block):
  		if isinstance(inst, TACBt) or isinstance(inst, TACReturn):
  			live_set.add(inst.val)
 
- 		if isinstance(inst, TACStore):
+ 		elif isinstance(inst, TACStore):
  			live_set.add(inst.val)
 
- 		if isinstance(inst, TACLoad):
+ 		elif isinstance(inst, TACLoad):
  			live_set.discard(inst.val)
 
  		# Remove assignee from live set
