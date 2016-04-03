@@ -82,6 +82,7 @@ def spill(blocks, register):
 		# Update block with new instructions
 		block.insts = new_insts
 
+
 def spill_and_fill(blocks, original_live_ranges, original_graph):
 	global NUM_COLORS
 
@@ -119,6 +120,7 @@ def spill_and_fill(blocks, original_live_ranges, original_graph):
 			live_ranges.pop(node_to_remove)
 
 	# Spill registers that we couldn't color at each step of reduction
+	print len(registers_to_spill)
 	for register in registers_to_spill:
 		spill(blocks, register)
 
@@ -129,7 +131,6 @@ def spill_and_fill(blocks, original_live_ranges, original_graph):
 		color(registers_to_color, original_graph)
 		return True
 
-
 # Computes mapping between virtual registers and physical registers, using stack as needed
 def allocate_registers(blocks):
 	done = False
@@ -137,7 +138,15 @@ def allocate_registers(blocks):
 		blocks = liveness(blocks)
 		live_ranges = get_live_ranges(blocks) # Generate live ranges of virtual registers
 		graph = get_graph(blocks) # Generate register interference graph
+		# compute_edges(graph)
 		done = spill_and_fill(blocks, live_ranges, graph)
+
+def compute_edges(graph):
+	num = 0
+	for k in graph:
+		for v in graph[k]:
+			num += 1
+	print num
 
 # Computes register interference graph
 def get_graph(blocks):
@@ -165,12 +174,11 @@ def get_graph(blocks):
 				for j in range(i+1, len(live_list)):
 					reg2 = live_list[j]
 
-					if reg1 != reg2:
-						if reg2 not in graph:
-							graph[reg2] = set()
+					if reg2 not in graph:
+						graph[reg2] = set()
 
-						graph[reg1].add(reg2)
-						graph[reg2].add(reg1)
+					graph[reg1].add(reg2)
+					graph[reg2].add(reg1)
 
 				if assignee != None and reg1 != assignee:
 					graph[assignee].add(reg1)
@@ -223,6 +231,8 @@ def main():
 	ast = generate_ast(raw_ast) # Generate AST object
 	tacs = tac_ast(ast) # Generate TAC instructions from AST object
 	blocks = make_bbs(tacs) # Generate basic blocks from TAC instructions
+
+	blocks = liveness(blocks)
 
 	# Register allocation
 	allocate_registers(blocks) # Get coloring

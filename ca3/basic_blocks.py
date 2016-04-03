@@ -74,6 +74,7 @@ def make_bbs(insts):
 # 			removal = kill_dead_code(block) or removal
 # 	return blocks
 
+
 # Percolate live_out set up the block
 def percolate(block):
 
@@ -118,10 +119,13 @@ def liveness(blocks):
 
 		# Compute/propogate liveness set changes until no change
 		for block in blocks:
-			# Percolate the live_out changes
-			change = percolate(block) or change
+
+			block_change = percolate(block)
+			if block_change:
+				change = True
 
 			# Compute a live range approximation
+			block.live_ranges = {}
 			for live_set in block.live_sets:
 				for register in live_set:
 					if block.live_ranges.has_key(register):
