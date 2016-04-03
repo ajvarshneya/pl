@@ -115,7 +115,8 @@ def spill_and_fill(blocks, original_live_ranges, original_graph):
 			graph[adj_node].discard(node_to_remove)
 
 		# Remove node from live_ranges
-		live_ranges.pop(node_to_remove)
+		if node_to_remove in live_ranges:
+			live_ranges.pop(node_to_remove)
 
 	# Spill registers that we couldn't color at each step of reduction
 	for register in registers_to_spill:
@@ -127,6 +128,7 @@ def spill_and_fill(blocks, original_live_ranges, original_graph):
 	else:
 		color(registers_to_color, original_graph)
 		return True
+
 
 # Computes mapping between virtual registers and physical registers, using stack as needed
 def allocate_registers(blocks):
@@ -142,32 +144,56 @@ def get_graph(blocks):
 	graph = {}
 	for block in blocks:
 		# Iterate through live sets in each block
-		for live_set in block.live_sets:
+		for inst, live_set in zip(block.insts, block.live_sets):
+			
+			assignee = None
+			if hasattr(inst, 'assignee'):
+				assignee = inst.assignee
+
+				if assignee not in graph:
+					graph[assignee] = set()
+
+			live_list = list(live_set)
+
 			# Add an edge between every two elements in the live sets in the graph (excluding self edges)
-			for r1 in live_set:
-				if r1 not in graph:
-					graph[r1] = set()
-				for r2 in live_set:
-					if r1 != r2:
-						if r2 not in graph:
-							graph[r2] = set()
-						graph[r1].add(r2)
-						graph[r2].add(r1)
+			for i in range(0, len(live_list)):
+				reg1 = live_list[i]
+
+				if reg1 not in graph:
+					graph[reg1] = set()
+
+				for j in range(i+1, len(live_list)):
+					reg2 = live_list[j]
+
+					if reg1 != reg2:
+						if reg2 not in graph:
+							graph[reg2] = set()
+
+						graph[reg1].add(reg2)
+						graph[reg2].add(reg1)
+
+				if assignee != None and reg1 != assignee:
+					graph[assignee].add(reg1)
+					graph[reg1].add(assignee)
+
 	return graph
 
-# Computes the live ranges for our set of blocks
+# Approximates live ranges in blocks
 def get_live_ranges(blocks):
 	live_ranges = {}
 	for block in blocks:
-		for live_set in block.live_sets:
-		 	for register in live_set:
-		 		if register in live_ranges:
-		 			live_ranges[register] += 1
-		 		else:
-		 			live_ranges[register] = 1
+		for register in block.live_ranges:
+
+			# Add register to dictionary if not yet encountered
+			if register not in live_ranges:
+				live_ranges[register] = 0
+
+			# Add to already computed live range approximation
+			live_ranges[register] += block.live_ranges[register]
+
 	return live_ranges
 
-# Reads in raw input (FOR AST DESERIALIZATION)
+# Reads in raw input
 def read_input(filename):
     f = open(filename)
     lines = []
@@ -193,34 +219,18 @@ def write_output(filename, asm):
 def main():
 	# Deserialize AST
 	filename = sys.argv[1] 	# .cl-type file
-	# print "Reading input ..."
 	raw_ast = read_input(filename) 	# Read AST from file
-	# print "Generating AST object ..."
 	ast = generate_ast(raw_ast) # Generate AST object
-	# print "Generating TAC ..."
 	tacs = tac_ast(ast) # Generate TAC instructions from AST object
-	# for tac in tacs:
-		# print tac
-	# print "TAC generated!"
-	# print "Generating basic blocks ..."
 	blocks = make_bbs(tacs) # Generate basic blocks from TAC instructions
 
-	# print "Eliminating dead code ..."
-	# Eliminate deadcode, compute liveness information
-	blocks = dead_code(blocks)
-	# print "Computing liveness information ..."
-	blocks = liveness(blocks)
-
 	# Register allocation
-	# print "Allocating registers ..."
 	allocate_registers(blocks) # Get coloring
 
 	# Generate assembly
-	# print "Generating assembly ..."
 	asm = gen_asm(blocks, coloring, spilled_registers)
 
 	# Write to output
-	# print "Writing assembly to output ..."
 	write_output(filename, asm)
 
 if __name__ == '__main__':

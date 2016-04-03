@@ -46,20 +46,22 @@ def tac_ast(ast):
 
 def tac_class(ast_class):
 	push_table()
+
 	for feature in ast_class.features:
 		tac_feature(ast_class.name, feature)
+
 	pop_table()
 
-# These aren't really used in the reference compiler
 def tac_feature(class_name, ast_feature): 
 	if ast_feature.kind == "method":
-		# push_table()
+		push_table()
+
 		assignee = ns()
 		tacs_append(TACLabel(class_name + "_" + ast_feature.name + "_" + nl()))
 		expr = tac_expression(ast_feature.expr)
-		tacs_append(TACAssign(assignee, expr))
-		tacs_append(TACReturn(assignee))
-		# pop_table()
+		tacs_append(TACReturn(expr))
+		
+		pop_table()
 
 	elif ast_feature.kind == "attribute_init":
 		pass
@@ -191,21 +193,27 @@ def tac_if(ast_if):
 
 
 def tac_while(ast_while):
-	loop_label = "while_pred_" + nl()
-	break_label = "while_end_" + nl()
+	start_label = "while_start_" + nl()
+	body_label = "while_body_" + nl()
+	exit_label = "while_exit_" + nl()
 
 	assignee = ns()
 
-	tacs_append(TACLabel(loop_label))
+	tacs_append(TACJmp(start_label))
+	tacs_append(TACLabel(start_label))
+
 	predicate = tac_expression(ast_while.predicate)
 	predicate_not = ns()
 	tacs_append(TACNot(predicate_not, predicate))
 
-	# while(predicate)
-	tacs_append(TACBt(predicate_not, break_label))
+	tacs_append(TACBt(predicate_not, exit_label))
+	tacs_append(TACBt(predicate, body_label))
+
+	tacs_append(TACLabel(body_label))
 	body = tac_expression(ast_while.body)
-	tacs_append(TACJmp(loop_label))
-	tacs_append(TACLabel(break_label))
+	tacs_append(TACJmp(start_label))
+
+	tacs_append(TACLabel(exit_label))
 
 	tacs_append(TACDefault(assignee, "Object"))
 
@@ -215,16 +223,15 @@ def tac_block(ast_block):
 	assignee = ns()
 	for expr in ast_block.body:
 		expr = tac_expression(expr)
-		tacs_append(TACAssign(assignee, expr))
+	tacs_append(TACAssign(assignee, expr))
 	return assignee
 
 def tac_binding(ast_binding):
+	assignee = get_symbol(ast_binding.var)
 	if ast_binding.kind == "let_binding_init":
-		assignee = get_symbol(ast_binding.var)
 		expr = tac_expression(ast_binding.expr)
 		tacs_append(TACAssign(assignee, expr))
 	if ast_binding.kind == "let_binding_no_init":
-		assignee = get_symbol(ast_binding.var)
 		typ = ast_binding.typ
 		tacs_append(TACDefault(assignee, typ))
 
@@ -232,10 +239,13 @@ def tac_let(ast_let):
 	assignee = ns()
 
 	push_table()
+
 	for binding in ast_let.bindings:
 		tac_binding(binding)
+		
 	expr = tac_expression(ast_let.expr)
 	tacs_append(TACAssign(assignee, expr))
+	
 	pop_table()
 
 	return assignee

@@ -250,7 +250,7 @@ def gen_asm(blocks, coloring, spilled_registers):
 				asm += [label(str(inst.label))]
 
 			elif isinstance(inst, TACBt):
-				predicate = get_color(inst.val, coloring)
+				predicate = get_color(inst.op1, coloring)
 
 				asm += [comment('branch')] # debugging label
 				asm += [cmpl(predicate, '$1')]
@@ -258,18 +258,18 @@ def gen_asm(blocks, coloring, spilled_registers):
 
 			elif isinstance(inst, TACStore):
 				asm += [comment('store')] # debugging label
-				register = get_color(inst.val, coloring)
-				stack_address = spilled_register_address[inst.val]
+				register = get_color(inst.op1, coloring)
+				stack_address = spilled_register_address[inst.op1]
 				asm += [movl(register, stack_address)]
 
 			elif isinstance(inst, TACLoad):
 				asm += [comment('load')] # debugging label
-				register = get_color(inst.val, coloring)
-				stack_address = spilled_register_address[inst.val]
+				register = get_color(inst.assignee, coloring)
+				stack_address = spilled_register_address[inst.assignee]
 				asm += [movl(stack_address, register)]
 
 			elif isinstance(inst, TACReturn):
-				value = get_color(inst.val, coloring)
+				value = get_color(inst.op1, coloring)
 				asm += [movl(value, '%eax')]
 				asm += [leave()]
 				asm += [ret()]

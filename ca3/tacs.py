@@ -206,31 +206,31 @@ class TACLabel(object):
 		return 'label ' + str(self.label)
 
 class TACReturn(object):
-	def __init__(self, val):
-		self.val = val
+	def __init__(self, op1):
+		self.op1 = op1
 
 	def __str__(self):
-		return 'return ' + str(self.val)
+		return 'return ' + str(self.op1)
 
 class TACBt(object):
-	def __init__(self, val, label):
-		self.val = val
+	def __init__(self, op1, label):
+		self.op1 = op1
 		self.label = label
 
 	def __str__(self):
-		return 'bt ' + str(self.val) + ' ' + str(self.label)
+		return 'bt ' + str(self.op1) + ' ' + str(self.label)
 
 class TACStore(object):
-	def __init__(self, val):
-		self.val = val
+	def __init__(self, op1):
+		self.op1 = op1
 
 	def __str__(self):
-		return 'store ' + str(self.val)
+		return 'store ' + str(self.op1)
 
 class TACLoad(object):
-	def __init__(self, val, offset):
+	def __init__(self, assignee, val):
+		self.assignee = assignee
 		self.val = val
-		self.offset = offset
 
 	def __str__(self):
-		return str(self.val) + ' <- ' + 'load ' + str(self.offset)
+		return str(self.assignee) + ' <- ' + 'load ' + str(self.val)

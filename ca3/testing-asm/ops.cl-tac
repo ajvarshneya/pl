@@ -1,0 +1,18 @@
+comment start
+label Main_main_0
+t$1 <- call in_int
+t$2 <- call in_int
+t$3 <- call in_int
+t$4 <- call in_int
+t$5 <- call in_int
+t$10 <- t$1
+t$11 <- t$2
+t$8 <- + t$10 t$11
+t$12 <- t$1
+t$13 <- t$2
+t$9 <- - t$12 t$13
+t$6 <- * t$8 t$9
+t$7 <- t$4
+t$5 <- / t$6 t$7
+t$0 <- t$5
+return t$0
