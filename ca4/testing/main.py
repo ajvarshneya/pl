@@ -6,200 +6,7 @@ from tacs_gen import *
 from basic_blocks import *
 from asm import *
 from asm_gen import *
-
-NUM_COLORS = 14 # Number of registers
-spilled_registers = []
-coloring = {}
-
-def is_assignee(inst, register):
-	if hasattr(inst, 'assignee'):
-		if inst.assignee == register:
-			return True
-	return False
-
-def is_operand(inst, register):
-	if hasattr(inst, 'op1'):
-		if inst.op1 == register:
-			return True
-	if hasattr(inst, 'op2'):
-		if inst.op2 == register:
-			return True
-	return False
-
-def color(registers_to_color, graph):
-	global coloring
-
-	# Colors that can be used
-	colors = [0]
-
-	while registers_to_color:
-		register = registers_to_color.pop()
-
-		# Get the best color for this register
-		best_color = -1
-		for color in colors:
-			is_valid_color = True
-			adj_nodes = graph[register]
-
-			# Does an adjacent node have this color?
-			for adj_node in adj_nodes:
-				if adj_node in coloring and coloring[adj_node] == color:
-					is_valid_color = False
-
-			# No adjacent nodes have the color
-			if is_valid_color:
-				best_color = color
-				break
-
-		# Couldn't find a best color, make one up
-		if best_color == -1:
-			colors.append(len(colors))
-			best_color = colors[-1]
-
-		# Set color of the register
-		coloring[register] = best_color
-
-def spill(blocks, register):
-	# Add register to our global list of spilled registers
-	global spilled_registers
-	spilled_registers += [register]
-
-	for block in blocks:
-		# Build new list of instructions with loads/stores added as necessary
-		new_insts = []
-		for inst in block.insts:
-			# Add load above current instruction where register is an operand
-			if is_operand(inst, register):
-				new_insts += [TACLoad(register, len(spilled_registers))]
-
-			# Add the current instruciton
-			new_insts += [inst]
-
-			# Add a store below current instruction where register is the assignee
-			if is_assignee(inst, register):
-				new_insts += [TACStore(register)]
-
-		# Update block with new instructions
-		block.insts = new_insts
-
-
-def spill_and_fill(blocks, original_live_ranges, original_graph):
-	global NUM_COLORS
-
-	# Operate on copies of graph, live_ranges
-	graph = copy(original_graph)
-	live_ranges = copy(original_live_ranges)
-
-	registers_to_color = []
-	registers_to_spill = []
-
-	# Construct a list of nodes to color and a list of nodes to spill
-	while graph:
-		# Find a node with fewer than k edges to color
-		node_to_remove = None
-		for node in graph.keys():
-			if len(graph[node]) < NUM_COLORS:
-				node_to_remove = node
-				break;
-
-		if node_to_remove:
-			# Add to coloring list
-			registers_to_color += [node_to_remove]
-		else:
-			# Can't find a node to color, spill the one with longest live range
-			node_to_remove = max(live_ranges, key=live_ranges.get)
-			registers_to_spill += [node_to_remove]
-
-		# Remove node from graph, continue
-		adj_nodes = graph.pop(node_to_remove)
-		for adj_node in adj_nodes:
-			graph[adj_node].discard(node_to_remove)
-
-		# Remove node from live_ranges
-		if node_to_remove in live_ranges:
-			live_ranges.pop(node_to_remove)
-
-	# Spill registers that we couldn't color at each step of reduction
-	print len(registers_to_spill)
-	for register in registers_to_spill:
-		spill(blocks, register)
-
-	# If we spilled, don't color, otherwise color
-	if registers_to_spill:
-		return False
-	else:
-		color(registers_to_color, original_graph)
-		return True
-
-# Computes mapping between virtual registers and physical registers, using stack as needed
-def allocate_registers(blocks):
-	done = False
-	while not done:
-		blocks = liveness(blocks)
-		live_ranges = get_live_ranges(blocks) # Generate live ranges of virtual registers
-		graph = get_graph(blocks) # Generate register interference graph
-		# compute_edges(graph)
-		done = spill_and_fill(blocks, live_ranges, graph)
-
-def compute_edges(graph):
-	num = 0
-	for k in graph:
-		for v in graph[k]:
-			num += 1
-	print num
-
-# Computes register interference graph
-def get_graph(blocks):
-	graph = {}
-	for block in blocks:
-		# Iterate through live sets in each block
-		for inst, live_set in zip(block.insts, block.live_sets):
-			
-			assignee = None
-			if hasattr(inst, 'assignee'):
-				assignee = inst.assignee
-
-				if assignee not in graph:
-					graph[assignee] = set()
-
-			live_list = list(live_set)
-
-			# Add an edge between every two elements in the live sets in the graph (excluding self edges)
-			for i in range(0, len(live_list)):
-				reg1 = live_list[i]
-
-				if reg1 not in graph:
-					graph[reg1] = set()
-
-				for j in range(i+1, len(live_list)):
-					reg2 = live_list[j]
-
-					if reg2 not in graph:
-						graph[reg2] = set()
-
-					graph[reg1].add(reg2)
-					graph[reg2].add(reg1)
-
-				if assignee != None and reg1 != assignee:
-					graph[assignee].add(reg1)
-					graph[reg1].add(assignee)
-
-	return graph
-
-# Approximates live ranges in blocks
-def get_live_ranges(blocks):
-	live_ranges = {}
-	for block in blocks:
-		for register in block.live_ranges:
-
-			# Add register to dictionary if not yet encountered
-			if register not in live_ranges:
-				live_ranges[register] = 0
-
-			# Add to already computed live range approximation
-			live_ranges[register] += block.live_ranges[register]
-
-	return live_ranges
+from allocate_registers import *
 
 # Reads in raw input
 def read_input(filename):
@@ -211,37 +18,200 @@ def read_input(filename):
     return lines
 
 # Writes to output
-def write_output(filename, asm):
+def write_output(filename, output):
 	f = open(filename[:-8] + ".s", 'w')
-	f.write(".section\t.rodata\n")
-	f.write(".int_fmt_string:\n")
-	f.write("\t.string \"%d\"\n")
-	f.write("\t.text\n")
-	f.write(".global\tmain\n")
-	f.write("\t.type\tmain, @function\n")
-	f.write("main:\n")
-	for a in asm:
-		f.write(str(a) + "\n")
+	f.write(output)
 	f.close()
+
+type_tags = {}
+
+def asm_vtables_gen(i_map):
+	vtables = "###############################################################################\n"
+	vtables += "#;;;;;;;;;;;;;;;;;;;;;;;;;; VIRTUAL METHOD TABLES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
+	vtables += "###############################################################################\n"
+
+	for cool_type in sorted(i_map):
+		# Label
+		vtables += ".globl " + cool_type + "..vtable\n"
+		vtables += cool_type + "..vtable:\n"
+		vtables += "\t\t\t# Virtual function table for " + cool_type + "\n"
+
+		# Type name
+		vtables += "\t\t\t.quad " + cool_type + "..string\n"
+
+		# Constructor label
+		vtables += "\t\t\t.quad " + cool_type + "..new\n"
+		for method in i_map[cool_type]:
+			# Method labels
+			vtables += "\t\t\t.quad " + method.associated_class + "." + method.name + "\n"
+	return vtables
+
+def asm_constructors_gen(c_map):
+	constructors = "\n###############################################################################\n"
+	constructors += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CONSTRUCTORS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
+	constructors += "###############################################################################\n"
+
+	for cool_type in sorted(c_map):
+		# Label
+		constructors += ".globl " + cool_type + "..new\n"
+		constructors += cool_type + "..new:\n"
+		constructors += str(comment("Constructor for " + cool_type))
+
+		# Handle calling convention
+		constructors += str(pushq("%rbp"))
+		constructors += str(movq("%rsp", "%rbp")) + "\n"
+
+		object_type_tag = "$" + str(type_tags[cool_type])
+		object_size = "$" + str(3 + len(c_map[cool_type]))
+		object_vtable_ptr = "$" + cool_type + "..vtable"
+
+		# Allocate space on the heap (calloc)
+		constructors += str(comment("Allocate heap space, get self ptr"))
+		constructors += str(movq(object_size, "%rdi")) # Num fields -> %rdi
+		constructors += str(movq("$8", "%rsi")) # Size (always 8) -> %rsi
+		constructors += str(call("calloc")) # Allocate space, ptr -> %rax
+
+		# Set self pointer
+		constructors += str(movq("%rax", "%rbx")) + "\n"
+
+		constructors += str(comment("Store type tag, size, vtable ptr"))
+		# Store type tag
+		constructors += str(movq(object_type_tag, "%rax")) 
+		constructors += str(movq("%rax", "0(%rbx)"))
+		# Store object size
+		constructors += str(movq(object_size, "%rax")) 
+		constructors += str(movq("%rax", "8(%rbx)"))
+		# Store vtable ptr
+		constructors += str(movq(object_vtable_ptr, "%rax")) 
+		constructors += str(movq("%rax", "16(%rbx)"))
+
+		constructors += str(movq("%rbx", "%rax"))
+
+		constructors += str(leave())
+		constructors += str(ret()) + "\n"
+
+	return constructors
+
+def asm_method_definitions_gen(i_map):
+	method_definitions = "\n###############################################################################\n"
+	method_definitions += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;; METHOD DEFINITIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
+	method_definitions += "###############################################################################\n"	
+
+	for cool_type in sorted(i_map):
+		for method in i_map[cool_type]:
+			if method.associated_class == cool_type:
+				# Method labels
+				method_definitions += ".globl " + method.associated_class + "." + method.name + "\n"
+				method_definitions += method.associated_class + "." + method.name + ":\n"
+				method_definitions += "\t\t\t# Method definition for " + method.associated_class + "." + method.name + "\n"
+				method_definitions += str(ret())
+	return method_definitions
+
+def asm_string_constants_gen(type_names, string_list):
+	strings = "\n###############################################################################\n"
+	strings += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;; STRING CONSTANTS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
+	strings += "###############################################################################\n"	
+
+	# Type names
+	for cool_type in type_names:
+		strings += ".globl " + cool_type + "..string\n"
+		strings += cool_type + "..string:\n"
+		strings += "\t\t\t.string \"" + cool_type + "\"\n\n"
+
+	# Handle empty string explicitly
+	strings += ".global empty.string\n"
+	strings += "empty.string:\n"
+	strings += "\t\t\t.string \"\" \n\n"
+	# TODO: all other string constants
+
+	return strings
+
+def asm_comparison_handlers_gen():
+	comparison_handlers = "\n###############################################################################\n"
+	comparison_handlers += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;; COMPARISON HANDLERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
+	comparison_handlers += "###############################################################################\n"	
+
+	return comparison_handlers
+
+def asm_start():
+	start_definition = "\n###############################################################################\n"
+	start_definition += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; START ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
+	start_definition += "###############################################################################\n"	
+
+	start_definition += ".globl start\n"
+	start_definition += "start:\n"
+	start_definition += str(comment("Program begins here"))
+	start_definition += "\t\t\t.globl main\n"
+	start_definition += "\t\t\t.type main, @function\n"
+	start_definition += "main:\n"
+	start_definition += str(call("Main..new"))
+	start_definition += str(call("Main.main"))
+	start_definition += str(call("exit"))
+
+	return start_definition
+
+def get_type_tags(c_map):
+	global type_tags
+	tag_idx = 0
+
+	basic_types = ["Bool", "Int", "IO", "Object", "String", "Main"]
+	custom_types = [x for x in c_map.keys() if x not in basic_types]
+
+	for cool_type in basic_types + custom_types:
+		type_tags[cool_type] = tag_idx
+		tag_idx += 1
 
 def main():
 	# Deserialize AST
 	filename = sys.argv[1] 	# .cl-type file
-	raw_ast = read_input(filename) 	# Read AST from file
-	ast = generate_ast(raw_ast) # Generate AST object
-	tacs = tac_ast(ast) # Generate TAC instructions from AST object
-	blocks = make_bbs(tacs) # Generate basic blocks from TAC instructions
+	raw_aast = read_input(filename) # Read AST from file
+	iterator = iter(raw_aast) # Get iterator to traverse raw annotated AST
 
-	blocks = liveness(blocks)
+	# Deserialize input into maps, ast
+	c_map = class_map_gen(iterator) # Generate class map dictionary
+	i_map = implementation_map_gen(iterator) # Generate implementation map dictionary
+	p_map = parent_map_gen(iterator) # Generate parent map dictionary
+	ast = ast_gen(iterator) # Generate AST object
 
-	# Register allocation
-	allocate_registers(blocks) # Get coloring
+	# Generate a list of type tags
+	get_type_tags(c_map)
 
-	# Generate assembly
-	asm = gen_asm(blocks, coloring, spilled_registers)
+	# Generate code to emit
+	vtables = asm_vtables_gen(i_map)
+	constructors = asm_constructors_gen(c_map)
+	method_definitions = asm_method_definitions_gen(i_map)
 
-	# Write to output
-	write_output(filename, asm)
+	type_names = sorted(c_map.keys())
+	strings = []
+
+	string_constants = asm_string_constants_gen(type_names, strings)
+	comparison_handlers = asm_comparison_handlers_gen()
+	start = asm_start()
+
+	# Build output string
+	output = vtables
+	output += constructors
+	output += method_definitions
+	output += string_constants
+	output += comparison_handlers
+	output += start
+
+	write_output(filename, output)
+
+	tacs = tacs_gen(ast) # Generate TAC instructions from AST object
+	for tac in tacs:
+		print tac
+	# blocks = bbs_gen(tacs) # Generate basic blocks from TAC instructions
+	# blocks = liveness(blocks) # Generate liveness information
+
+	# # Register allocation
+	# allocate_registers(blocks) # Get coloring
+
+	# # Generate assembly
+	# asm = asm_gen(blocks, coloring, spilled_registers)
+
+	# # Write to output
+	# write_output(filename, asm)
 
 if __name__ == '__main__':
 	main()

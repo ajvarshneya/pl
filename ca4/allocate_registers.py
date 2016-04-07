@@ -2,12 +2,15 @@ import sys
 from tacs import *
 from tacs_gen import *
 from basic_blocks import *
-from asm import *
-from asm_gen import *
 
 NUM_COLORS = 14 # Number of registers
 spilled_registers = []
 coloring = {}
+
+def get_color(register):
+	global coloring
+	colors = ['%r8d', '%r9d', '%r10d', '%r11d', '%r12d', '%r13d', '%r14d', '%r15d', '%eax', '%ebx', '%ecx', '%edx', '%esi', '%edi']
+	return str(colors[int(coloring[register])])
 
 def is_assignee(inst, register):
 	if hasattr(inst, 'assignee'):

@@ -2,7 +2,7 @@ from copy import copy
 from tacs import *
 
 # Generates list of basic blocks given list of TAC objects
-def make_bbs(insts):
+def bbs_gen(insts):
 	blocks = []
 	block_insts = []
 
@@ -74,72 +74,6 @@ def make_bbs(insts):
 # 			removal = kill_dead_code(block) or removal
 # 	return blocks
 
-# # Percolate live_out set up the block
-# def percolate(block):
-
-# 	change = False
-
-# 	live_sets = []
-
-# 	# Copy so that we don't overwrite live_out
-# 	live_set = copy(block.live_out)
-
-#  	for inst in reversed(block.insts):
-
-#  		# Remove assignee from live set
-#  		if hasattr(inst, 'assignee'):
-#  			live_set.discard(inst.assignee)
-
-#  		# Add operands to live set
-#  		if hasattr(inst, 'op1'):
-#  			live_set.add(inst.op1)
-
-#  		if hasattr(inst, 'op2'):
-#  			live_set.add(inst.op2)
-
-# 	 	# Add live set to list of live sets
-# 	 	live_sets.insert(0, copy(live_set))
-
-#  	if block.live_in != live_set:
-#  		change = True
-
-#  	# Copy liveness information
-# 	block.live_in = live_set
-#  	block.live_sets = live_sets
-
-#  	return change
-
-# # Refreshes the liveness sets of blocks by percolating changes
-# def liveness(blocks):
-
-# 	change = True # Whether we removed something on last iteration
-# 	while (change):
-# 		change = False
-
-# 		# Compute/propogate liveness set changes until no change
-# 		for block in blocks:
-# 			# Percolate the live_out changes
-# 			change = percolate(block) or change
-
-# 			# Compute a live range approximation
-# 			for live_set in block.live_sets:
-# 				for register in live_set:
-# 					if block.live_ranges.has_key(register):
-# 						block.live_ranges[register] += 1
-# 					else:
-# 						block.live_ranges[register] = 1
-
-# 		for block in blocks:
-# 			# live_out = live_in1 U live_in2 U ...
-# 			live_out = set()
-# 			for child in block.children:
-# 				live_out = live_out.union(child.live_in)
-
-# 			block.live_out = live_out
-
-# 	return blocks
-
-
 
 # Percolate live_out set up the block
 def percolate(block):
@@ -185,7 +119,7 @@ def liveness(blocks):
 
 		# Compute/propogate liveness set changes until no change
 		for block in blocks:
-			
+
 			block_change = percolate(block)
 			if block_change:
 				change = True
@@ -208,77 +142,6 @@ def liveness(blocks):
 			block.live_out = live_out
 
 	return blocks
-
-
-
-
-
-
-
-
-
-# # Refreshes the liveness sets of blocks by percolating changes
-# def liveness(blocks):
-
-# 	change = True # Whether we removed something on last iteration
-# 	while (change):
-# 		change = False
-
-# 		# Compute/propogate liveness set changes until no change
-# 		for block in blocks:
-# 			live_sets = []
-
-# 			# Copy so that we don't overwrite live_out
-# 			live_set = copy(block.live_out)
-
-# 		 	for inst in reversed(block.insts):
-
-# 		 		# Remove assignee from live set
-# 		 		if hasattr(inst, 'assignee'):
-# 		 			live_set.discard(inst.assignee)
-
-# 		 		# Add operands to live set
-# 		 		if hasattr(inst, 'op1'):
-# 		 			live_set.add(inst.op1)
-
-# 		 		if hasattr(inst, 'op2'):
-# 		 			live_set.add(inst.op2)
-
-# 			 	# Add live set to list of live sets
-# 			 	live_sets.insert(0, copy(live_set))
-
-# 		 	if block.live_in != live_set:
-# 		 		change = True
-
-# 		 	# Copy liveness information
-# 			block.live_in = live_set
-# 		 	block.live_sets = live_sets
-
-# 			# Compute a live range approximation
-# 			block.live_ranges = {}
-# 			for live_set in block.live_sets:
-# 				for register in live_set:
-# 					if block.live_ranges.has_key(register):
-# 						block.live_ranges[register] += 1
-# 					else:
-# 						block.live_ranges[register] = 1
-
-# 		for block in blocks:
-# 			# live_out = live_in1 U live_in2 U ...
-# 			live_out = set()
-# 			for child in block.children:
-# 				live_out = live_out.union(child.live_in)
-
-# 			block.live_out = live_out
-
-# 	return blocks
-
-
-
-
-
-
-
 
 # Generates list of TAC instruction objects given instructions
 def make_inst_list(tac):

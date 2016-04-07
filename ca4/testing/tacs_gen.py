@@ -39,7 +39,7 @@ def tacs_append(tac):
 	global tacs
 	tacs += [tac]
 
-def tac_ast(ast):
+def tacs_gen(ast):
 	for ast_class in ast.classes:
 		tac_class(ast_class)
 	return tacs
