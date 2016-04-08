@@ -486,11 +486,3 @@ class ASTInternal(ASTExpression):
         s += self.class_method + "\n"
         return s
 
-
-
-
-
-
-
-
-

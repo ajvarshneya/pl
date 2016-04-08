@@ -61,6 +61,9 @@ def asm_constructors_gen(c_map):
 		constructors += str(pushq("%rbp"))
 		constructors += str(movq("%rsp", "%rbp")) + "\n"
 
+		# Push callee saved registers
+		asm_push_callee()
+
 		object_type_tag = "$" + str(type_tags[cool_type])
 		object_size = "$" + str(3 + len(c_map[cool_type]))
 		object_vtable_ptr = "$" + cool_type + "..vtable"
@@ -87,12 +90,15 @@ def asm_constructors_gen(c_map):
 
 		constructors += str(movq("%rbx", "%rax"))
 
+		# Pop callee saved registers
+		asm_pop_callee()
+
 		constructors += str(leave())
 		constructors += str(ret()) + "\n"
 
 	return constructors
 
-def asm_method_definitions_gen(i_map):
+def asm_method_definitions_gen(i_map, asm):
 	method_definitions = "\n###############################################################################\n"
 	method_definitions += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;; METHOD DEFINITIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	method_definitions += "###############################################################################\n"	
@@ -104,7 +110,10 @@ def asm_method_definitions_gen(i_map):
 				method_definitions += ".globl " + method.associated_class + "." + method.name + "\n"
 				method_definitions += method.associated_class + "." + method.name + ":\n"
 				method_definitions += "\t\t\t# Method definition for " + method.associated_class + "." + method.name + "\n"
-				method_definitions += str(ret())
+				if cool_type == "Main" and method.name == "main":
+					method_definitions += asm
+				else:
+					method_definitions += str(ret())
 	return method_definitions
 
 def asm_string_constants_gen(type_names, string_list):
@@ -173,13 +182,27 @@ def main():
 	p_map = parent_map_gen(iterator) # Generate parent map dictionary
 	ast = ast_gen(iterator) # Generate AST object
 
+	tacs = tacs_gen(ast) # Generate TAC instructions from AST object
+		
+	blocks = bbs_gen(tacs) # Generate basic blocks from TAC instructions
+	blocks = liveness(blocks) # Generate liveness information
+
+	# Register allocation
+	allocate_registers(blocks) # Get coloring
+
+	# Generate assembly
+	asm_list = asm_gen(blocks, spilled_registers)
+	asm = ""
+	for inst in asm_list:
+		asm += str(inst)
+
 	# Generate a list of type tags
 	get_type_tags(c_map)
 
 	# Generate code to emit
 	vtables = asm_vtables_gen(i_map)
 	constructors = asm_constructors_gen(c_map)
-	method_definitions = asm_method_definitions_gen(i_map)
+	method_definitions = asm_method_definitions_gen(i_map, asm)
 
 	type_names = sorted(c_map.keys())
 	strings = []
@@ -196,22 +219,11 @@ def main():
 	output += comparison_handlers
 	output += start
 
-	write_output(filename, output)
-
-	tacs = tacs_gen(ast) # Generate TAC instructions from AST object
 	for tac in tacs:
 		print tac
-	# blocks = bbs_gen(tacs) # Generate basic blocks from TAC instructions
-	# blocks = liveness(blocks) # Generate liveness information
 
-	# # Register allocation
-	# allocate_registers(blocks) # Get coloring
-
-	# # Generate assembly
-	# asm = asm_gen(blocks, coloring, spilled_registers)
-
-	# # Write to output
-	# write_output(filename, asm)
+	# Write to output
+	write_output(filename, output)
 
 if __name__ == '__main__':
 	main()

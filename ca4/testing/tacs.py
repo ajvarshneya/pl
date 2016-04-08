@@ -233,4 +233,21 @@ class TACLoad(object):
 		self.val = val
 
 	def __str__(self):
-		return str(self.assignee) + ' <- ' + 'load ' + str(self.val)
+		return str(self.assignee) + ' <- load ' + str(self.val)
+
+class TACBox(object):
+	def __init__(self, assignee, op1, box_type):
+		self.assignee = assignee
+		self.op1 = op1
+		self.box_type = box_type
+
+	def __str__(self):
+		return str(self.assignee) + ' <- box ' + str(self.box_type) + " " + str(self.op1)
+
+class TACUnbox(object):
+	def __init__(self, assignee, op1):
+		self.assignee = assignee
+		self.op1 = op1
+
+	def __str__(self):
+		return str(self.assignee) + ' <- unbox ' + str(self.op1)

@@ -7,10 +7,15 @@ NUM_COLORS = 14 # Number of registers
 spilled_registers = []
 coloring = {}
 
-def get_color(register):
+def get_color(register, size=64):
 	global coloring
-	colors = ['%r8d', '%r9d', '%r10d', '%r11d', '%r12d', '%r13d', '%r14d', '%r15d', '%eax', '%ebx', '%ecx', '%edx', '%esi', '%edi']
-	return str(colors[int(coloring[register])])
+	colors32 = ['%r8d', '%r9d', '%r10d', '%r11d', '%r12d', '%r13d', '%r14d', '%r15d', '%eax', '%ebx', '%ecx', '%edx', '%esi', '%edi']
+	colors64 = ['%r8', '%r9', '%r10', '%r11', '%r12', '%r13', '%r14', '%r15', '%rax', '%rbx', '%rcx', '%rdx', '%rsi', '%rdi']
+	if size == 64:
+		return str(colors64[int(coloring[register])])
+	if size == 32:
+		return str(colors32[int(coloring[register])])
+	raise ValueError("Size is neither 32 nor 64.")
 
 def is_assignee(inst, register):
 	if hasattr(inst, 'assignee'):
@@ -121,7 +126,6 @@ def spill_and_fill(blocks, original_live_ranges, original_graph):
 			live_ranges.pop(node_to_remove)
 
 	# Spill registers that we couldn't color at each step of reduction
-	print len(registers_to_spill)
 	for register in registers_to_spill:
 		spill(blocks, register)
 

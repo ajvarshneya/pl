@@ -249,10 +249,11 @@ def tac_let(ast_let):
 	return assignee
 
 def tac_case_element(ast_case):
-	pass
+	raise NotImplemented("TODO CASE ELEMENT")
+
 
 def tac_case(ast_case):
-	pass
+	raise NotImplemented("TODO CASE")
 
 def tac_new(ast_new):
 	assignee = ns()
@@ -266,34 +267,71 @@ def tac_isvoid(ast_isvoid):
 	return assignee
 
 def tac_plus(ast_plus):
-	assignee = ns()
+	val1 = ns()
+	val2 = ns()
+	result = ns()
+	box = ns()
+	box_type = "Int"
+
 	e1 = tac_expression(ast_plus.e1)
 	e2 = tac_expression(ast_plus.e2)
-	tacs_append(TACPlus(assignee, e1, e2))
-	return assignee	
+
+	tacs_append(TACUnbox(val1, e1))
+	tacs_append(TACUnbox(val2, e2))
+	tacs_append(TACPlus(result, val1, val2))
+	tacs_append(TACBox(box, result, box_type))
+	return box
 
 def tac_minus(ast_minus):
-	assignee = ns()
+	val1 = ns()
+	val2 = ns()
+	result = ns()
+	box = ns()
+	box_type = "Int"
+
 	e1 = tac_expression(ast_minus.e1)
 	e2 = tac_expression(ast_minus.e2)
-	tacs_append(TACMinus(assignee, e1, e2))
-	return assignee
+
+	tacs_append(TACUnbox(val1, e1))
+	tacs_append(TACUnbox(val2, e2))
+	tacs_append(TACMinus(result, val1, val2))
+	tacs_append(TACBox(box, result, box_type))
+	return box
 
 def tac_multiply(ast_times):
-	assignee = ns()
+	val1 = ns()
+	val2 = ns()
+	result = ns()
+	box = ns()
+	box_type = "Int"
+
 	e1 = tac_expression(ast_times.e1)
 	e2 = tac_expression(ast_times.e2)
-	tacs_append(TACMultiply(assignee, e1, e2))
-	return assignee
+
+	tacs_append(TACUnbox(val1, e1))
+	tacs_append(TACUnbox(val2, e2))
+	tacs_append(TACMultiply(result, val1, val2))
+	tacs_append(TACBox(box, result, box_type))
+	return box
 
 def tac_divide(ast_divide):
-	assignee = ns()
+	val1 = ns()
+	val2 = ns()
+	result = ns()
+	box = ns()
+	box_type = "Int"
+
 	e1 = tac_expression(ast_divide.e1)
 	e2 = tac_expression(ast_divide.e2)
-	tacs_append(TACDivide(assignee, e1, e2))
-	return assignee
+
+	tacs_append(TACUnbox(val1, e1))
+	tacs_append(TACUnbox(val2, e2))
+	tacs_append(TACDivide(result, val1, val2))
+	tacs_append(TACBox(box, result, box_type))
+	return box
 
 def tac_lt(ast_lt):
+	raise NotImplemented("TODO LT")
 	assignee = ns()
 	e1 = tac_expression(ast_lt.e1)
 	e2 = tac_expression(ast_lt.e2)
@@ -301,6 +339,7 @@ def tac_lt(ast_lt):
 	return assignee
 
 def tac_le(ast_le):
+	raise NotImplemented("TODO LE")
 	assignee = ns()
 	e1 = tac_expression(ast_le.e1)
 	e2 = tac_expression(ast_le.e2)
@@ -308,6 +347,7 @@ def tac_le(ast_le):
 	return assignee
 
 def tac_eq(ast_eq):
+	raise NotImplemented("TODO EQ")
 	assignee = ns()
 	e1 = tac_expression(ast_eq.e1)
 	e2 = tac_expression(ast_eq.e2)
@@ -315,16 +355,30 @@ def tac_eq(ast_eq):
 	return assignee
 
 def tac_not(ast_not):
-	assignee = ns()
+	val = ns()
+	result = ns()
+	box = ns()
+	box_type = "Bool"
+
 	expr = tac_expression(ast_not.expr)
-	tacs_append(TACNot(assignee, expr))
-	return assignee
+
+	tacs_append(TACUnbox(val, expr))
+	tacs_append(TACNot(result, val))
+	tacs_append(TACBox(box, result, box_type))
+	return box
 
 def tac_negate(ast_negate):
-	assignee = ns()
+	val = ns()
+	result = ns()
+	box = ns()
+	box_type = "Int"
+
 	expr = tac_expression(ast_negate.expr)
-	tacs_append(TACNeg(assignee, expr))
-	return assignee
+
+	tacs_append(TACUnbox(val, expr))
+	tacs_append(TACNeg(result, val))
+	tacs_append(TACBox(box, result, box_type))
+	return box
 
 def tac_int(ast_integer):
 	assignee = ns()

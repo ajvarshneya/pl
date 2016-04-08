@@ -122,15 +122,6 @@ class jnz(object):
 		s = "\t\t\tjnz " + str(self.label) + "\n"
 		return s
 
-# ret
-class ret(object):
-	def __init__(self):
-		pass
-
-	def __str__(self):
-		s = "\t\t\treturn" + "\n"
-		return s
-
 # call
 class call(object):
 	def __init__(self, label):
