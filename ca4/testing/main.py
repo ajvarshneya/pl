@@ -52,6 +52,9 @@ def asm_constructors_gen(c_map):
 	constructors += "###############################################################################\n"
 
 	for cool_type in sorted(c_map):
+		# New scope
+		push_table()
+
 		# Label
 		constructors += ".globl " + cool_type + "..new\n"
 		constructors += cool_type + "..new:\n"
@@ -62,7 +65,10 @@ def asm_constructors_gen(c_map):
 		constructors += str(movq("%rsp", "%rbp")) + "\n"
 
 		# Push callee saved registers
-		asm_push_callee()
+		asm_list = []
+		asm_push_callee(asm_list)
+		for asm in asm_list:
+			constructors += str(asm)
 
 		object_type_tag = "$" + str(type_tags[cool_type])
 		object_size = "$" + str(3 + len(c_map[cool_type]))
@@ -90,11 +96,50 @@ def asm_constructors_gen(c_map):
 
 		constructors += str(movq("%rbx", "%rax"))
 
+		constructors += "\n"
+
+		# TAC Generation for attributes
+		tac = []
+
+		tac += [TACLabel(cool_type + "_attributes")]
+
+		# Generate TAC to initialize the attributes
+		tac += [TACComment("Attribute initializations for " + cool_type)]
+		for attribute in c_map[cool_type]:
+			assignee = get_symbol(attribute.name)
+			tac += [TACDefault(assignee, attribute.typ)]
+
+		# Generate TAC to assign attributes with initialization
+		for attribute in c_map[cool_type]:
+			if attribute.kind == "attribute_init":
+				tac += tac_attribute_init(cool_type, attribute)
+
+		blocks = bbs_gen(tac) # Generate basic blocks from TAC instructions
+		blocks = liveness(blocks) # Generate liveness information
+		allocate_registers(blocks) # Get coloring
+
+		# Generate assembly
+		asm_list = asm_gen(blocks, spilled_registers)
+		for inst in asm_list:
+			constructors += str(inst)
+
+		# Reset globals
+		global spilled_register_address
+		spilled_registers_address = {}
+
+		constructors += "\n"
+
 		# Pop callee saved registers
-		asm_pop_callee()
+		asm_list = []
+		asm_pop_callee(asm_list)
+		for asm in asm_list:
+			constructors += str(asm)
 
 		constructors += str(leave())
 		constructors += str(ret()) + "\n"
+
+		# End scope
+		pop_table()
 
 	return constructors
 
@@ -182,12 +227,20 @@ def main():
 	p_map = parent_map_gen(iterator) # Generate parent map dictionary
 	ast = ast_gen(iterator) # Generate AST object
 
-	tacs = tacs_gen(ast) # Generate TAC instructions from AST object
-		
-	blocks = bbs_gen(tacs) # Generate basic blocks from TAC instructions
-	blocks = liveness(blocks) # Generate liveness information
+	# Find main method
+	main_class_methods = i_map["Main"]
+	main_method = None
+	for method in main_class_methods:
+		if method.name == "main":
+			main_method = method
 
-	# Register allocation
+	if main_method == None:
+		raise StandardError("Main not found.")
+
+	tac = tac_method("Main", main_method) # Generate TAC instructions from AST object	
+
+	blocks = bbs_gen(tac) # Generate basic blocks from TAC instructions
+	blocks = liveness(blocks) # Generate liveness information
 	allocate_registers(blocks) # Get coloring
 
 	# Generate assembly
@@ -219,8 +272,8 @@ def main():
 	output += comparison_handlers
 	output += start
 
-	for tac in tacs:
-		print tac
+	# for tac in tacs:
+	# 	print tac
 
 	# Write to output
 	write_output(filename, output)

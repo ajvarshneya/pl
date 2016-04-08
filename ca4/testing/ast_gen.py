@@ -29,9 +29,9 @@ def class_map_gen(iterator):
 
 		class_map[class_name] = attributes
 
-	class_map["Int"] = [ASTFeature("attribute_init", "x", "0", [], "raw.Int", "0", "0")]
-	class_map["Bool"] = [ASTFeature("attribute_init", "x", "0", [], "raw.Int", "0", "0")]
-	class_map["String"] = [ASTFeature("attribute_init", "s", "0", [], "raw.String", "0", "")]
+	class_map["Int"] = [ASTFeature("attribute_no_init", "x", "0", [], "Int", "0", "0")]
+	class_map["Bool"] = [ASTFeature("attribute_no_init", "x", "0", [], "Int", "0", "0")]
+	class_map["String"] = [ASTFeature("attribute_no_init", "s", "0", [], "String", "0", "")]
 
 	return class_map
 

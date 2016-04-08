@@ -67,6 +67,11 @@ Bool..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
+			# Push callee saved registers
+			pushq %r15
+			pushq %r14
+			pushq %r13
+			pushq %r12
 			# Allocate heap space, get self ptr
 			movq $4, %rdi
 			movq $8, %rsi
@@ -81,6 +86,34 @@ Bool..new:
 			movq $Bool..vtable, %rax
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
+
+Bool_attributes:
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r8
+
+			# Pop callee saved registers
+			popq %r12
+			popq %r13
+			popq %r14
+			popq %r15
 			leave
 			ret
 
@@ -90,6 +123,11 @@ IO..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
+			# Push callee saved registers
+			pushq %r15
+			pushq %r14
+			pushq %r13
+			pushq %r12
 			# Allocate heap space, get self ptr
 			movq $3, %rdi
 			movq $8, %rsi
@@ -104,6 +142,14 @@ IO..new:
 			movq $IO..vtable, %rax
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
+
+IO_attributes:
+
+			# Pop callee saved registers
+			popq %r12
+			popq %r13
+			popq %r14
+			popq %r15
 			leave
 			ret
 
@@ -113,6 +159,11 @@ Int..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
+			# Push callee saved registers
+			pushq %r15
+			pushq %r14
+			pushq %r13
+			pushq %r12
 			# Allocate heap space, get self ptr
 			movq $4, %rdi
 			movq $8, %rsi
@@ -127,6 +178,34 @@ Int..new:
 			movq $Int..vtable, %rax
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
+
+Int_attributes:
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r8
+
+			# Pop callee saved registers
+			popq %r12
+			popq %r13
+			popq %r14
+			popq %r15
 			leave
 			ret
 
@@ -136,6 +215,11 @@ Main..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
+			# Push callee saved registers
+			pushq %r15
+			pushq %r14
+			pushq %r13
+			pushq %r12
 			# Allocate heap space, get self ptr
 			movq $3, %rdi
 			movq $8, %rsi
@@ -150,6 +234,14 @@ Main..new:
 			movq $Main..vtable, %rax
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
+
+Main_attributes:
+
+			# Pop callee saved registers
+			popq %r12
+			popq %r13
+			popq %r14
+			popq %r15
 			leave
 			ret
 
@@ -159,6 +251,11 @@ Object..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
+			# Push callee saved registers
+			pushq %r15
+			pushq %r14
+			pushq %r13
+			pushq %r12
 			# Allocate heap space, get self ptr
 			movq $3, %rdi
 			movq $8, %rsi
@@ -173,6 +270,14 @@ Object..new:
 			movq $Object..vtable, %rax
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
+
+Object_attributes:
+
+			# Pop callee saved registers
+			popq %r12
+			popq %r13
+			popq %r14
+			popq %r15
 			leave
 			ret
 
@@ -182,6 +287,11 @@ String..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
+			# Push callee saved registers
+			pushq %r15
+			pushq %r14
+			pushq %r13
+			pushq %r12
 			# Allocate heap space, get self ptr
 			movq $4, %rdi
 			movq $8, %rsi
@@ -196,6 +306,34 @@ String..new:
 			movq $String..vtable, %rax
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
+
+String_attributes:
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call String..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r8
+
+			# Pop callee saved registers
+			popq %r12
+			popq %r13
+			popq %r14
+			popq %r15
 			leave
 			ret
 
@@ -222,33 +360,7 @@ IO.out_string:
 .globl Main.main
 Main.main:
 			# Method definition for Main.main
-			pushq %rbp
-			movq %rsp, %rbp
 Main_main_0:
-			# Default Int
-			# Push caller saved registers
-			pushq %rcx
-			pushq %rdx
-			pushq %rsi
-			pushq %rdi
-			pushq %r8
-			pushq %r9
-			pushq %r10
-			pushq %r11
-			call Int..new
-			# Pop caller saved registers
-			popq %r11
-			popq %r10
-			popq %r9
-			popq %r8
-			popq %rdi
-			popq %rsi
-			popq %rdx
-			popq %rcx
-			movq %rax, %r11
-			# Move value into box, save object pointer
-			movl $0, 24(%r11)
-			# Default Int
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -269,9 +381,50 @@ Main_main_0:
 			popq %rdx
 			popq %rcx
 			movq %rax, %r12
-			# Move value into box, save object pointer
-			movl $0, 24(%r12)
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r13
 			# Initialize integer, 2
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r9
+			# Move value into box, save object pointer
+			movl $2, 24(%r9)
+			# Initialize integer, 3
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -293,34 +446,11 @@ Main_main_0:
 			popq %rcx
 			movq %rax, %r8
 			# Move value into box, save object pointer
-			movl $2, 24(%r8)
-			# Initialize integer, 3
-			# Push caller saved registers
-			pushq %rcx
-			pushq %rdx
-			pushq %rsi
-			pushq %rdi
-			pushq %r8
-			pushq %r9
-			pushq %r10
-			pushq %r11
-			call Int..new
-			# Pop caller saved registers
-			popq %r11
-			popq %r10
-			popq %r9
-			popq %r8
-			popq %rdi
-			popq %rsi
-			popq %rdx
-			popq %rcx
-			movq %rax, %r11
-			# Move value into box, save object pointer
-			movl $3, 24(%r11)
+			movl $3, 24(%r8)
 			# Dereference the box
-			movq 24(%r8), %r10
+			movq 24(%r9), %r10
 			# Dereference the box
-			movq 24(%r11), %r9
+			movq 24(%r8), %r9
 			# multiplication
 			movl %r10d, %r8d
 			imull %r9d, %r8d
@@ -366,9 +496,9 @@ Main_main_0:
 			popq %rsi
 			popq %rdx
 			popq %rcx
-			movq %rax, %r8
+			movq %rax, %r10
 			# Move value into box, save object pointer
-			movl $4, 24(%r8)
+			movl $4, 24(%r10)
 			# Initialize integer, 2
 			# Push caller saved registers
 			pushq %rcx
@@ -389,20 +519,20 @@ Main_main_0:
 			popq %rsi
 			popq %rdx
 			popq %rcx
-			movq %rax, %r9
+			movq %rax, %r8
 			# Move value into box, save object pointer
-			movl $2, 24(%r9)
+			movl $2, 24(%r8)
+			# Dereference the box
+			movq 24(%r10), %r9
 			# Dereference the box
 			movq 24(%r8), %r10
-			# Dereference the box
-			movq 24(%r9), %r8
 			# division
 			subq $8, %rsp
 			pushq %rdx
 			pushq %rax
 			pushq %rcx
-			movl %r8d, 24(%rsp)
-			movl %r10d, %eax
+			movl %r10d, 24(%rsp)
+			movl %r9d, %eax
 			cltd
 			movl 24(%rsp), %ecx
 			idivl %ecx
@@ -410,7 +540,7 @@ Main_main_0:
 			popq %rcx
 			popq %rax
 			popq %rdx
-			movl 4(%rsp), %r9d
+			movl 4(%rsp), %r8d
 			addq $8, %rsp
 			# Push caller saved registers
 			pushq %rcx
@@ -432,8 +562,8 @@ Main_main_0:
 			popq %rdx
 			popq %rcx
 			# Move value into box, save object pointer
-			movl %r9d, 24(%rax)
-			movq %rax, %r13
+			movl %r8d, 24(%rax)
+			movq %rax, %r9
 			# Initialize integer, 123
 			# Push caller saved registers
 			pushq %rcx
@@ -458,7 +588,7 @@ Main_main_0:
 			# Move value into box, save object pointer
 			movl $123, 24(%r10)
 			# Dereference the box
-			movq 24(%r13), %r8
+			movq 24(%r9), %r8
 			# Dereference the box
 			movq 24(%r10), %r9
 			# multiplication
@@ -506,19 +636,19 @@ Main_main_0:
 			popq %rsi
 			popq %rdx
 			popq %rcx
-			movq %rax, %r9
+			movq %rax, %r12
 			# Move value into box, save object pointer
-			movl $8, 24(%r9)
+			movl $8, 24(%r12)
 			# Dereference the box
 			movq 24(%r8), %r10
 			# Dereference the box
-			movq 24(%r9), %r8
+			movq 24(%r12), %r9
 			# division
 			subq $8, %rsp
 			pushq %rdx
 			pushq %rax
 			pushq %rcx
-			movl %r8d, 24(%rsp)
+			movl %r9d, 24(%rsp)
 			movl %r10d, %eax
 			cltd
 			movl 24(%rsp), %ecx
@@ -527,37 +657,8 @@ Main_main_0:
 			popq %rcx
 			popq %rax
 			popq %rdx
-			movl 4(%rsp), %r9d
+			movl 4(%rsp), %r8d
 			addq $8, %rsp
-			# Push caller saved registers
-			pushq %rcx
-			pushq %rdx
-			pushq %rsi
-			pushq %rdi
-			pushq %r8
-			pushq %r9
-			pushq %r10
-			pushq %r11
-			call Int..new
-			# Pop caller saved registers
-			popq %r11
-			popq %r10
-			popq %r9
-			popq %r8
-			popq %rdi
-			popq %rsi
-			popq %rdx
-			popq %rcx
-			# Move value into box, save object pointer
-			movl %r9d, 24(%rax)
-			movq %rax, %r8
-			# Dereference the box
-			movq 24(%r11), %r10
-			# Dereference the box
-			movq 24(%r8), %r9
-			# addition
-			movl %r10d, %r8d
-			addl %r9d, %r8d
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -580,6 +681,35 @@ Main_main_0:
 			# Move value into box, save object pointer
 			movl %r8d, 24(%rax)
 			movq %rax, %r9
+			# Dereference the box
+			movq 24(%r11), %r8
+			# Dereference the box
+			movq 24(%r9), %r10
+			# addition
+			movl %r8d, %r9d
+			addl %r10d, %r9d
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			# Move value into box, save object pointer
+			movl %r9d, 24(%rax)
+			movq %rax, %r8
 			# Initialize integer, 4
 			# Push caller saved registers
 			pushq %rcx
@@ -604,12 +734,12 @@ Main_main_0:
 			# Move value into box, save object pointer
 			movl $4, 24(%r10)
 			# Dereference the box
-			movq 24(%r9), %r8
+			movq 24(%r8), %r9
 			# Dereference the box
-			movq 24(%r10), %r9
+			movq 24(%r10), %r8
 			# addition
-			movl %r8d, %r10d
-			addl %r9d, %r10d
+			movl %r9d, %r10d
+			addl %r8d, %r10d
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -652,9 +782,9 @@ Main_main_0:
 			popq %rsi
 			popq %rdx
 			popq %rcx
-			movq %rax, %r8
+			movq %rax, %r10
 			# Move value into box, save object pointer
-			movl $234, 24(%r8)
+			movl $234, 24(%r10)
 			# Initialize integer, 2
 			# Push caller saved registers
 			pushq %rcx
@@ -675,20 +805,20 @@ Main_main_0:
 			popq %rsi
 			popq %rdx
 			popq %rcx
-			movq %rax, %r10
+			movq %rax, %r8
 			# Move value into box, save object pointer
-			movl $2, 24(%r10)
-			# Dereference the box
-			movq 24(%r8), %r13
+			movl $2, 24(%r8)
 			# Dereference the box
 			movq 24(%r10), %r11
+			# Dereference the box
+			movq 24(%r8), %r10
 			# division
 			subq $8, %rsp
 			pushq %rdx
 			pushq %rax
 			pushq %rcx
-			movl %r11d, 24(%rsp)
-			movl %r13d, %eax
+			movl %r10d, 24(%rsp)
+			movl %r11d, %eax
 			cltd
 			movl 24(%rsp), %ecx
 			idivl %ecx
@@ -829,18 +959,18 @@ Main_main_0:
 			movl %r8d, 24(%rax)
 			movq %rax, %r9
 			# assign
-			movq %r9, %r11
-			# assign
-			movq %r11, %r10
+			movq %r9, %r12
 			# assign
 			movq %r12, %r8
+			# assign
+			movq %r13, %r10
 			# Dereference the box
-			movq 24(%r10), %r9
+			movq 24(%r8), %r9
 			# Dereference the box
-			movq 24(%r8), %r10
+			movq 24(%r10), %r8
 			# subtraction
-			movl %r9d, %r8d
-			subl %r10d, %r8d
+			movl %r9d, %r10d
+			subl %r8d, %r10d
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -861,32 +991,9 @@ Main_main_0:
 			popq %rdx
 			popq %rcx
 			# Move value into box, save object pointer
-			movl %r8d, 24(%rax)
-			movq %rax, %r12
+			movl %r10d, 24(%rax)
+			movq %rax, %r11
 			# Initialize integer, 237447
-			# Push caller saved registers
-			pushq %rcx
-			pushq %rdx
-			pushq %rsi
-			pushq %rdi
-			pushq %r8
-			pushq %r9
-			pushq %r10
-			pushq %r11
-			call Int..new
-			# Pop caller saved registers
-			popq %r11
-			popq %r10
-			popq %r9
-			popq %r8
-			popq %rdi
-			popq %rsi
-			popq %rdx
-			popq %rcx
-			movq %rax, %r9
-			# Move value into box, save object pointer
-			movl $237447, 24(%r9)
-			# Initialize integer, 8
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -908,18 +1015,41 @@ Main_main_0:
 			popq %rcx
 			movq %rax, %r8
 			# Move value into box, save object pointer
-			movl $8, 24(%r8)
-			# Dereference the box
-			movq 24(%r9), %r10
+			movl $237447, 24(%r8)
+			# Initialize integer, 8
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r13
+			# Move value into box, save object pointer
+			movl $8, 24(%r13)
 			# Dereference the box
 			movq 24(%r8), %r9
+			# Dereference the box
+			movq 24(%r13), %r10
 			# division
 			subq $8, %rsp
 			pushq %rdx
 			pushq %rax
 			pushq %rcx
-			movl %r9d, 24(%rsp)
-			movl %r10d, %eax
+			movl %r10d, 24(%rsp)
+			movl %r9d, %eax
 			cltd
 			movl 24(%rsp), %ecx
 			idivl %ecx
@@ -952,12 +1082,12 @@ Main_main_0:
 			movl %r8d, 24(%rax)
 			movq %rax, %r9
 			# Dereference the box
-			movq 24(%r12), %r8
+			movq 24(%r11), %r10
 			# Dereference the box
-			movq 24(%r9), %r10
+			movq 24(%r9), %r8
 			# addition
-			movl %r8d, %r9d
-			addl %r10d, %r9d
+			movl %r10d, %r9d
+			addl %r8d, %r9d
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -979,7 +1109,7 @@ Main_main_0:
 			popq %rcx
 			# Move value into box, save object pointer
 			movl %r9d, 24(%rax)
-			movq %rax, %r12
+			movq %rax, %r13
 			# Initialize integer, 4
 			# Push caller saved registers
 			pushq %rcx
@@ -1000,9 +1130,9 @@ Main_main_0:
 			popq %rsi
 			popq %rdx
 			popq %rcx
-			movq %rax, %r10
+			movq %rax, %r11
 			# Move value into box, save object pointer
-			movl $4, 24(%r10)
+			movl $4, 24(%r11)
 			# Initialize integer, 6000
 			# Push caller saved registers
 			pushq %rcx
@@ -1052,14 +1182,14 @@ Main_main_0:
 			popq %rcx
 			# Move value into box, save object pointer
 			movl %r8d, 24(%rax)
-			movq %rax, %r9
+			movq %rax, %r10
 			# Dereference the box
-			movq 24(%r10), %r8
+			movq 24(%r11), %r8
 			# Dereference the box
-			movq 24(%r9), %r10
+			movq 24(%r10), %r9
 			# multiplication
-			movl %r8d, %r9d
-			imull %r10d, %r9d
+			movl %r8d, %r10d
+			imull %r9d, %r10d
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -1080,15 +1210,15 @@ Main_main_0:
 			popq %rdx
 			popq %rcx
 			# Move value into box, save object pointer
-			movl %r9d, 24(%rax)
+			movl %r10d, 24(%rax)
 			movq %rax, %r8
 			# Dereference the box
-			movq 24(%r12), %r10
+			movq 24(%r13), %r9
 			# Dereference the box
-			movq 24(%r8), %r9
+			movq 24(%r8), %r10
 			# subtraction
-			movl %r10d, %r8d
-			subl %r9d, %r8d
+			movl %r9d, %r8d
+			subl %r10d, %r8d
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -1164,18 +1294,18 @@ Main_main_0:
 			movl %r8d, 24(%rax)
 			movq %rax, %r9
 			# assign
-			movq %r9, %r12
+			movq %r9, %r13
 			# assign
-			movq %r11, %r8
+			movq %r12, %r8
 			# assign
-			movq %r12, %r11
+			movq %r13, %r9
 			# Dereference the box
 			movq 24(%r8), %r10
 			# Dereference the box
-			movq 24(%r11), %r9
+			movq 24(%r9), %r8
 			# addition
-			movl %r10d, %r8d
-			addl %r9d, %r8d
+			movl %r10d, %r9d
+			addl %r8d, %r9d
 			# Push caller saved registers
 			pushq %rcx
 			pushq %rdx
@@ -1196,12 +1326,12 @@ Main_main_0:
 			popq %rdx
 			popq %rcx
 			# Move value into box, save object pointer
-			movl %r8d, 24(%rax)
-			movq %rax, %r9
+			movl %r9d, 24(%rax)
+			movq %rax, %r8
 			# assign
-			movq %r9, %r11
+			movq %r8, %r12
 			# assign
-			movq %r11, %r8
+			movq %r12, %r8
 			movq %r8, %rax
 			leave
 			ret

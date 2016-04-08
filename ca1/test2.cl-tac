@@ -1,4 +1,4 @@
-comment start
+# start
 label Main_main_0
 t$1 <- default Int
 t$2 <- default Int

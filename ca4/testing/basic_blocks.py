@@ -3,6 +3,8 @@ from tacs import *
 
 # Generates list of basic blocks given list of TAC objects
 def bbs_gen(insts):
+	# for tac in insts:
+	# 	print tac
 	blocks = []
 	block_insts = []
 
@@ -77,6 +79,7 @@ def bbs_gen(insts):
 
 # Percolate live_out set up the block
 def percolate(block):
+	# print str(block)
 
 	change = False
 

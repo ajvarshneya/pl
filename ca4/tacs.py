@@ -251,3 +251,18 @@ class TACUnbox(object):
 
 	def __str__(self):
 		return str(self.assignee) + ' <- unbox ' + str(self.op1)
+
+class TACLoadParam(object):
+	def __init__(self, assignee, op1):
+		self.assignee = assignee
+		self.op1 = op1
+
+	def __str__(self):
+		return str(self.assignee) + ' <- load_param ' + str(self.op1)
+
+class TACComment(object):
+	def __init__(self, text):
+		self.text = text
+
+	def __str__(self):
+		return "# " + str(self.text)

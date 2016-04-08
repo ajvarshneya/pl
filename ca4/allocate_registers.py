@@ -78,7 +78,7 @@ def spill(blocks, register):
 			if is_operand(inst, register):
 				new_insts += [TACLoad(register, len(spilled_registers))]
 
-			# Add the current instruciton
+			# Add the current instruction
 			new_insts += [inst]
 
 			# Add a store below current instruction where register is the assignee
@@ -87,7 +87,6 @@ def spill(blocks, register):
 
 		# Update block with new instructions
 		block.insts = new_insts
-
 
 def spill_and_fill(blocks, original_live_ranges, original_graph):
 	global NUM_COLORS
