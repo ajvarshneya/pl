@@ -55,71 +55,85 @@ def asm_constructors_gen(c_map):
 		# New scope
 		push_table()
 
+		# Get attributes
+		attributes = c_map[cool_type]
+
 		# Label
 		constructors += ".globl " + cool_type + "..new\n"
 		constructors += cool_type + "..new:\n"
 		constructors += str(comment("Constructor for " + cool_type))
 
-		# Handle calling convention
+		# Calling conventions
 		constructors += str(pushq("%rbp"))
 		constructors += str(movq("%rsp", "%rbp")) + "\n"
 
-		# Push callee saved registers
 		asm_list = []
 		asm_push_callee(asm_list)
 		for asm in asm_list:
 			constructors += str(asm)
 
 		object_type_tag = "$" + str(type_tags[cool_type])
-		object_size = "$" + str(3 + len(c_map[cool_type]))
+		object_size = "$" + str(3 + len(attributes))
 		object_vtable_ptr = "$" + cool_type + "..vtable"
 
-		# Allocate space on the heap (calloc)
+		# Allocate space on the heap (calloc), get object pointer
 		constructors += str(comment("Allocate heap space, get self ptr"))
 		constructors += str(movq(object_size, "%rdi")) # Num fields -> %rdi
 		constructors += str(movq("$8", "%rsi")) # Size (always 8) -> %rsi
+
+		asm_list = []
+		asm_push_caller(asm_list)
+		for asm in asm_list:
+			constructors += str(asm)
+
 		constructors += str(call("calloc")) # Allocate space, ptr -> %rax
 
-		# Set self pointer
+		asm_list = []
+		asm_pop_caller(asm_list)
+		for asm in asm_list:
+			constructors += str(asm)
+
 		constructors += str(movq("%rax", "%rbx")) + "\n"
 
+		# Setup type tag, size, vtable pointer
 		constructors += str(comment("Store type tag, size, vtable ptr"))
-		# Store type tag
 		constructors += str(movq(object_type_tag, "%rax")) 
 		constructors += str(movq("%rax", "0(%rbx)"))
-		# Store object size
 		constructors += str(movq(object_size, "%rax")) 
 		constructors += str(movq("%rax", "8(%rbx)"))
-		# Store vtable ptr
 		constructors += str(movq(object_vtable_ptr, "%rax")) 
 		constructors += str(movq("%rax", "16(%rbx)"))
 
+		# Save object pointer
 		constructors += str(movq("%rbx", "%rax"))
-
 		constructors += "\n"
 
 		# TAC Generation for attributes
 		tac = []
-
 		tac += [TACLabel(cool_type + "_attributes")]
 
 		# Generate TAC to initialize the attributes
 		tac += [TACComment("Attribute initializations for " + cool_type)]
-		for attribute in c_map[cool_type]:
-			assignee = get_symbol(attribute.name)
-			tac += [TACDefault(assignee, attribute.typ)]
+		for attribute in attributes:
+			attr_reg = get_symbol(attribute.name)
+			tac += [TACDefault(attr_reg, attribute.typ)]
 
 		# Generate TAC to assign attributes with initialization
-		for attribute in c_map[cool_type]:
+		for attribute in attributes:
 			if attribute.kind == "attribute_init":
 				tac += tac_attribute_init(cool_type, attribute)
+
+		# Generate TAC to store attributes at the correct offsets in this class
+		for attribute in attributes:
+			attr_reg = get_symbol(attribute.name)
+			tac += [TACStoreAttribute(attribute.name, attr_reg)]
 
 		blocks = bbs_gen(tac) # Generate basic blocks from TAC instructions
 		blocks = liveness(blocks) # Generate liveness information
 		allocate_registers(blocks) # Get coloring
 
 		# Generate assembly
-		asm_list = asm_gen(blocks, spilled_registers)
+		asm_list = asm_gen(blocks, spilled_registers, attributes)
 		for inst in asm_list:
 			constructors += str(inst)
 
@@ -227,6 +241,8 @@ def main():
 	p_map = parent_map_gen(iterator) # Generate parent map dictionary
 	ast = ast_gen(iterator) # Generate AST object
 
+	################ Main Method START ###################
+
 	# Find main method
 	main_class_methods = i_map["Main"]
 	main_method = None
@@ -244,10 +260,17 @@ def main():
 	allocate_registers(blocks) # Get coloring
 
 	# Generate assembly
-	asm_list = asm_gen(blocks, spilled_registers)
+	attributes = c_map["Main"]
+	asm_list = asm_gen(blocks, spilled_registers, attributes)
+
 	asm = ""
+	asm += str(pushq("%rbp"))
+	asm += str(movq("%rsp", "%rbp")) + "\n"
+
 	for inst in asm_list:
 		asm += str(inst)
+
+	################ Main Method END #####################
 
 	# Generate a list of type tags
 	get_type_tags(c_map)

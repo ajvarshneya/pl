@@ -75,7 +75,25 @@ Bool..new:
 			# Allocate heap space, get self ptr
 			movq $4, %rdi
 			movq $8, %rsi
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
 			call calloc
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
 			movq %rax, %rbx
 
 			# Store type tag, size, vtable ptr
@@ -88,26 +106,9 @@ Bool..new:
 			movq %rbx, %rax
 
 Bool_attributes:
-			# Push caller saved registers
-			pushq %rcx
-			pushq %rdx
-			pushq %rsi
-			pushq %rdi
-			pushq %r8
-			pushq %r9
-			pushq %r10
-			pushq %r11
-			call Int..new
-			# Pop caller saved registers
-			popq %r11
-			popq %r10
-			popq %r9
-			popq %r8
-			popq %rdi
-			popq %rsi
-			popq %rdx
-			popq %rcx
-			movq %rax, %r8
+			movl $0, 24(%rbx)
+			movq %rbx, %r8
+			movq %r8, 24(%rbx)
 
 			# Pop callee saved registers
 			popq %r12
@@ -131,7 +132,25 @@ IO..new:
 			# Allocate heap space, get self ptr
 			movq $3, %rdi
 			movq $8, %rsi
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
 			call calloc
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
 			movq %rax, %rbx
 
 			# Store type tag, size, vtable ptr
@@ -167,7 +186,25 @@ Int..new:
 			# Allocate heap space, get self ptr
 			movq $4, %rdi
 			movq $8, %rsi
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
 			call calloc
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
 			movq %rax, %rbx
 
 			# Store type tag, size, vtable ptr
@@ -180,26 +217,9 @@ Int..new:
 			movq %rbx, %rax
 
 Int_attributes:
-			# Push caller saved registers
-			pushq %rcx
-			pushq %rdx
-			pushq %rsi
-			pushq %rdi
-			pushq %r8
-			pushq %r9
-			pushq %r10
-			pushq %r11
-			call Int..new
-			# Pop caller saved registers
-			popq %r11
-			popq %r10
-			popq %r9
-			popq %r8
-			popq %rdi
-			popq %rsi
-			popq %rdx
-			popq %rcx
-			movq %rax, %r8
+			movl $0, 24(%rbx)
+			movq %rbx, %r8
+			movq %r8, 24(%rbx)
 
 			# Pop callee saved registers
 			popq %r12
@@ -223,7 +243,25 @@ Main..new:
 			# Allocate heap space, get self ptr
 			movq $3, %rdi
 			movq $8, %rsi
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
 			call calloc
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
 			movq %rax, %rbx
 
 			# Store type tag, size, vtable ptr
@@ -259,7 +297,25 @@ Object..new:
 			# Allocate heap space, get self ptr
 			movq $3, %rdi
 			movq $8, %rsi
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
 			call calloc
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
 			movq %rax, %rbx
 
 			# Store type tag, size, vtable ptr
@@ -295,7 +351,25 @@ String..new:
 			# Allocate heap space, get self ptr
 			movq $4, %rdi
 			movq $8, %rsi
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
 			call calloc
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
 			movq %rax, %rbx
 
 			# Store type tag, size, vtable ptr
@@ -308,26 +382,7 @@ String..new:
 			movq %rbx, %rax
 
 String_attributes:
-			# Push caller saved registers
-			pushq %rcx
-			pushq %rdx
-			pushq %rsi
-			pushq %rdi
-			pushq %r8
-			pushq %r9
-			pushq %r10
-			pushq %r11
-			call String..new
-			# Pop caller saved registers
-			popq %r11
-			popq %r10
-			popq %r9
-			popq %r8
-			popq %rdi
-			popq %rsi
-			popq %rdx
-			popq %rcx
-			movq %rax, %r8
+			movq %r8, 24(%rbx)
 
 			# Pop callee saved registers
 			popq %r12
@@ -360,6 +415,9 @@ IO.out_string:
 .globl Main.main
 Main.main:
 			# Method definition for Main.main
+			pushq %rbp
+			movq %rsp, %rbp
+
 Main_main_0:
 			# Push caller saved registers
 			pushq %rcx
