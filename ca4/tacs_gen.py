@@ -1,9 +1,11 @@
 from tacs import *
 from ast import *
+from ast_gen import *
 
 symbol_counter = 0
 label_counter = 0
 symbol_tables = []
+current_class = None
 
 # Returns a new symbol (virtual register)
 def ns():
@@ -19,13 +21,15 @@ def nl():
 	label_counter += 1
 	return str(c)
 
-# Returns the symbol if it exists, otherwise a new symbol
+# Returns symbol if in symbol table
 def get_symbol(identifier):
 	global symbol_tables
 	for symbol_table in reversed(symbol_tables):
 		if identifier in symbol_table:
 			return symbol_table[identifier]
+	return None
 
+def add_symbol(identifier):
 	symbol_tables[-1][identifier] = ns()
 	return symbol_tables[-1][identifier]
 
@@ -38,48 +42,6 @@ def push_table():
 def pop_table():
 	global symbol_tables
 	symbol_tables.pop()
-
-# # Add tac instruction to global list
-# def tacs_append(tac):
-# 	global tacs
-# 	tacs += [tac]
-
-# # Top level tac generator
-# def tacs_gen(ast):
-# 	for ast_class in ast.classes:
-# 		tac_class(ast_class)
-# 	return tacs
-
-# # Generate tac lists for every feature in class
-# def tac_class(ast_class):
-# 	push_table()
-
-# 	# TODO initialize all attributes with TACDefault
-
-# 	# Separate features into methods and attributes
-# 	attributes = []
-# 	methods = []
-# 	for feature in ast_class.features:
-# 		if feature.kind == "attribute_init" | feature.kind == "attribute_no_init":
-# 			attributes += [feature]
-# 		if feature.kind == "method" | feature.kind == "method_formals":
-# 			methods += [feature]
-
-# 	# Initialize all attributes with TACDefault
-# 	for attribute in attributes:
-# 		tac += 
-
-# 	for feature in ast_class.features:
-# 		if ast_feature.kind == "method":
-# 			tac_method(ast_class.name, feature)
-# 		if ast_feature.kind == "method_formals":
-# 			tac_method_formals(ast_class.name, feature)
-# 		if ast_feature.kind == "attribute_no_init":
-# 			tac_attribute_no_init(ast_class.name, feature)
-# 		if ast_feature.kind == "attribute_init":
-# 			tac_attribute_init(ast_class.name, feature)
-
-# 	pop_table()
 
 def tac_method(class_name, ast_feature):
 	# New scope
@@ -113,7 +75,7 @@ def tac_method_formals(class_name, ast_feature):
 	# Dispatch handles generating TAC for the formals before call
 	# However, we have to create an entry point for our actual parameters to be used in the method (formal parameters)
 	for formal in ast_feature.formals:
-		param = get_symbol(formal.name)
+		param = add_symbol(formal.name)
 		assignee = ns()
 		tac += [TACLoadParam(assignee, param)]
 
@@ -127,16 +89,6 @@ def tac_method_formals(class_name, ast_feature):
 
 	return tac
 
-# def tac_attribute_no_init(class_name, ast_feature):
-# 	tac = []
-
-# 	tac += [TACComment("Start of attribute no init " + class_name + "_" + ast_feature.name)]
-# 	assignee = get_symbol(ast_feature.name)
-# 	tac += [TACDefault(assignee, ast_feature.type)]
-# 	tac += [TACComment("End of attribute no init " + class_name + "_" + ast_feature.name)]
-
-# 	return tac
-
 def tac_attribute_init(class_name, ast_feature):
 	tac = []
 	
@@ -146,16 +98,11 @@ def tac_attribute_init(class_name, ast_feature):
 	expr = tac_expression(ast_feature.expr, tac)
 
 	# Assign to identifier
-	assignee = get_symbol(ast_feature.name)
+	assignee = add_symbol(ast_feature.name)
 	tac += [TACAssign(assignee, expr)]
 	tac += [TACComment("End of attribute init " + class_name + "_" + ast_feature.name)]
 
 	return tac
-
-# def tac_formal(ast_formal):
-# 	assignee = get_symbol(ast_formal.name)
-# 	tacs_append(TACDefault(assignee, ast_formal.typ))
-# 	return assignee
 
 def tac_expression(ast_expression, tac):
 	if isinstance(ast_expression, ASTAssign):
@@ -217,7 +164,10 @@ def tac_expression(ast_expression, tac):
 def tac_assign(ast_assign, tac):
 	assignee = get_symbol(ast_assign.var)
 	expr = tac_expression(ast_assign.rhs, tac)
-	tac += [TACAssign(assignee, expr)]
+	if assignee == None:
+		tac += [TACStoreAttribute(ast_assign.var, expr)]
+	else:
+		tac += [TACAssign(assignee, expr)]
 	return assignee
 
 def tac_dynamic_dispatch(ast_dynamic_dispatch, tac):
@@ -308,7 +258,7 @@ def tac_block(ast_block, tac):
 	return expr
 
 def tac_binding(ast_binding, tac):
-	assignee = get_symbol(ast_binding.var)
+	assignee = add_symbol(ast_binding.var)
 	if ast_binding.kind == "let_binding_init":
 		expr = tac_expression(ast_binding.expr, tac)
 		tac += [(TACAssign(assignee, expr))]

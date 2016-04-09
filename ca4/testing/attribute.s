@@ -112,7 +112,7 @@ Bool..new:
 Bool_attributes:
 			movl $0, 24(%rbx)
 			movq %rbx, %r8
-			movq %r8, 12(%rbx)
+			movq %r8, 24(%rbx)
 
 			# Pop callee saved registers
 			popq %r12
@@ -223,7 +223,7 @@ Int..new:
 Int_attributes:
 			movl $0, 24(%rbx)
 			movq %rbx, %r8
-			movq %r8, 12(%rbx)
+			movq %r8, 24(%rbx)
 
 			# Pop callee saved registers
 			popq %r12
@@ -298,7 +298,7 @@ Main_attributes:
 			popq %rdx
 			popq %rcx
 			movq %rax, %r8
-			movq %r8, 12(%rbx)
+			movq %r8, 24(%rbx)
 
 			# Pop callee saved registers
 			popq %r12
@@ -407,7 +407,7 @@ String..new:
 			movq %rbx, %rax
 
 String_attributes:
-			movq %r8, 12(%rbx)
+			movq %r8, 24(%rbx)
 
 			# Pop callee saved registers
 			popq %r12
@@ -467,9 +467,115 @@ Main_main_0:
 			movq %rax, %r9
 			# Move value into box, save object pointer
 			movl $1, 24(%r9)
+			# Initialize integer, 2
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r10
+			# Move value into box, save object pointer
+			movl $2, 24(%r10)
+			# Dereference the box
+			movq 24(%r9), %r8
+			# Dereference the box
+			movq 24(%r10), %r9
+			# addition
+			movl %r8d, %r10d
+			addl %r9d, %r10d
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			# Move value into box, save object pointer
+			movl %r10d, 24(%rax)
+			movq %rax, %r8
+			# Initialize integer, 1
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r8
+			# Move value into box, save object pointer
+			movl $1, 24(%r8)
 			# assign
-			movq %r9, %r8
-			movq %r8, %rax
+			movq %r11, %r9
+			# Dereference the box
+			movq 24(%r8), %r10
+			# Dereference the box
+			movq 24(%r9), %r8
+			# addition
+			movl %r10d, %r9d
+			addl %r8d, %r9d
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			# Move value into box, save object pointer
+			movl %r9d, 24(%rax)
+			movq %rax, %r8
+			# assign
+			movq %r8, %r11
+			movq %r11, %rax
 			leave
 			ret
 .globl Object.abort

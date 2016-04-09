@@ -1,6 +1,9 @@
 class Main inherits IO {
 	a : Int;
 	main() : Object {
-		a <- 1
+		{
+			1 + 2;
+			a <- 1 + a;
+		}
 	};
 };

@@ -115,7 +115,7 @@ def asm_constructors_gen(c_map):
 		# Generate TAC to initialize the attributes
 		tac += [TACComment("Attribute initializations for " + cool_type)]
 		for attribute in attributes:
-			attr_reg = get_symbol(attribute.name)
+			attr_reg = add_symbol(attribute.name) # Make new symbol for the attribute
 			tac += [TACDefault(attr_reg, attribute.typ)]
 
 		# Generate TAC to assign attributes with initialization
@@ -125,7 +125,7 @@ def asm_constructors_gen(c_map):
 
 		# Generate TAC to store attributes at the correct offsets in this class
 		for attribute in attributes:
-			attr_reg = get_symbol(attribute.name)
+			attr_reg = get_symbol(attribute.name) # Use already created symbol
 			tac += [TACStoreAttribute(attribute.name, attr_reg)]
 
 		blocks = bbs_gen(tac) # Generate basic blocks from TAC instructions
@@ -253,11 +253,14 @@ def main():
 	if main_method == None:
 		raise StandardError("Main not found.")
 
-	tac = tac_method("Main", main_method) # Generate TAC instructions from AST object	
+	tac = tac_method("Main", main_method, c_map) # Generate TAC instructions from AST object	
 
 	blocks = bbs_gen(tac) # Generate basic blocks from TAC instructions
 	blocks = liveness(blocks) # Generate liveness information
 	allocate_registers(blocks) # Get coloring
+
+	for block in blocks:
+		print block
 
 	# Generate assembly
 	attributes = c_map["Main"]

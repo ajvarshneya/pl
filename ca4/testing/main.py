@@ -259,6 +259,9 @@ def main():
 	blocks = liveness(blocks) # Generate liveness information
 	allocate_registers(blocks) # Get coloring
 
+	for block in blocks:
+		print block
+
 	# Generate assembly
 	attributes = c_map["Main"]
 	asm_list = asm_gen(blocks, spilled_registers, attributes)

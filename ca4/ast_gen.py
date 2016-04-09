@@ -1,5 +1,9 @@
 from ast import *
 
+c_map = {}
+i_map = {}
+p_map = {}
+
 # Deserializes the class map
 def class_map_gen(iterator):
 	# class_map \n
@@ -32,6 +36,9 @@ def class_map_gen(iterator):
 	class_map["Int"] = [ASTFeature("attribute_no_init", "x", "0", [], "raw.Int", "0", "0")]
 	class_map["Bool"] = [ASTFeature("attribute_no_init", "x", "0", [], "raw.Int", "0", "0")]
 	class_map["String"] = [ASTFeature("attribute_no_init", "s", "0", [], "raw.String", "0", "")]
+
+	global c_map
+	c_map = class_map
 
 	return class_map
 
@@ -71,6 +78,10 @@ def implementation_map_gen(iterator):
 			methods += [method]
 
 		implementation_map[class_name] = methods
+
+	global i_map
+	i_map = implementation_map
+
 	return implementation_map
 
 
@@ -83,6 +94,9 @@ def parent_map_gen(iterator):
 		child_name = next(iterator)
 		parent_name = next(iterator)
 		parent_map[child_name] = parent_name
+
+	global p_map
+	p_map = parent_map
 
 	return parent_map
 
