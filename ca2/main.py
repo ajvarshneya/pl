@@ -207,11 +207,9 @@ def tac_while(ast_while):
 	return assignee
 
 def tac_block(ast_block):
-	assignee = ns()
 	for expr in ast_block.body:
 		expr = tac_expression(expr)
-		tacs_append(TACAssign(assignee, expr))
-	return assignee
+	return expr
 
 def tac_binding(ast_binding):
 	if ast_binding.kind == "let_binding_init":
@@ -224,16 +222,13 @@ def tac_binding(ast_binding):
 		tacs_append(TACDefault(assignee, typ))
 
 def tac_let(ast_let):
-	assignee = ns()
-
 	push_table()
 	for binding in ast_let.bindings:
 		tac_binding(binding)
 	expr = tac_expression(ast_let.expr)
-	tacs_append(TACAssign(assignee, expr))
 	pop_table()
 
-	return assignee
+	return expr
 
 def tac_case_element(ast_case):
 	pass

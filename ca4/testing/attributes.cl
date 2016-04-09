@@ -1,4 +1,11 @@
 class Main inherits IO {
+	a : Int;
+	b : Int <- 111;
+	c : Int <- 2222;
+	d : Int <- 44;
+	x : Int <- 4444;
+	y : Int <- 10928310;
+	z : Int <- 88;
 	main() : Object {
 		let a : Int,
 			b : Int,

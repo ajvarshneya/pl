@@ -244,8 +244,8 @@ Main..new:
 			pushq %r14
 			pushq %r13
 			pushq %r12
-			# Allocate $3 bytes on heap
-			movq $3, %rdi
+			# Allocate $10 bytes on heap
+			movq $10, %rdi
 			movq $8, %rsi
 			# Push caller saved registers
 			pushq %rcx
@@ -271,13 +271,310 @@ Main..new:
 			# Store type tag, size, vtable ptr
 			movq $5, %rax
 			movq %rax, 0(%rbx)
-			movq $3, %rax
+			movq $10, %rax
 			movq %rax, 8(%rbx)
 			movq $Main..vtable, %rax
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
 
 Main_attributes:
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r8
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r9
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r10
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r11
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r12
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r13
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r14
+			# Initialize integer, 111
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r10
+			# Move value into box, save object pointer
+			movl $111, 24(%r10)
+			# assign
+			movq %r10, %r9
+			# Initialize integer, 2222
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r11
+			# Move value into box, save object pointer
+			movl $2222, 24(%r11)
+			# assign
+			movq %r11, %r10
+			# Initialize integer, 44
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r12
+			# Move value into box, save object pointer
+			movl $44, 24(%r12)
+			# assign
+			movq %r12, %r11
+			# Initialize integer, 4444
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r13
+			# Move value into box, save object pointer
+			movl $4444, 24(%r13)
+			# assign
+			movq %r13, %r12
+			# Initialize integer, 10928310
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r14
+			# Move value into box, save object pointer
+			movl $10928310, 24(%r14)
+			# assign
+			movq %r14, %r13
+			# Initialize integer, 88
+			# Push caller saved registers
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			movq %rax, %r15
+			# Move value into box, save object pointer
+			movl $88, 24(%r15)
+			# assign
+			movq %r15, %r14
+			movq %r8, 12(%rbx)
+			movq %r9, 16(%rbx)
+			movq %r10, 20(%rbx)
+			movq %r11, 24(%rbx)
+			movq %r12, 28(%rbx)
+			movq %r13, 32(%rbx)
+			movq %r14, 36(%rbx)
 
 			# Pop callee saved registers
 			popq %r12

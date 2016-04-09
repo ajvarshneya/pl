@@ -422,7 +422,7 @@ def asm_store_attribute(inst, asm, attributes):
 		if x.name == inst.identifier: 
 			break
 
-	offset = (3 + i) * 8
+	offset = (3 + i) * 4
 	asm += [(movq(get_color(inst.op1), str(offset) + "(%rbx)"))]
 
 def asm_push_caller(asm):

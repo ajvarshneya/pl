@@ -270,9 +270,9 @@ class TACLoadAttribute(object):
 		return str(self.assignee) + ' <- load_attr ' + str(self.op1) + ', ' + str(self.identifier)
 
 class TACStoreAttribute(object):
-	def __init__(self, op1, identifier):
-		self.op1 = op1
+	def __init__(self, identifier, op1):
 		self.identifier = identifier
+		self.op1 = op1
 
 	def __str__(self):
 		return str(self.identifier) + ' <- store_attr ' + str(self.op1)

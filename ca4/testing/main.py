@@ -77,7 +77,7 @@ def asm_constructors_gen(c_map):
 		object_vtable_ptr = "$" + cool_type + "..vtable"
 
 		# Allocate space on the heap (calloc), get object pointer
-		constructors += str(comment("Allocate heap space, get self ptr"))
+		constructors += str(comment("Allocate " + object_size + " bytes on heap"))
 		constructors += str(movq(object_size, "%rdi")) # Num fields -> %rdi
 		constructors += str(movq("$8", "%rsi")) # Size (always 8) -> %rsi
 

@@ -3,7 +3,7 @@ from allocate_registers import *
 
 spilled_register_address = {}
 
-def asm_gen(blocks, spilled_registers):
+def asm_gen(blocks, spilled_registers, attributes):
 	global spilled_register_address
 
 	asm = []
@@ -67,9 +67,9 @@ def asm_gen(blocks, spilled_registers):
 			elif isinstance(inst, TACUnbox):
 				asm_unbox(inst, asm)
 			elif isinstance(inst, TACLoadAttribute):
-				asm_load_attribute(inst, asm)
+				asm_load_attribute(inst, asm, attributes)
 			elif isinstance(inst, TACStoreAttribute):
-				asm_store_attribute(inst, asm)				
+				asm_store_attribute(inst, asm, attributes)		
 
 	return asm
 
@@ -254,23 +254,26 @@ def asm_neg(inst, asm):
 	asm += [(negl(assignee))]
 
 def asm_default(inst, asm):
+	if inst.c_type == "raw.Int":
+		box = get_color(inst.assignee)
 
-	assignee = get_color(inst.assignee, 32)
+		# Move value 0 into object field
+		asm += [(movl('$0', '24(%rbx)'))]
+		asm += [movq('%rbx', box)]
 
-	# Push caller saved registers for fxn call
-	asm_push_caller(asm)
+	elif inst.c_type == "raw.String":
+		pass
+	else:
+		# Call constructor
+		asm_push_caller(asm)
+		asm += [(call(inst.c_type + "..new"))]
+		asm_pop_caller(asm)
 
-	# Call constructor for type
-	asm += [(call(inst.c_type + "..new"))]
+		# Get box register
+		box = get_color(inst.assignee)
 
-	# Pop caller saved registers for fxn call
-	asm_pop_caller(asm)
-
-	# Get box register
-	box = get_color(inst.assignee)
-
-	# Move pointer to object (rax) into box addr register
-	asm += [(movq('%rax', box))]
+		# Move pointer to object (rax) into box addr register
+		asm += [(movq('%rax', box))]
 
 # def asm_out_int(inst, asm):
 # 	op1 = get_color(inst.op1)
@@ -407,9 +410,20 @@ def asm_unbox(inst, asm):
 	asm += [(comment("Dereference the box"))]
 	asm += [(movq('24(' + box + ')', value))]
 
-def asm_load_attribute(inst, asm):
+def asm_load_attribute(inst, asm, attributes):
+	raise NotImplemented("TODO attribute load")
 
-def asm_store_attribute(inst, asm):
+def asm_store_attribute(inst, asm, attributes):
+	# Have: object to store in attribute, identifier of attribute
+	# Want to update this class's attribute to be that identifier
+	# Need to use self register (rbx) and offset from it by an amount according to class map index
+	
+	for i, x in enumerate(attributes):
+		if x.name == inst.identifier: 
+			break
+
+	offset = (3 + i) * 8
+	asm += [(movq(get_color(inst.op1), str(offset) + "(%rbx)"))]
 
 def asm_push_caller(asm):
 	asm += [(comment('Push caller saved registers'))]
