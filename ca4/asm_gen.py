@@ -76,77 +76,77 @@ def asm_gen(blocks, spilled_registers, attributes):
 def asm_assign(inst, asm):
 	assignee = get_color(inst.assignee)
 	op1 = get_color(inst.op1)
-	asm += [(comment('assign'))] # debugging label
-	asm += [(movq(op1, assignee))]
+	asm += [comment('assign')] # debugging label
+	asm += [movq(op1, assignee)]
 
 def asm_plus(inst, asm):
 	assignee = get_color(inst.assignee, 32)
 	op1 = get_color(inst.op1, 32)
 	op2 = get_color(inst.op2, 32)
 
-	asm += [(comment('addition'))] # debugging label
+	asm += [comment('addition')] # debugging label
 	if op2 == assignee:
-		asm += [(addl(op1, assignee))]
+		asm += [addl(op1, assignee)]
 	else:
-		asm += [(movl(op1, assignee))]
-		asm += [(addl(op2, assignee))]
+		asm += [movl(op1, assignee)]
+		asm += [addl(op2, assignee)]
 
 def asm_minus(inst, asm):
 	assignee = get_color(inst.assignee, 32)
 	op1 = get_color(inst.op1, 32)
 	op2 = get_color(inst.op2, 32)
 
-	asm += [(comment('subtraction'))] # debugging label
+	asm += [comment('subtraction')] # debugging label
 	if op2 == assignee:
-		asm += [(subl(op1, assignee))]
-		asm += [(negl(assignee))]
+		asm += [subl(op1, assignee)]
+		asm += [negl(assignee)]
 	else:
-		asm += [(movl(op1, assignee))]
-		asm += [(subl(op2, assignee))]
+		asm += [movl(op1, assignee)]
+		asm += [subl(op2, assignee)]
 
 def asm_multiply(inst, asm):
 	assignee = get_color(inst.assignee, 32)
 	op1 = get_color(inst.op1, 32)
 	op2 = get_color(inst.op2, 32)
 
-	asm += [(comment('multiplication'))] # debugging label
+	asm += [comment('multiplication')] # debugging label
 	if op2 == assignee:
-		asm += [(imull(op1, assignee))]
+		asm += [imull(op1, assignee)]
 	else:
-		asm += [(movl(op1, assignee))]
-		asm += [(imull(op2, assignee))]
+		asm += [movl(op1, assignee)]
+		asm += [imull(op2, assignee)]
 
 def asm_divide(inst, asm):
 	assignee = get_color(inst.assignee, 32) # rX
 	op1 = get_color(inst.op1, 32) # rY
 	op2 = get_color(inst.op2, 32) # rZ
 
-	asm += [(comment('division'))] # debugging label
+	asm += [comment('division')] # debugging label
 
 	# Make room for temps on stack
-	asm += [(subq('$8', '%rsp'))]
+	asm += [subq('$8', '%rsp')]
 
 	# Save registers we will use
-	asm += [(pushq('%rdx'))]
-	asm += [(pushq('%rax'))]
-	asm += [(pushq('%rcx'))]
+	asm += [pushq('%rdx')]
+	asm += [pushq('%rax')]
+	asm += [pushq('%rcx')]
 
 	# Compute quotient rX = rY / rZ
-	asm += [(movl(op2, '24(%rsp)'))] # rZ -> stack (in case its in eax)
-	asm += [(movl(op1, '%eax'))] # rY -> eax
-	asm += [(cltd())] # zero extend eax into edx
-	asm += [(movl('24(%rsp)', '%ecx'))] # rZ -> ecx
-	asm += [(idivl('%ecx'))] # divide rY by rZ
-	asm += [(movl('%eax', '28(%rsp)'))] # result -> stack
+	asm += [movl(op2, '24(%rsp)')] # rZ -> stack (in case its in eax)
+	asm += [movl(op1, '%eax')] # rY -> eax
+	asm += [cltd()] # zero extend eax into edx
+	asm += [movl('24(%rsp)', '%ecx')] # rZ -> ecx
+	asm += [idivl('%ecx')] # divide rY by rZ
+	asm += [movl('%eax', '28(%rsp)')] # result -> stack
 
 	# Restore registers
-	asm += [(popq('%rcx'))]
-	asm += [(popq('%rax'))]
-	asm += [(popq('%rdx'))]
+	asm += [popq('%rcx')]
+	asm += [popq('%rax')]
+	asm += [popq('%rdx')]
 
 	# Save result, remove temp space
-	asm += [(movl('4(%rsp)', assignee))] # result -> rX
-	asm += [(addq('$8', '%rsp'))]
+	asm += [movl('4(%rsp)', assignee)] # result -> rX
+	asm += [addq('$8', '%rsp')]
 
 # def asm_lt(inst, asm):
 # 	assignee = get_color(inst.assignee)
@@ -188,12 +188,12 @@ def asm_divide(inst, asm):
 # 	 += [end(label(true_label))]
 
 def asm_int(inst, asm):
-	asm += [(comment("Initialize integer, " + inst.val))]
+	asm += [comment("Initialize integer, " + inst.val)]
 	# Push caller saved registers for fxn call
 	asm_push_caller(asm)
 
 	# Create new int object, object address in %rax
-	asm += [(call("Int..new"))]
+	asm += [call("Int..new")]
 
 	# Pop caller saved registers for fxn call
 	asm_pop_caller(asm)
@@ -205,20 +205,20 @@ def asm_int(inst, asm):
 	box = get_color(inst.assignee)
 
 	# Move pointer to object (rax) into box addr register
-	asm += [(movq('%rax', box))]
+	asm += [movq('%rax', box)]
 
-	asm += [(comment("Move value into box, save object pointer"))]
-	asm += [(movl(value, '24(' + box + ')'))]
+	asm += [comment("Move value into box, save object pointer")]
+	asm += [movl(value, '24(' + box + ')')]
 
 
 def asm_bool(inst, asm):
-	asm += [(comment("Initialize boolean, " + inst.val))]
+	asm += [comment("Initialize boolean, " + inst.val)]
 
 	# Push caller saved registers for fxn call
 	asm_push_caller(asm)
 
 	# Create new int object, object address in %rax
-	asm += [(call("Bool..new"))]
+	asm += [call("Bool..new")]
 
 	# Pop caller saved registers for fxn call
 	asm_pop_caller(asm)
@@ -234,31 +234,31 @@ def asm_bool(inst, asm):
 	box = get_color(inst.assignee)
 
 	# Move pointer to object (rax) into box addr register
-	asm += [(movq('%rax', box))]
+	asm += [movq('%rax', box)]
 
-	asm += [(comment("Move value into box, save object pointer"))]
-	asm += [(movl(value, '24(' + box + ')'))]
+	asm += [comment("Move value into box, save object pointer")]
+	asm += [movl(value, '24(' + box + ')')]
 
 def asm_not(inst, asm):
 	assignee = get_color(inst.assignee, 32)
 	op1 = get_color(inst.op1, 32)
-	asm += [(comment('not'))] # debugging label
-	asm += [(movl(op1, assignee))]
-	asm += [(xorl('$1', assignee))]
+	asm += [comment('not')] # debugging label
+	asm += [movl(op1, assignee)]
+	asm += [xorl('$1', assignee)]
 
 def asm_neg(inst, asm):
 	assignee = get_color(inst.assignee, 32)
 	op1 = get_color(inst.op1, 32)
-	asm += [(comment('negate'))] # debugging label
-	asm += [(movl(op1, assignee))]
-	asm += [(negl(assignee))]
+	asm += [comment('negate')] # debugging label
+	asm += [movl(op1, assignee)]
+	asm += [negl(assignee)]
 
 def asm_default(inst, asm):
 	if inst.c_type == "raw.Int":
 		box = get_color(inst.assignee)
 
 		# Move value 0 into object field
-		asm += [(movl('$0', '24(%rbx)'))]
+		asm += [movl('$0', '24(%rbx)')]
 		asm += [movq('%rbx', box)]
 
 	elif inst.c_type == "raw.String":
@@ -266,14 +266,14 @@ def asm_default(inst, asm):
 	else:
 		# Call constructor
 		asm_push_caller(asm)
-		asm += [(call(inst.c_type + "..new"))]
+		asm += [call(inst.c_type + "..new")]
 		asm_pop_caller(asm)
 
 		# Get box register
 		box = get_color(inst.assignee)
 
 		# Move pointer to object (rax) into box addr register
-		asm += [(movq('%rax', box))]
+		asm += [movq('%rax', box)]
 
 # def asm_out_int(inst, asm):
 # 	op1 = get_color(inst.op1)
@@ -342,10 +342,10 @@ def asm_default(inst, asm):
 # 	 += [end(addq('$4', '%rsp'))]
 
 def asm_jmp(inst, asm):
-	asm += [(jmp(str(inst.label)))]
+	asm += [jmp(str(inst.label))]
 
 def asm_label(inst, asm):
-	asm += [(label(str(inst.label)))]
+	asm += [label(str(inst.label))]
 
 # def asm_bt(inst, asm):
 # 	predicate = get_color(inst.op1)
@@ -355,24 +355,24 @@ def asm_label(inst, asm):
 # 	 += [end(je(inst.label))]
 
 def asm_store(inst, spilled_register_address, asm):
-	asm += [(comment('store'))] # debugging label
+	asm += [comment('store')] # debugging label
 	register = get_color(inst.op1)
 
 	stack_address = spilled_register_address[inst.op1]
-	asm += [(movq(register, stack_address))]
+	asm += [movq(register, stack_address)]
 
 def asm_load(inst, spilled_register_address, asm):
-	asm += [(comment('load'))] # debugging label
+	asm += [comment('load')] # debugging label
 	register = get_color(inst.assignee)
 
 	stack_address = spilled_register_address[inst.assignee]
-	asm += [(movq(stack_address, register))]
+	asm += [movq(stack_address, register)]
 
 def asm_return(inst, asm):
 	value = get_color(inst.op1)
-	asm += [(movq(value, '%rax'))]
-	asm += [(leave())]
-	asm += [(ret())]
+	asm += [movq(value, '%rax')]
+	asm += [leave()]
+	asm += [ret()]
 
 def asm_box(inst, asm):
 	# Push caller saved registers for fxn call
@@ -380,9 +380,9 @@ def asm_box(inst, asm):
 
 	# Call the correct constructor to make a new boxed object
 	if inst.box_type == "Int":
-		asm += [(call("Int..new"))]
+		asm += [call("Int..new")]
 	elif inst.box_type == "Bool":
-		asm += [(call("Bool..new"))]
+		asm += [call("Bool..new")]
 	else:
 		raise ValueError("Box_type is neither Int nor Bool")
 
@@ -392,14 +392,14 @@ def asm_box(inst, asm):
 	# Get value register and move its value into the box
 	value = get_color(inst.op1, 32)
 
-	asm += [(comment("Move value into box, save object pointer"))]
-	asm += [(movl(value, '24(%rax)'))]
+	asm += [comment("Move value into box, save object pointer")]
+	asm += [movl(value, '24(%rax)')]
 
 	# Get box register
 	box = get_color(inst.assignee)
 
 	# Move pointer to object (rax) into box addr register
-	asm += [(movq('%rax', box))]
+	asm += [movq('%rax', box)]
 
 def asm_unbox(inst, asm):
 	# Get box address, assignee registers
@@ -407,11 +407,18 @@ def asm_unbox(inst, asm):
 	value = get_color(inst.assignee)
 
 	# Move box value into value
-	asm += [(comment("Dereference the box"))]
-	asm += [(movq('24(' + box + ')', value))]
+	asm += [comment("Dereference the box")]
+	asm += [movq('24(' + box + ')', value)]
 
 def asm_load_attribute(inst, asm, attributes):
-	raise NotImplemented("TODO attribute load")
+	for i, x in enumerate(attributes):
+		if x.name == inst.identifier: 
+			break
+
+	offset = (3 + i) * 8
+
+	assignee = get_color(inst.assignee)
+	asm += [movq(str(offset) + '(%rbx)', assignee)]
 
 def asm_store_attribute(inst, asm, attributes):
 	# Have: object to store in attribute, identifier of attribute
@@ -423,40 +430,41 @@ def asm_store_attribute(inst, asm, attributes):
 			break
 
 	offset = (3 + i) * 8
-	asm += [(movq(get_color(inst.op1), str(offset) + "(%rbx)"))]
+
+	asm += [movq(get_color(inst.op1), str(offset) + '(%rbx)')]
 
 def asm_push_caller(asm):
-	asm += [(comment('Push caller saved registers'))]
-	asm += [(pushq('%rcx'))]
-	asm += [(pushq('%rdx'))]
-	asm += [(pushq('%rsi'))]
-	asm += [(pushq('%rdi'))]
-	asm += [(pushq('%r8'))]
-	asm += [(pushq('%r9'))]
-	asm += [(pushq('%r10'))]
-	asm += [(pushq('%r11'))]
+	asm += [comment('Push caller saved registers')]
+	asm += [pushq('%rcx')]
+	asm += [pushq('%rdx')]
+	asm += [pushq('%rsi')]
+	asm += [pushq('%rdi')]
+	asm += [pushq('%r8')]
+	asm += [pushq('%r9')]
+	asm += [pushq('%r10')]
+	asm += [pushq('%r11')]
 
 def asm_pop_caller(asm):
-	asm += [(comment('Pop caller saved registers'))]
-	asm += [(popq('%r11'))]
-	asm += [(popq('%r10'))]
-	asm += [(popq('%r9'))]
-	asm += [(popq('%r8'))]
-	asm += [(popq('%rdi'))]
-	asm += [(popq('%rsi'))]
-	asm += [(popq('%rdx'))]
-	asm += [(popq('%rcx'))]
+	asm += [comment('Pop caller saved registers')]
+	asm += [popq('%r11')]
+	asm += [popq('%r10')]
+	asm += [popq('%r9')]
+	asm += [popq('%r8')]
+	asm += [popq('%rdi')]
+	asm += [popq('%rsi')]
+	asm += [popq('%rdx')]
+	asm += [popq('%rcx')]
 
 def asm_push_callee(asm):
-	asm += [(comment('Push callee saved registers'))]
-	asm += [(pushq('%r15'))]
-	asm += [(pushq('%r14'))]
-	asm += [(pushq('%r13'))]
-	asm += [(pushq('%r12'))]
+	asm += [comment('Push callee saved registers')]
+	asm += [pushq('%r15')]
+	asm += [pushq('%r14')]
+	asm += [pushq('%r13')]
+	asm += [pushq('%r12')]
 
 def asm_pop_callee(asm):
-	asm += [(comment('Pop callee saved registers'))]
-	asm += [(popq('%r12'))]
-	asm += [(popq('%r13'))]
-	asm += [(popq('%r14'))]
-	asm += [(popq('%r15'))]
+	asm += [comment('Pop callee saved registers')]
+	asm += [popq('%r12')]
+	asm += [popq('%r13')]
+	asm += [popq('%r14')]
+	asm += [popq('%r15')]
