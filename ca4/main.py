@@ -46,7 +46,7 @@ def asm_vtables_gen(i_map):
 			vtables += "\t\t\t.quad " + method.associated_class + "." + method.name + "\n"
 	return vtables
 
-def asm_constructors_gen(c_map):
+def asm_constructors_gen(c_map, idx_c_map):
 	constructors = "\n###############################################################################\n"
 	constructors += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CONSTRUCTORS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	constructors += "###############################################################################\n"
@@ -113,6 +113,10 @@ def asm_constructors_gen(c_map):
 		for attribute in c_map[cool_type]:
 			if attribute.kind == "attribute_init":
 				tac += tac_attribute_init(cool_type, attribute)
+
+		# Generate TAC to store attributes at the correct offsets
+		for attribute in c_map[cool_type]:
+			tac += [TACStoreAttribute()]
 
 		blocks = bbs_gen(tac) # Generate basic blocks from TAC instructions
 		blocks = liveness(blocks) # Generate liveness information
@@ -227,6 +231,15 @@ def main():
 	p_map = parent_map_gen(iterator) # Generate parent map dictionary
 	ast = ast_gen(iterator) # Generate AST object
 
+	# Construct dictionary of dictionaries, mapping class to a mapping of attributes to indices
+	idx_c_map = {}
+	for ast_class in c_map:
+		idx_c_map[ast_class] = {}
+		i = 0
+		for attribute in c_map[ast_class]:
+			idx_c_map[ast_class][attribute.name] = i
+			i += 1
+
 	# Find main method
 	main_class_methods = i_map["Main"]
 	main_method = None
@@ -254,7 +267,7 @@ def main():
 
 	# Generate code to emit
 	vtables = asm_vtables_gen(i_map)
-	constructors = asm_constructors_gen(c_map)
+	constructors = asm_constructors_gen(c_map, idx_c_map)
 	method_definitions = asm_method_definitions_gen(i_map, asm)
 
 	type_names = sorted(c_map.keys())

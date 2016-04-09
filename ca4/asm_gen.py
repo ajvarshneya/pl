@@ -66,6 +66,10 @@ def asm_gen(blocks, spilled_registers):
 				asm_box(inst, asm)
 			elif isinstance(inst, TACUnbox):
 				asm_unbox(inst, asm)
+			elif isinstance(inst, TACLoadAttribute):
+				asm_load_attribute(inst, asm)
+			elif isinstance(inst, TACStoreAttribute):
+				asm_store_attribute(inst, asm)				
 
 	return asm
 
@@ -402,6 +406,10 @@ def asm_unbox(inst, asm):
 	# Move box value into value
 	asm += [(comment("Dereference the box"))]
 	asm += [(movq('24(' + box + ')', value))]
+
+def asm_load_attribute(inst, asm):
+
+def asm_store_attribute(inst, asm):
 
 def asm_push_caller(asm):
 	asm += [(comment('Push caller saved registers'))]

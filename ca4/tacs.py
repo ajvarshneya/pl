@@ -260,6 +260,23 @@ class TACLoadParam(object):
 	def __str__(self):
 		return str(self.assignee) + ' <- load_param ' + str(self.op1)
 
+class TACLoadAttribute(object):
+	def __init__(self, assignee, op1, identifier):
+		self.assignee = assignee
+		self.op1 = op1
+		self.identifier = identifier
+
+	def __str__(self):
+		return str(self.assignee) + ' <- load_attr ' + str(self.op1) + ', ' + str(self.identifier)
+
+class TACStoreAttribute(object):
+	def __init__(self, op1, identifier):
+		self.op1 = op1
+		self.identifier = identifier
+
+	def __str__(self):
+		return str(self.identifier) + ' <- store_attr ' + str(self.op1)
+
 class TACComment(object):
 	def __init__(self, text):
 		self.text = text
