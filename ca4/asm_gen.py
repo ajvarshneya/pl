@@ -22,6 +22,12 @@ def asm_gen(blocks, spilled_registers, attributes):
 		for inst in block.insts:
 			if isinstance(inst, TACAssign):	
 				asm_assign(inst, asm)
+			elif isinstance(inst, TACDynamicDispatch):
+				asm_dynamic_dispatch(inst, asm)
+			elif isinstance(inst, TACStaticDispatch):
+				asm_static_dispatch(inst, asm)
+			elif isinstance(inst, TACSelfDispatch):
+				asm_self_dispatch(inst, asm)
 			elif isinstance(inst, TACPlus):
 				asm_plus(inst, asm)
 			elif isinstance(inst, TACMinus):
@@ -44,12 +50,10 @@ def asm_gen(blocks, spilled_registers, attributes):
 				asm_not(inst, asm)
 			elif isinstance(inst, TACNeg):
 				asm_neg(inst, asm)
+			elif isinstance(inst, TACNew):
+				asm_new(inst, asm)
 			elif isinstance(inst, TACDefault):
 				asm_default(inst, asm)
-			# elif isinstance(inst, TACOutInt):
-			# 	asm_out_int(inst, asm)
-			# elif isinstance(inst, TACInInt):
-			# 	asm_in_int(inst, asm)
 			elif isinstance(inst, TACJmp):
 				asm_jmp(inst, asm)
 			elif isinstance(inst, TACLabel):
@@ -69,7 +73,13 @@ def asm_gen(blocks, spilled_registers, attributes):
 			elif isinstance(inst, TACLoadAttribute):
 				asm_load_attribute(inst, asm, attributes)
 			elif isinstance(inst, TACStoreAttribute):
-				asm_store_attribute(inst, asm, attributes)		
+				asm_store_attribute(inst, asm, attributes)	
+			# elif isinstance(inst, TACGetType):
+			# 	asm_get_type(inst, asm)	
+			# elif isinstance(inst, TACCmpType):
+			# 	asm_cmp_type(inst, asm)	
+			# elif isinstance(inst, TACBranchToComparison):
+			# 	asm_bt_type(inst, asm)
 
 	return asm
 
@@ -78,6 +88,14 @@ def asm_assign(inst, asm):
 	op1 = get_color(inst.op1)
 	asm += [comment('assign')] # debugging label
 	asm += [movq(op1, assignee)]
+
+def asm_dynamic_dispatch(inst, asm):
+	# Push all caller registers
+
+def asm_static_dispatch(inst, asm):
+
+def asm_self_dispatch(inst, asm):
+
 
 def asm_plus(inst, asm):
 	assignee = get_color(inst.assignee, 32)
@@ -148,47 +166,72 @@ def asm_divide(inst, asm):
 	asm += [movl('4(%rsp)', assignee)] # result -> rX
 	asm += [addq('$8', '%rsp')]
 
-def asm_lt(inst, asm):
-	assignee = get_color(inst.assignee)
-	op1 = get_color(inst.op1)
-	op2 = get_color(inst.op2)
-	true_label = 'asm_label_' + nl()
+# def asm_lt(inst, asm):
+# 	assignee = get_color(inst.assignee)
+# 	op1 = get_color(inst.op1)
+# 	op2 = get_color(inst.op2)
+# 	true_label = 'asm_label_' + nl()
 
-	 += [end(comment('less than'))] # debugging label
-	 += [end(cmpl(op1, op2))]
-	 += [end(movl('$1', assignee))]
-	 += [end(jl(true_label))]
-	 += [end(movl('$0', assignee))]
-	 += [end(label(true_label))]
+# 	 += [end(comment('less than'))] # debugging label
+# 	 += [end(cmpl(op1, op2))]
+# 	 += [end(movl('$1', assignee))]
+# 	 += [end(jl(true_label))]
+# 	 += [end(movl('$0', assignee))]
+# 	 += [end(label(true_label))]
 
-def asm_leq(inst, asm):
-	assignee = get_color(inst.assignee)
-	op1 = get_color(inst.op1)
-	op2 = get_color(inst.op2)
-	true_label = 'asm_label_' + nl()
+# def asm_leq(inst, asm):
+# 	assignee = get_color(inst.assignee)
+# 	op1 = get_color(inst.op1)
+# 	op2 = get_color(inst.op2)
+# 	true_label = 'asm_label_' + nl()
 
-	 += [end(comment('less than equals'))] # debugging label
-	 += [end(cmpl(op1, op2))]
-	 += [end(movl('$1', assignee))]
-	 += [end(jle(true_label))]
-	 += [end(movl('$0', assignee))]
-	 += [end(label(true_label))]
+# 	 += [end(comment('less than equals'))] # debugging label
+# 	 += [end(cmpl(op1, op2))]
+# 	 += [end(movl('$1', assignee))]
+# 	 += [end(jle(true_label))]
+# 	 += [end(movl('$0', assignee))]
+# 	 += [end(label(true_label))]
 
-def asm_equal(inst, asm):
-	assignee = get_color(inst.assignee)
-	op1 = get_color(inst.op1)
-	op2 = get_color(inst.op2)
-	true_label = 'asm_label_' + nl()
+# def asm_equal(inst, asm):
+# 	assignee = get_color(inst.assignee)
+# 	op1 = get_color(inst.op1)
+# 	op2 = get_color(inst.op2)
+
+# 	# Call the desired comparison helper
+# 	true_label = 'asm_label_' + nl()
 	
-	 += [end(comment('equals'))] # debugging label
-	 += [end(cmpl(op1, op2))]
-	 += [end(movl('$1', assignee))]
-	 += [end(je(true_label))]
-	 += [end(movl('$0', assignee))]
-	 += [end(label(true_label))]
+# 	 += [end(comment('equals'))] # debugging label
+# 	 += [end(cmpl(op1, op2))]
+# 	 += [end(movl('$1', assignee))]
+# 	 += [end(je(true_label))]
+# 	 += [end(movl('$0', assignee))]
+# 	 += [end(label(true_label))]
 
-def asm_get_type(inst, asm):
-	
+# def asm_get_type(inst, asm):
+# 	assignee = get_color(inst.assignee)
+# 	box = get_color(inst.op1)
+
+# 	asm += [movq('(' + box + ')'), assignee]
+
+# def asm_cmp_type(inst, asm):
+# 	type1 = get_color(inst.op1)
+# 	type2 = get_color(inst.op2)
+
+# 	asm += [cmpq(type1, type2)]
+# 	asm += [je(inst.eq_label)]
+# 	asm += [jmp(inst.neq_label)]
+
+# def asm_bt_type(inst, asm):
+# 	type1 = get_color(inst.op1)
+
+# 	# Jump to the correct call label for this comparison
+# 	asm += [cmpq('$0', type1)]
+# 	asm += [je(inst.bool_label)]
+# 	asm += [cmpq('$1', type1)]
+# 	asm += [je(inst.int_label)]
+# 	asm += [cmpq('$3', type1)]
+# 	asm += [je(inst.string_label)]
+# 	asm += [jmp(inst.other_label)]
 
 def asm_int(inst, asm):
 	asm += [comment("Initialize integer, " + inst.val)]
@@ -255,6 +298,9 @@ def asm_neg(inst, asm):
 	asm += [comment('negate')] # debugging label
 	asm += [movl(op1, assignee)]
 	asm += [negl(assignee)]
+
+def asm_new(inst, asm):
+	
 
 def asm_default(inst, asm):
 	# Call constructor
@@ -340,12 +386,12 @@ def asm_jmp(inst, asm):
 def asm_label(inst, asm):
 	asm += [label(str(inst.label))]
 
-def asm_bt(inst, asm):
-	predicate = get_color(inst.op1)
+# def asm_bt(inst, asm):
+# 	predicate = get_color(inst.op1)
 
-	 += [end(comment('branch'))] # debugging label
-	 += [end(cmpl(predicate, '$1'))]
-	 += [end(je(inst.label))]
+# 	 += [end(comment('branch'))] # debugging label
+# 	 += [end(cmpl(predicate, '$1'))]
+# 	 += [end(je(inst.label))]
 
 def asm_store(inst, spilled_register_address, asm):
 	asm += [comment('store')] # debugging label

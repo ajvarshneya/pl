@@ -179,6 +179,15 @@ class cmpl(object):
 		s = "\t\t\tcmpl " + str(self.op2) + ", " + str(self.op1) + "\n"
 		return s
 
+class cmpq(object):
+	def __init__(self, op1, op2):
+		self.op1 = op1
+		self.op2 = op2
+
+	def __str__(self):
+		s = "\t\t\tcmpq " + str(self.op2) + ", " + str(self.op1) + "\n"
+		return s
+
 # negl
 class negl(object):
 	def __init__(self, register):

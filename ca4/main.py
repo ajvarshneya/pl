@@ -65,7 +65,7 @@ def asm_constructors_gen(c_map):
 
 		# Calling conventions
 		constructors += str(pushq("%rbp"))
-		constructors += str(movq("%rsp", "%rbp")) + "\n"
+		constructors += str(movq("%rsp", "%rbp"))
 
 		constructors += asm_push_callee_str()
 
@@ -83,7 +83,7 @@ def asm_constructors_gen(c_map):
 		constructors += asm_pop_caller_str()
 
 		# Save object pointer
-		constructors += str(movq("%rax", "%rbx")) + "\n"
+		constructors += str(movq("%rax", "%rbx"))
 
 		# Setup type tag, size, vtable pointer
 		constructors += str(comment("Store type tag, size, vtable ptr"))
@@ -131,14 +131,9 @@ def asm_constructors_gen(c_map):
 		global spilled_register_address
 		spilled_registers_address = {}
 
-		constructors += "\n"
-
 		# Save object pointer
 		constructors += str(movq("%rbx", "%rax"))
-		constructors += "\n"
-
 		constructors += asm_pop_callee_str()
-
 		constructors += str(leave())
 		constructors += str(ret()) + "\n"
 
@@ -188,12 +183,19 @@ def asm_method_definitions_gen(c_map, i_map):
 				# Generate assembly from TAC
 				asm_list = asm_gen(blocks, spilled_registers, attributes)
 
-				# Emit code
+				# Create new stack frame
 				method_definitions += str(pushq("%rbp"))
 				method_definitions += str(movq("%rsp", "%rbp"))
 
+				# Calling convention
+				method_definitions += asm_push_callee_str()
+
+				# Generate assembly from TAC
 				for asm in asm_list:
 					method_definitions += str(asm)
+
+				# Calling convention
+				method_definitions += asm_pop_callee_str()
 
 	return method_definitions
 
@@ -208,16 +210,18 @@ def asm_string_constants_gen(type_names, string_list):
 		strings += "string_constant.." + cool_type + ":\n"
 		strings += "\t\t\t.string \"" + cool_type + "\"\n\n"
 
+	# Static string constants
 	for string in string_list:
 		strings += ".globl " + "string_constant.." + string + "\n"
 		strings += "string_constant.." + string + ":\n"
 		strings += "\t\t\t.string \"" + string + "\"\n\n"
 
+	# TODO Empty strings?
+
 	# Handle empty string explicitly
 	strings += ".global empty.string\n"
 	strings += "empty.string:\n"
 	strings += "\t\t\t.string \"\" \n\n"
-	# TODO: all other string constants
 
 	return strings
 
@@ -225,6 +229,23 @@ def asm_comparison_handlers_gen():
 	comparison_handlers = "\n###############################################################################\n"
 	comparison_handlers += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;; COMPARISON HANDLERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	comparison_handlers += "###############################################################################\n"	
+
+	comparison_handlers += str(label("comparison_handlers"))
+
+	comparison_handlers += str(label("lt_int_cmp"))
+	comparison_handlers += str(label("lt_bool_cmp"))
+	comparison_handlers += str(label("lt_string_cmp"))
+	comparison_handlers += str(label("lt_other_cmp"))
+
+	comparison_handlers += str(label("le_int_cmp"))
+	comparison_handlers += str(label("le_bool_cmp"))
+	comparison_handlers += str(label("le_string_cmp"))
+	comparison_handlers += str(label("le_other_cmp"))
+
+	comparison_handlers += str(label("eq_int_cmp"))
+	comparison_handlers += str(label("eq_bool_cmp"))
+	comparison_handlers += str(label("eq_string_cmp"))
+	comparison_handlers += str(label("eq_other_cmp"))
 
 	return comparison_handlers
 

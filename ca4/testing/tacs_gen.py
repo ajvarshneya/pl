@@ -104,11 +104,6 @@ def tac_attribute_init(class_name, ast_feature):
 
 	return tac
 
-# def tac_formal(ast_formal):
-# 	assignee = get_symbol(ast_formal.name)
-# 	tacs_append(TACDefault(assignee, ast_formal.typ))
-# 	return assignee
-
 def tac_expression(ast_expression, tac):
 	if isinstance(ast_expression, ASTAssign):
 		return tac_assign(ast_expression, tac)
@@ -177,24 +172,28 @@ def tac_assign(ast_assign, tac):
 		return assignee
 
 def tac_dynamic_dispatch(ast_dynamic_dispatch, tac):
-	return tac_self_dispatch(ast_dynamic_dispatch)
+	assignee = ns()
+
+	# return tac_self_dispatch(ast_dynamic_dispatch)
 
 def tac_static_dispatch(ast_static_dispatch, tac):
-	return tac_self_dispatch(ast_static_dispatch)
+	assignee = ns()
+
+	# return tac_self_dispatch(ast_static_dispatch)
 
 def tac_self_dispatch(ast_self_dispatch, tac):
 	assignee = ns()
 
-	if ast_self_dispatch.method == "out_string":
-		expr = tac_expression(ast_self_dispatch.args[0], tac)
-		tac += [TACOutString(assignee, expr)]
-	if ast_self_dispatch.method == "out_int":
-		expr = tac_expression(ast_self_dispatch.args[0], tac)
-		tac += [TACOutInt(assignee, expr)]
-	if ast_self_dispatch.method == "in_string":
-		tac += [TACInString(assignee)]
-	if ast_self_dispatch.method == "in_int":
-		tac += [TACInInt(assignee)]
+	# if ast_self_dispatch.method == "out_string":
+	# 	expr = tac_expression(ast_self_dispatch.args[0], tac)
+	# 	tac += [TACOutString(assignee, expr)]
+	# if ast_self_dispatch.method == "out_int":
+	# 	expr = tac_expression(ast_self_dispatch.args[0], tac)
+	# 	tac += [TACOutInt(assignee, expr)]
+	# if ast_self_dispatch.method == "in_string":
+	# 	tac += [TACInString(assignee)]
+	# if ast_self_dispatch.method == "in_int":
+	# 	tac += [TACInInt(assignee)]
 
 	return assignee
 

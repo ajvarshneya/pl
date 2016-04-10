@@ -290,7 +290,6 @@ def tac_let(ast_let, tac):
 def tac_case_element(ast_case, tac):
 	raise NotImplemented("TODO CASE ELEMENT")
 
-
 def tac_case(ast_case, tac):
 	raise NotImplemented("TODO CASE")
 
@@ -369,84 +368,127 @@ def tac_divide(ast_divide, tac):
 	tac += [TACBox(box, result, box_type)]
 	return box
 
-def tac_lt(ast_lt, tac):
-	type1 = ns()
-	type2 = ns()
-	val1 = ns()
-	val2 = ns()
-	box = ns()
+# def tac_lt(ast_lt, tac):
+# 	type1 = ns()
+# 	type2 = ns()
+# 	val1 = ns()
+# 	val2 = ns()
+# 	result = ns()
+# 	box = ns()
 
-	e1 = tac_expression(ast_lt.e1, tac)
-	e2 = tac_expression(ast_lt.e2, tac)
+# 	equal_label = "types_equal_" + nl()
+# 	not_equal_label = "types_not_equal_" + nl()
+# 	exit_label = "exit_label_" + nl() 
 
-	tac += [TACUnbox(val1, e1)]
-	tac += [TACUnbox(val2, e2)]
-	tac += [TACGetType(type1, e1)]
-	tac += [TACGetType(type2, e2)]
+# 	int_label = "int_cmp_" + nl()
+# 	bool_label = "bool_cmp_" + nl()
+# 	string_label = "string_cmp_" + nl()
+# 	other_label = "other_cmp_" + nl()
 
-	tac += [TACLT(result, e1, e2, type1, type2)]
-	tac += [TACBox(box, result)]
+# 	e1 = tac_expression(ast_lt.e1, tac)
+# 	e2 = tac_expression(ast_lt.e2, tac)
 
-	return box
+# 	# Compare the types of the operands and branch accordingly
+# 	tac += [TACGetType(type1, e1)]  
+# 	tac += [TACGetType(type2, e2)]
+# 	tac += [TACCmpType(type1, type2, equal_label, not_equal_label)]
 
-def tac_le(ast_le, tac):
-	type1 = ns()
-	type2 = ns()
-	types_equal = ns()
-	val1 = ns()
-	val2 = ns()
-	box = ns()
+# 	# Equal types, jump to the correct comparison call
+# 	tac += [TACLabel(equal_label)]
+# 	tac += [TACUnbox(val1, e1)]
+# 	tac += [TACUnbox(val2, e2)]
+# 	tac += [TACBranchToComparison(type1, int_label, bool_label, string_label, other_label)]
+# 	tac += [TACLT(result, val1, val2)] # Comparison call labels
+# 	tac += [TACJmp(exit_label)]
 
-	equal_label = "types_equal_" + nl()
-	not_equal_label = "types_not_equal_" + nl()
-	exit_label = "exit_label_" + nl() 
+# 	# Not equal types, put $0 in result
+# 	tac += [TACLabel(not_equal_label)]
+# 	tac += [TACBool(result, "false")]
+# 	tac += [TACJmp(exit_label)]
 
-	e1 = tac_expression(ast_le.e1, tac)
-	e2 = tac_expression(ast_le.e2, tac)
+# 	tac += [TACLabel(exit_label)]
+# 	tac += [TACBox(box, result)]
 
-	# Compare the types of the operands and branch accordingly
-	tac += [TACGetType(type1, e1)]  
-	tac += [TACGetType(type2, e2)]
-	tac += [TACCmpType(types_equal, type1, type2)]
-	tac += [TACBt(types_equal, equal_label)]
-	tac += [TACBt(types_not_equal, not_equal_label)]
+# 	return box
 
-	# Equal types, jump to the correct comparison
-	tac += [TACLabel(equal_label)]
-	tac += [TACUnbox(val1, e1)]
-	tac += [TACUnbox(val2, e2)]
-	tac += [TACBranchToComparison(type1)]
-	tac += [TACLEQ(result, val1, val2)]
-	tac += [TACJmp(exit_label)]
+# def tac_le(ast_le, tac):
+# 	type1 = ns()
+# 	type2 = ns()
+# 	val1 = ns()
+# 	val2 = ns()
+# 	result = ns()
+# 	box = ns()
 
-	# Not equal types, put $0 in result
-	tac += [TACLabel(not_equal_label)]
-	tac += [TACJmp(exit_label)]
+# 	equal_label = "types_equal_" + nl()
+# 	not_equal_label = "types_not_equal_" + nl()
+# 	exit_label = "exit_label_" + nl() 
 
-	tac += [TACLabel(exit_label)]
-	tac += [TACBox(box, result)]
+# 	int_label = "int_cmp_" + nl()
+# 	bool_label = "bool_cmp_" + nl()
+# 	string_label = "string_cmp_" + nl()
+# 	other_label = "other_cmp_" + nl()
 
-	return box
+# 	e1 = tac_expression(ast_le.e1, tac)
+# 	e2 = tac_expression(ast_le.e2, tac)
 
-def tac_eq(ast_eq, tac):
-	type1 = ns()
-	type2 = ns()
-	val1 = ns()
-	val2 = ns()
-	box = ns()
+# 	# Compare the types of the operands and branch accordingly
+# 	tac += [TACGetType(type1, e1)]
+# 	tac += [TACGetType(type2, e2)]
+# 	tac += [TACCmpType(type1, type2, equal_label, not_equal_label)]
 
-	e1 = tac_expression(ast_eq.e1, tac)
-	e2 = tac_expression(ast_eq.e2, tac)
+# 	# Equal types, jump to the correct comparison call
+# 	tac += [TACLabel(equal_label)]
+# 	tac += [TACUnbox(val1, e1)]
+# 	tac += [TACUnbox(val2, e2)]
+# 	tac += [TACBranchToComparison(type1, int_label, bool_label, string_label, other_label)]
+# 	tac += [TACLEQ(result, val1, val2)] # Comparison call labels
+# 	tac += [TACJmp(exit_label)]
 
-	tac += [TACUnbox(val1, e1)]
-	tac += [TACUnbox(val2, e2)]
-	tac += [TACGetType(type1, e1)]
-	tac += [TACGetType(type2, e2)]
+# 	# Not equal types, put $0 in result
+# 	tac += [TACLabel(not_equal_label)]
+# 	tac += [TACBool(result, "false")]
+# 	tac += [TACJmp(exit_label)]
 
-	tac += [TACEqual(result, e1, e2, type1, type2)]
-	tac += [TACBox(box, result)]
+# 	tac += [TACLabel(exit_label)]
+# 	tac += [TACBox(box, result)]
 
-	return box
+# 	return box
+
+# def tac_eq(ast_eq, tac):
+# 	type1 = ns()
+# 	type2 = ns()
+# 	result = ns()
+# 	box = ns()
+
+# 	equal_label = "types_equal_" + nl()
+# 	not_equal_label = "types_not_equal_" + nl()
+# 	exit_label = "exit_label_" + nl() 
+
+# 	# Get TAC expressions, boxed
+# 	e1 = tac_expression(ast_eq.e1, tac)
+# 	e2 = tac_expression(ast_eq.e2, tac)
+
+# 	# Compare the types of the operands and branch accordingly
+# 	tac += [TACGetType(type1, e1)]  
+# 	tac += [TACGetType(type2, e2)]
+# 	tac += [TACCmpType(type1, type2, equal_label, not_equal_label)]
+
+# 	# Equal types, jump to the correct comparison call
+# 	tac += [TACLabel(equal_label)]
+# 	tac += [TACCallComparison(type1, exit_label)]
+
+# 	tac += [TACBranchToComparison(type1, int_label, bool_label, string_label, other_label)]
+# 	tac += [TACEqual(result, e1, e2, int_label, bool_label, string_label, other_label, exit_label)] # Comparison call labels
+
+# 	# Not equal types, put $0 in result
+# 	tac += [TACLabel(not_equal_label)]
+# 	tac += [TACBool(result, "false")]
+# 	tac += [TACJmp(exit_label)]
+
+# 	tac += [TACLabel(exit_label)]
+# 	tac += [TACBox(box, result)]
+
+# 	return box
 
 def tac_not(ast_not, tac):
 	val = ns()
