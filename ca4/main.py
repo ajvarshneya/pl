@@ -37,7 +37,7 @@ def asm_vtables_gen(i_map):
 		vtables += "\t\t\t# Virtual function table for " + cool_type + "\n"
 
 		# Type name
-		vtables += "\t\t\t.quad " + cool_type + "..string\n"
+		vtables += "\t\t\t.quad " + "string_constant.." + cool_type + "\n"
 
 		# Constructor label
 		vtables += "\t\t\t.quad " + cool_type + "..new\n"
@@ -70,6 +70,7 @@ def asm_constructors_gen(c_map):
 		constructors += asm_push_callee_str()
 
 		object_type_tag = "$" + str(type_tags[cool_type])
+		# TODO, size for in_string
 		object_size = "$" + str(3 + len(attributes))
 		object_vtable_ptr = "$" + cool_type + "..vtable"
 
@@ -146,22 +147,54 @@ def asm_constructors_gen(c_map):
 
 	return constructors
 
-def asm_method_definitions_gen(i_map, asm):
+def asm_method_definitions_gen(c_map, i_map):
 	method_definitions = "\n###############################################################################\n"
 	method_definitions += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;; METHOD DEFINITIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	method_definitions += "###############################################################################\n"	
 
+	global spilled_registers
+	global coloring
+
 	for cool_type in sorted(i_map):
-		for method in i_map[cool_type]:
+		methods = i_map[cool_type]
+		attributes = c_map[cool_type]
+
+		for method in methods:
 			if method.associated_class == cool_type:
-				# Method labels
+
+				spilled_registers = []
+				coloring = {}
+
+				# Method header
 				method_definitions += ".globl " + method.associated_class + "." + method.name + "\n"
 				method_definitions += method.associated_class + "." + method.name + ":\n"
 				method_definitions += "\t\t\t# Method definition for " + method.associated_class + "." + method.name + "\n"
-				if cool_type == "Main" and method.name == "main":
-					method_definitions += asm
-				else:
-					method_definitions += str(ret())
+
+				if method.associated_class in ["Bool", "Int", "IO", "Object", "String"]:
+					if method.name in ["abort", "type_name", "copy", "out_string", "in_string", "out_int", "in_int", "length", "concat", "substr"]:
+						continue
+
+				# Generate TAC
+				if method.kind == "method":
+					tac = tac_method(cool_type, method)
+				if method.kind == "method_formals":
+					tac = tac_method_formals(cool_type, method)
+
+				# Register allocation
+				blocks = bbs_gen(tac)
+				blocks = liveness(blocks)
+				allocate_registers(blocks)
+
+				# Generate assembly from TAC
+				asm_list = asm_gen(blocks, spilled_registers, attributes)
+
+				# Emit code
+				method_definitions += str(pushq("%rbp"))
+				method_definitions += str(movq("%rsp", "%rbp"))
+
+				for asm in asm_list:
+					method_definitions += str(asm)
+
 	return method_definitions
 
 def asm_string_constants_gen(type_names, string_list):
@@ -171,9 +204,14 @@ def asm_string_constants_gen(type_names, string_list):
 
 	# Type names
 	for cool_type in type_names:
-		strings += ".globl " + cool_type + "..string\n"
-		strings += cool_type + "..string:\n"
+		strings += ".globl " + "string_constant.." + cool_type + "\n"
+		strings += "string_constant.." + cool_type + ":\n"
 		strings += "\t\t\t.string \"" + cool_type + "\"\n\n"
+
+	for string in string_list:
+		strings += ".globl " + "string_constant.." + string + "\n"
+		strings += "string_constant.." + string + ":\n"
+		strings += "\t\t\t.string \"" + string + "\"\n\n"
 
 	# Handle empty string explicitly
 	strings += ".global empty.string\n"
@@ -231,52 +269,18 @@ def main():
 	p_map = parent_map_gen(iterator) # Generate parent map dictionary
 	ast = ast_gen(iterator) # Generate AST object
 
-	################ Main Method START ###################
-
-	# Find main method
-	main_class_methods = i_map["Main"]
-	main_method = None
-	for method in main_class_methods:
-		if method.name == "main":
-			main_method = method
-
-	if main_method == None:
-		raise StandardError("Main not found.")
-
-	tac = tac_method("Main", main_method) # Generate TAC instructions from AST object	
-
-	blocks = bbs_gen(tac) # Generate basic blocks from TAC instructions
-	blocks = liveness(blocks) # Generate liveness information
-	allocate_registers(blocks) # Get coloring
-
-	for block in blocks:
-		print block
-
-	# Generate assembly
-	attributes = c_map["Main"]
-	asm_list = asm_gen(blocks, spilled_registers, attributes)
-
-	asm = ""
-	asm += str(pushq("%rbp"))
-	asm += str(movq("%rsp", "%rbp")) + "\n"
-
-	for inst in asm_list:
-		asm += str(inst)
-
-	################ Main Method END #####################
-
 	# Generate a list of type tags
 	get_type_tags(c_map)
 
 	# Generate code to emit
 	vtables = asm_vtables_gen(i_map)
 	constructors = asm_constructors_gen(c_map)
-	method_definitions = asm_method_definitions_gen(i_map, asm)
+	method_definitions = asm_method_definitions_gen(c_map, i_map)
 
+	global string_list
 	type_names = sorted(c_map.keys())
-	strings = []
+	string_constants = asm_string_constants_gen(type_names, string_list)
 
-	string_constants = asm_string_constants_gen(type_names, strings)
 	comparison_handlers = asm_comparison_handlers_gen()
 	start = asm_start()
 
@@ -287,9 +291,6 @@ def main():
 	output += string_constants
 	output += comparison_handlers
 	output += start
-
-	# for tac in tacs:
-	# 	print tac
 
 	# Write to output
 	write_output(filename, output)

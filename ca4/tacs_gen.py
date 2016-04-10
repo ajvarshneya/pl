@@ -6,6 +6,7 @@ symbol_counter = 0
 label_counter = 0
 symbol_tables = []
 current_class = None
+string_list = []
 
 # Returns a new symbol (virtual register)
 def ns():
@@ -369,28 +370,66 @@ def tac_divide(ast_divide, tac):
 	return box
 
 def tac_lt(ast_lt, tac):
-	raise NotImplemented("TODO LT")
-	assignee = ns()
+	type1 = ns()
+	type2 = ns()
+	val1 = ns()
+	val2 = ns()
+	box = ns()
+
 	e1 = tac_expression(ast_lt.e1, tac)
 	e2 = tac_expression(ast_lt.e2, tac)
-	tac += [TACLT(assignee, e1, e2)]
-	return assignee
+
+	tac += [TACUnbox(val1, e1)]
+	tac += [TACUnbox(val2, e2)]
+	tac += [TACGetType(type1, e1)]
+	tac += [TACGetType(type2, e2)]
+
+	tac += [TACLT(result, e1, e2, type1, type2)]
+	tac += [TACBox(box, result)]
+
+	return box
 
 def tac_le(ast_le, tac):
-	raise NotImplemented("TODO LE")
-	assignee = ns()
+	type1 = ns()
+	type2 = ns()
+	val1 = ns()
+	val2 = ns()
+	box = ns()
+
 	e1 = tac_expression(ast_le.e1, tac)
 	e2 = tac_expression(ast_le.e2, tac)
-	tac += [TACLEQ(assignee, e1, e2)]
-	return assignee
+
+	tac += [TACUnbox(val1, e1)]
+	tac += [TACUnbox(val2, e2)]
+
+	tac += [TACGetType(type1, e1)]
+	tac += [TACGetType(type2, e2)]
+	tac += [TACCmpType(type1, type2)]
+
+	tac += [TACLEQ(result, e1, e2)]
+	tac += [TACBox(box, result)]
+
+	return box
 
 def tac_eq(ast_eq, tac):
-	raise NotImplemented("TODO EQ")
-	assignee = ns()
+	type1 = ns()
+	type2 = ns()
+	val1 = ns()
+	val2 = ns()
+	box = ns()
+
 	e1 = tac_expression(ast_eq.e1, tac)
 	e2 = tac_expression(ast_eq.e2, tac)
-	tac += [TACEqual(assignee, e1, e2)]
-	return assignee
+
+	tac += [TACUnbox(val1, e1)]
+	tac += [TACUnbox(val2, e2)]
+	tac += [TACGetType(type1, e1)]
+	tac += [TACGetType(type2, e2)]
+
+	tac += [TACEqual(result, e1, e2, type1, type2)]
+	tac += [TACBox(box, result)]
+
+	return box
 
 def tac_not(ast_not, tac):
 	val = ns()
@@ -424,6 +463,11 @@ def tac_int(ast_integer, tac):
 	return assignee
 
 def tac_string(ast_string, tac):
+	global string_list
+
+	if ast_string.constant not in string_list:
+		string_list += [ast_string.constant]
+
 	assignee = ns()
 	tac += [TACString(assignee, ast_string.constant)]
 	return assignee

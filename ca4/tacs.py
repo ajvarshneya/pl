@@ -46,31 +46,45 @@ class TACDivide(object):
 
 # Comparison instructions
 class TACLT(object):
-	def __init__(self, assignee, op1, op2):
+	def __init__(self, assignee, op1, op2, type1, type2):
 		self.assignee = assignee
 		self.op1 = op1
 		self.op2 = op2
-
+		self.type1 = type1
+		self.type2 = type2
+		
 	def __str__(self):
-		return 	str(self.assignee) + ' <- < ' + str(self.op1) + ' ' + str(self.op2)
+		return 	str(self.assignee) + ' <- < ' + str(self.op1) + ':' + str(type1) + ' ' + str(self.op2) + ':' + str(type2)
 
 class TACLEQ(object):
-	def __init__(self, assignee, op1, op2):
+	def __init__(self, assignee, op1, op2, type1, type2):
 		self.assignee = assignee
 		self.op1 = op1
 		self.op2 = op2
+		self.type1 = type1
+		self.type2 = type2
 
 	def __str__(self):
-		return 	str(self.assignee) + ' <- <= ' + str(self.op1) + ' ' + str(self.op2)
+		return 	str(self.assignee) + ' <- <= ' + str(self.op1) + ':' + str(type1) + ' ' + str(self.op2) + ':' + str(type2)
 
 class TACEqual(object):
-	def __init__(self, assignee, op1, op2):
+	def __init__(self, assignee, op1, op2, type1, type2):
 		self.assignee = assignee
 		self.op1 = op1
 		self.op2 = op2
+		self.type1 = type1
+		self.type2 = type2
 
 	def __str__(self):
-		return 	str(self.assignee) + ' <- = ' + str(self.op1) + ' ' + str(self.op2)
+		return 	str(self.assignee) + ' <- = ' + str(self.op1) + ':' + str(type1) + ' ' + str(self.op2) + ':' + str(type2)
+
+class TACGetType(object):
+	def __init__(self, assignee, op1):
+		self.assignee = assignee
+		self.op1 = op1
+
+	def __str__(self):
+		return 	str(self.assignee) + ' <- get_type ' + str(self.op1)
 
 # Constant assignment instructions
 class TACInt(object):

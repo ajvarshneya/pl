@@ -6,6 +6,7 @@ symbol_counter = 0
 label_counter = 0
 symbol_tables = []
 current_class = None
+string_list = []
 
 # Returns a new symbol (virtual register)
 def ns():
@@ -424,6 +425,11 @@ def tac_int(ast_integer, tac):
 	return assignee
 
 def tac_string(ast_string, tac):
+	global string_list
+
+	if ast_string.constant not in string_list:
+		string_list += [ast_string.constant]
+
 	assignee = ns()
 	tac += [TACString(assignee, ast_string.constant)]
 	return assignee

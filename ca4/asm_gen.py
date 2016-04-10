@@ -148,44 +148,47 @@ def asm_divide(inst, asm):
 	asm += [movl('4(%rsp)', assignee)] # result -> rX
 	asm += [addq('$8', '%rsp')]
 
-# def asm_lt(inst, asm):
-# 	assignee = get_color(inst.assignee)
-# 	op1 = get_color(inst.op1)
-# 	op2 = get_color(inst.op2)
-# 	true_label = 'asm_label_' + nl()
+def asm_lt(inst, asm):
+	assignee = get_color(inst.assignee)
+	op1 = get_color(inst.op1)
+	op2 = get_color(inst.op2)
+	true_label = 'asm_label_' + nl()
 
-# 	 += [end(comment('less than'))] # debugging label
-# 	 += [end(cmpl(op1, op2))]
-# 	 += [end(movl('$1', assignee))]
-# 	 += [end(jl(true_label))]
-# 	 += [end(movl('$0', assignee))]
-# 	 += [end(label(true_label))]
+	 += [end(comment('less than'))] # debugging label
+	 += [end(cmpl(op1, op2))]
+	 += [end(movl('$1', assignee))]
+	 += [end(jl(true_label))]
+	 += [end(movl('$0', assignee))]
+	 += [end(label(true_label))]
 
-# def asm_leq(inst, asm):
-# 	assignee = get_color(inst.assignee)
-# 	op1 = get_color(inst.op1)
-# 	op2 = get_color(inst.op2)
-# 	true_label = 'asm_label_' + nl()
+def asm_leq(inst, asm):
+	assignee = get_color(inst.assignee)
+	op1 = get_color(inst.op1)
+	op2 = get_color(inst.op2)
+	true_label = 'asm_label_' + nl()
 
-# 	 += [end(comment('less than equals'))] # debugging label
-# 	 += [end(cmpl(op1, op2))]
-# 	 += [end(movl('$1', assignee))]
-# 	 += [end(jle(true_label))]
-# 	 += [end(movl('$0', assignee))]
-# 	 += [end(label(true_label))]
+	 += [end(comment('less than equals'))] # debugging label
+	 += [end(cmpl(op1, op2))]
+	 += [end(movl('$1', assignee))]
+	 += [end(jle(true_label))]
+	 += [end(movl('$0', assignee))]
+	 += [end(label(true_label))]
 
-# def asm_equal(inst, asm):
-# 	assignee = get_color(inst.assignee)
-# 	op1 = get_color(inst.op1)
-# 	op2 = get_color(inst.op2)
-# 	true_label = 'asm_label_' + nl()
+def asm_equal(inst, asm):
+	assignee = get_color(inst.assignee)
+	op1 = get_color(inst.op1)
+	op2 = get_color(inst.op2)
+	true_label = 'asm_label_' + nl()
 	
-# 	 += [end(comment('equals'))] # debugging label
-# 	 += [end(cmpl(op1, op2))]
-# 	 += [end(movl('$1', assignee))]
-# 	 += [end(je(true_label))]
-# 	 += [end(movl('$0', assignee))]
-# 	 += [end(label(true_label))]
+	 += [end(comment('equals'))] # debugging label
+	 += [end(cmpl(op1, op2))]
+	 += [end(movl('$1', assignee))]
+	 += [end(je(true_label))]
+	 += [end(movl('$0', assignee))]
+	 += [end(label(true_label))]
+
+def asm_get_type(inst, asm):
+	
 
 def asm_int(inst, asm):
 	asm += [comment("Initialize integer, " + inst.val)]
@@ -337,12 +340,12 @@ def asm_jmp(inst, asm):
 def asm_label(inst, asm):
 	asm += [label(str(inst.label))]
 
-# def asm_bt(inst, asm):
-# 	predicate = get_color(inst.op1)
+def asm_bt(inst, asm):
+	predicate = get_color(inst.op1)
 
-# 	 += [end(comment('branch'))] # debugging label
-# 	 += [end(cmpl(predicate, '$1'))]
-# 	 += [end(je(inst.label))]
+	 += [end(comment('branch'))] # debugging label
+	 += [end(cmpl(predicate, '$1'))]
+	 += [end(je(inst.label))]
 
 def asm_store(inst, spilled_register_address, asm):
 	asm += [comment('store')] # debugging label
