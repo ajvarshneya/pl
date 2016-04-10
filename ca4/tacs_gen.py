@@ -392,21 +392,38 @@ def tac_lt(ast_lt, tac):
 def tac_le(ast_le, tac):
 	type1 = ns()
 	type2 = ns()
+	types_equal = ns()
 	val1 = ns()
 	val2 = ns()
 	box = ns()
 
+	equal_label = "types_equal_" + nl()
+	not_equal_label = "types_not_equal_" + nl()
+	exit_label = "exit_label_" + nl() 
+
 	e1 = tac_expression(ast_le.e1, tac)
 	e2 = tac_expression(ast_le.e2, tac)
 
+	# Compare the types of the operands and branch accordingly
+	tac += [TACGetType(type1, e1)]  
+	tac += [TACGetType(type2, e2)]
+	tac += [TACCmpType(types_equal, type1, type2)]
+	tac += [TACBt(types_equal, equal_label)]
+	tac += [TACBt(types_not_equal, not_equal_label)]
+
+	# Equal types, jump to the correct comparison
+	tac += [TACLabel(equal_label)]
 	tac += [TACUnbox(val1, e1)]
 	tac += [TACUnbox(val2, e2)]
+	tac += [TACBranchToComparison(type1)]
+	tac += [TACLEQ(result, val1, val2)]
+	tac += [TACJmp(exit_label)]
 
-	tac += [TACGetType(type1, e1)]
-	tac += [TACGetType(type2, e2)]
-	tac += [TACCmpType(type1, type2)]
+	# Not equal types, put $0 in result
+	tac += [TACLabel(not_equal_label)]
+	tac += [TACJmp(exit_label)]
 
-	tac += [TACLEQ(result, e1, e2)]
+	tac += [TACLabel(exit_label)]
 	tac += [TACBox(box, result)]
 
 	return box

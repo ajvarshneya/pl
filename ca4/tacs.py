@@ -86,6 +86,22 @@ class TACGetType(object):
 	def __str__(self):
 		return 	str(self.assignee) + ' <- get_type ' + str(self.op1)
 
+class TACCmpType(object):
+	def __init__(self, assignee, op1, op2):
+		self.assignee = assignee
+		self.op1 = op1
+		self.op2 = op2
+
+	def __str__(self):
+		return 	str(self.assignee) + ' <- cmp_type ' + str(self.op1) + str(self.op2)
+
+class TACBranchToComparison(object):
+	def __init__(self, op1):
+		self.op1 = op1
+
+	def __str__(self):
+		return 	"select_comparison " + str(self.op1)
+
 # Constant assignment instructions
 class TACInt(object):
 	def __init__(self, assignee, val):
