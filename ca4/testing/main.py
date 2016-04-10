@@ -67,32 +67,19 @@ def asm_constructors_gen(c_map):
 		constructors += str(pushq("%rbp"))
 		constructors += str(movq("%rsp", "%rbp")) + "\n"
 
-		asm_list = []
-		asm_push_callee(asm_list)
-		for asm in asm_list:
-			constructors += str(asm)
-
 		object_type_tag = "$" + str(type_tags[cool_type])
 		object_size = "$" + str(3 + len(attributes))
 		object_vtable_ptr = "$" + cool_type + "..vtable"
 
 		# Allocate space on the heap (calloc), get object pointer
 		constructors += str(comment("Allocate " + object_size + " bytes on heap"))
+		constructors += asm_push_caller_str()
 		constructors += str(movq(object_size, "%rdi")) # Num fields -> %rdi
 		constructors += str(movq("$8", "%rsi")) # Size (always 8) -> %rsi
-
-		asm_list = []
-		asm_push_caller(asm_list)
-		for asm in asm_list:
-			constructors += str(asm)
-
 		constructors += str(call("calloc")) # Allocate space, ptr -> %rax
+		constructors += asm_pop_caller_str()
 
-		asm_list = []
-		asm_pop_caller(asm_list)
-		for asm in asm_list:
-			constructors += str(asm)
-
+		# Save object pointer
 		constructors += str(movq("%rax", "%rbx")) + "\n"
 
 		# Setup type tag, size, vtable pointer
@@ -104,29 +91,33 @@ def asm_constructors_gen(c_map):
 		constructors += str(movq(object_vtable_ptr, "%rax")) 
 		constructors += str(movq("%rax", "16(%rbx)"))
 
+		# Call default constructors
+		for idx, attribute in enumerate(attributes):
+			offset = (3 + idx) * 8
+			if attribute.typ == "raw.Int":
+				constructors += str(movl("$0", "24(%rbx)"))
+			elif attribute.typ == "raw.String":
+				constructors += str(movq("empty.string", "%rax"))
+				constructors += str(movq("%rax", "24(%rbx)"))
+			else:
+				constructors += asm_push_caller_str()
+				constructors += str(call(attribute.typ + "..new"))
+				constructors += asm_pop_caller_str()
+				constructors += str(movq("%rax", str(offset) + "(%rbx)"))
+
 		# Save object pointer
 		constructors += str(movq("%rbx", "%rax"))
 		constructors += "\n"
 
-		# TAC Generation for attributes
+		# TAC Generation for attribute initialization
 		tac = []
-		tac += [TACLabel(cool_type + "_attributes")]
-
-		# Generate TAC to initialize the attributes
+		tac += [TACLabel(cool_type + "_attr_init")]
 		tac += [TACComment("Attribute initializations for " + cool_type)]
-		for attribute in attributes:
-			attr_reg = get_symbol(attribute.name)
-			tac += [TACDefault(attr_reg, attribute.typ)]
 
 		# Generate TAC to assign attributes with initialization
 		for attribute in attributes:
 			if attribute.kind == "attribute_init":
 				tac += tac_attribute_init(cool_type, attribute)
-
-		# Generate TAC to store attributes at the correct offsets in this class
-		for attribute in attributes:
-			attr_reg = get_symbol(attribute.name)
-			tac += [TACStoreAttribute(attribute.name, attr_reg)]
 
 		blocks = bbs_gen(tac) # Generate basic blocks from TAC instructions
 		blocks = liveness(blocks) # Generate liveness information

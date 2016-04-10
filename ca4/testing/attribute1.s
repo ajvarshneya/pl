@@ -71,14 +71,7 @@ Bool..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
-			# Push callee saved registers
-			pushq %r15
-			pushq %r14
-			pushq %r13
-			pushq %r12
 			# Allocate $4 bytes on heap
-			movq $4, %rdi
-			movq $8, %rsi
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -89,6 +82,8 @@ Bool..new:
 			pushq %r9
 			pushq %r10
 			pushq %r11
+			movq $4, %rdi
+			movq $8, %rsi
 			call calloc
 			# Pop caller saved registers
 			popq %r11
@@ -109,12 +104,10 @@ Bool..new:
 			movq %rax, 8(%rbx)
 			movq $Bool..vtable, %rax
 			movq %rax, 16(%rbx)
+			movl $0, 24(%rbx)
 			movq %rbx, %rax
 
-Bool_attributes:
-			movl $0, 24(%rbx)
-			movq %rbx, %r8
-			movq %r8, 24(%rbx)
+Bool_attr_init:
 
 			# Pop callee saved registers
 			popq %r12
@@ -130,14 +123,7 @@ IO..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
-			# Push callee saved registers
-			pushq %r15
-			pushq %r14
-			pushq %r13
-			pushq %r12
 			# Allocate $3 bytes on heap
-			movq $3, %rdi
-			movq $8, %rsi
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -148,6 +134,8 @@ IO..new:
 			pushq %r9
 			pushq %r10
 			pushq %r11
+			movq $3, %rdi
+			movq $8, %rsi
 			call calloc
 			# Pop caller saved registers
 			popq %r11
@@ -170,7 +158,7 @@ IO..new:
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
 
-IO_attributes:
+IO_attr_init:
 
 			# Pop callee saved registers
 			popq %r12
@@ -186,14 +174,7 @@ Int..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
-			# Push callee saved registers
-			pushq %r15
-			pushq %r14
-			pushq %r13
-			pushq %r12
 			# Allocate $4 bytes on heap
-			movq $4, %rdi
-			movq $8, %rsi
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -204,6 +185,8 @@ Int..new:
 			pushq %r9
 			pushq %r10
 			pushq %r11
+			movq $4, %rdi
+			movq $8, %rsi
 			call calloc
 			# Pop caller saved registers
 			popq %r11
@@ -224,12 +207,10 @@ Int..new:
 			movq %rax, 8(%rbx)
 			movq $Int..vtable, %rax
 			movq %rax, 16(%rbx)
+			movl $0, 24(%rbx)
 			movq %rbx, %rax
 
-Int_attributes:
-			movl $0, 24(%rbx)
-			movq %rbx, %r8
-			movq %r8, 24(%rbx)
+Int_attr_init:
 
 			# Pop callee saved registers
 			popq %r12
@@ -245,14 +226,7 @@ Main..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
-			# Push callee saved registers
-			pushq %r15
-			pushq %r14
-			pushq %r13
-			pushq %r12
-			# Allocate $4 bytes on heap
-			movq $4, %rdi
-			movq $8, %rsi
+			# Allocate $5 bytes on heap
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -263,6 +237,8 @@ Main..new:
 			pushq %r9
 			pushq %r10
 			pushq %r11
+			movq $5, %rdi
+			movq $8, %rsi
 			call calloc
 			# Pop caller saved registers
 			popq %r11
@@ -279,13 +255,60 @@ Main..new:
 			# Store type tag, size, vtable ptr
 			movq $5, %rax
 			movq %rax, 0(%rbx)
-			movq $4, %rax
+			movq $5, %rax
 			movq %rax, 8(%rbx)
 			movq $Main..vtable, %rax
 			movq %rax, 16(%rbx)
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			movq %rax, 24(%rbx)
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			movq %rax, 32(%rbx)
 			movq %rbx, %rax
 
-Main_attributes:
+Main_attr_init:
+			# Loading b
+			movq 32(%rbx), %r9
+			# Initialize integer, 7
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -308,7 +331,101 @@ Main_attributes:
 			popq %rcx
 			popq %rbx
 			movq %rax, %r8
+			# Move value into box, save object pointer
+			movl $7, 24(%r8)
+			# Unboxing t$22
+			movq 24(%r9), %r11
+			# Unboxing t$23
+			movq 24(%r8), %r10
+			# addition
+			movl %r11d, %r9d
+			addl %r10d, %r9d
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			# Boxing t$24
+			movl %r9d, 24(%rax)
+			movq %rax, %r8
+			# Storing a
 			movq %r8, 24(%rbx)
+			# Loading a
+			movq 24(%rbx), %r8
+			# Initialize integer, 9001
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			movq %rax, %r10
+			# Move value into box, save object pointer
+			movl $9001, 24(%r10)
+			# Unboxing t$28
+			movq 24(%r8), %r9
+			# Unboxing t$29
+			movq 24(%r10), %r8
+			# addition
+			movl %r9d, %r10d
+			addl %r8d, %r10d
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			# Boxing t$30
+			movl %r10d, 24(%rax)
+			movq %rax, %r8
+			# Storing b
+			movq %r8, 32(%rbx)
 
 			# Pop callee saved registers
 			popq %r12
@@ -324,14 +441,7 @@ Object..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
-			# Push callee saved registers
-			pushq %r15
-			pushq %r14
-			pushq %r13
-			pushq %r12
 			# Allocate $3 bytes on heap
-			movq $3, %rdi
-			movq $8, %rsi
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -342,6 +452,8 @@ Object..new:
 			pushq %r9
 			pushq %r10
 			pushq %r11
+			movq $3, %rdi
+			movq $8, %rsi
 			call calloc
 			# Pop caller saved registers
 			popq %r11
@@ -364,7 +476,7 @@ Object..new:
 			movq %rax, 16(%rbx)
 			movq %rbx, %rax
 
-Object_attributes:
+Object_attr_init:
 
 			# Pop callee saved registers
 			popq %r12
@@ -380,14 +492,7 @@ String..new:
 			pushq %rbp
 			movq %rsp, %rbp
 
-			# Push callee saved registers
-			pushq %r15
-			pushq %r14
-			pushq %r13
-			pushq %r12
 			# Allocate $4 bytes on heap
-			movq $4, %rdi
-			movq $8, %rsi
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -398,6 +503,8 @@ String..new:
 			pushq %r9
 			pushq %r10
 			pushq %r11
+			movq $4, %rdi
+			movq $8, %rsi
 			call calloc
 			# Pop caller saved registers
 			popq %r11
@@ -418,10 +525,11 @@ String..new:
 			movq %rax, 8(%rbx)
 			movq $String..vtable, %rax
 			movq %rax, 16(%rbx)
+			movq empty.string, %rax
+			movq %rax, 24(%rbx)
 			movq %rbx, %rax
 
-String_attributes:
-			movq %r8, 24(%rbx)
+String_attr_init:
 
 			# Pop callee saved registers
 			popq %r12
@@ -458,35 +566,13 @@ Main.main:
 			movq %rsp, %rbp
 
 Main_main_0:
-			# Initialize integer, 1
-			# Push caller saved registers
-			pushq %rbx
-			pushq %rcx
-			pushq %rdx
-			pushq %rsi
-			pushq %rdi
-			pushq %r8
-			pushq %r9
-			pushq %r10
-			pushq %r11
-			call Int..new
-			# Pop caller saved registers
-			popq %r11
-			popq %r10
-			popq %r9
-			popq %r8
-			popq %rdi
-			popq %rsi
-			popq %rdx
-			popq %rcx
-			popq %rbx
-			movq %rax, %r8
-			# Move value into box, save object pointer
-			movl $1, 24(%r8)
-			movq 24(%rbx), %r9
-			# Dereference the box
+			# Loading a
+			movq 24(%rbx), %r8
+			# Loading b
+			movq 32(%rbx), %r9
+			# Unboxing t$0
 			movq 24(%r8), %r10
-			# Dereference the box
+			# Unboxing t$1
 			movq 24(%r9), %r8
 			# addition
 			movl %r10d, %r9d
@@ -512,10 +598,173 @@ Main_main_0:
 			popq %rdx
 			popq %rcx
 			popq %rbx
-			# Move value into box, save object pointer
+			# Boxing t$2
 			movl %r9d, 24(%rax)
 			movq %rax, %r8
+			# Storing a
 			movq %r8, 24(%rbx)
+			# Initialize integer, 100
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			movq %rax, %r8
+			# Move value into box, save object pointer
+			movl $100, 24(%r8)
+			# Loading a
+			movq 24(%rbx), %r10
+			# Loading b
+			movq 32(%rbx), %r9
+			# Unboxing t$15
+			movq 24(%r10), %r11
+			# Unboxing t$16
+			movq 24(%r9), %r10
+			# multiplication
+			movl %r11d, %r9d
+			imull %r10d, %r9d
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			# Boxing t$17
+			movl %r9d, 24(%rax)
+			movq %rax, %r10
+			# Initialize integer, 2
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			movq %rax, %r11
+			# Move value into box, save object pointer
+			movl $2, 24(%r11)
+			# Unboxing t$11
+			movq 24(%r10), %r9
+			# Unboxing t$12
+			movq 24(%r11), %r10
+			# division
+			subq $8, %rsp
+			pushq %rdx
+			pushq %rax
+			pushq %rcx
+			movl %r10d, 24(%rsp)
+			movl %r9d, %eax
+			cltd
+			movl 24(%rsp), %ecx
+			idivl %ecx
+			movl %eax, 28(%rsp)
+			popq %rcx
+			popq %rax
+			popq %rdx
+			movl 4(%rsp), %r11d
+			addq $8, %rsp
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			# Boxing t$13
+			movl %r11d, 24(%rax)
+			movq %rax, %r9
+			# Unboxing t$6
+			movq 24(%r8), %r10
+			# Unboxing t$7
+			movq 24(%r9), %r8
+			# subtraction
+			movl %r10d, %r9d
+			subl %r8d, %r9d
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call Int..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			# Boxing t$8
+			movl %r9d, 24(%rax)
+			movq %rax, %r8
+			# Storing b
+			movq %r8, 32(%rbx)
 			movq %r8, %rax
 			leave
 			ret

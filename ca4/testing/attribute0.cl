@@ -1,8 +1,10 @@
 class Main inherits IO {
-	a : Int;
+	a : Int <- b + 7;
+	b : Int <- a + 9001;
 	main() : Object {
 		{
-			a <- 1 + a;
+			a;
+			b;
 		}
 	};
 };

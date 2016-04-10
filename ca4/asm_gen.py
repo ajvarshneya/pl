@@ -207,7 +207,7 @@ def asm_int(inst, asm):
 	# Move pointer to object (rax) into box addr register
 	asm += [movq('%rax', box)]
 
-	asm += [comment("Move value into box, save object pointer")]
+	asm += [comment("Move " + inst.val + " into box")]
 	asm += [movl(value, '24(' + box + ')')]
 
 
@@ -254,26 +254,16 @@ def asm_neg(inst, asm):
 	asm += [negl(assignee)]
 
 def asm_default(inst, asm):
-	if inst.c_type == "raw.Int":
-		box = get_color(inst.assignee)
+	# Call constructor
+	asm_push_caller(asm)
+	asm += [call(inst.c_type + "..new")]
+	asm_pop_caller(asm)
 
-		# Move value 0 into object field
-		asm += [movl('$0', '24(%rbx)')]
-		asm += [movq('%rbx', box)]
+	# Get box register
+	box = get_color(inst.assignee)
 
-	elif inst.c_type == "raw.String":
-		pass
-	else:
-		# Call constructor
-		asm_push_caller(asm)
-		asm += [call(inst.c_type + "..new")]
-		asm_pop_caller(asm)
-
-		# Get box register
-		box = get_color(inst.assignee)
-
-		# Move pointer to object (rax) into box addr register
-		asm += [movq('%rax', box)]
+	# Move pointer to object (rax) into box addr register
+	asm += [movq('%rax', box)]
 
 # def asm_out_int(inst, asm):
 # 	op1 = get_color(inst.op1)
@@ -392,7 +382,7 @@ def asm_box(inst, asm):
 	# Get value register and move its value into the box
 	value = get_color(inst.op1, 32)
 
-	asm += [comment("Move value into box, save object pointer")]
+	asm += [comment("Boxing " + inst.op1)]
 	asm += [movl(value, '24(%rax)')]
 
 	# Get box register
@@ -407,10 +397,11 @@ def asm_unbox(inst, asm):
 	value = get_color(inst.assignee)
 
 	# Move box value into value
-	asm += [comment("Dereference the box")]
+	asm += [comment("Unboxing " + inst.assignee)]
 	asm += [movq('24(' + box + ')', value)]
 
 def asm_load_attribute(inst, asm, attributes):
+	asm += [comment("Loading " + inst.identifier)]
 	for i, x in enumerate(attributes):
 		if x.name == inst.identifier: 
 			break
@@ -424,7 +415,7 @@ def asm_store_attribute(inst, asm, attributes):
 	# Have: object to store in attribute, identifier of attribute
 	# Want to update this class's attribute to be that identifier
 	# Need to use self register (rbx) and offset from it by an amount according to class map index
-	
+	asm += [comment("Storing " + inst.identifier)]
 	for i, x in enumerate(attributes):
 		if x.name == inst.identifier: 
 			break
@@ -433,8 +424,41 @@ def asm_store_attribute(inst, asm, attributes):
 
 	asm += [movq(get_color(inst.op1), str(offset) + '(%rbx)')]
 
+def asm_push_caller_str():
+	s = ""
+	asm_list = []
+	asm_push_caller(asm_list)
+	for asm in asm_list:
+		s += str(asm)
+	return s
+
+def asm_pop_caller_str():
+	s = ""
+	asm_list = []
+	asm_pop_caller(asm_list)
+	for asm in asm_list:
+		s += str(asm)
+	return s
+
+def asm_push_callee_str():
+	s = ""
+	asm_list = []
+	asm_push_callee(asm_list)
+	for asm in asm_list:
+		s += str(asm)
+	return s
+
+def asm_pop_callee_str():
+	s = ""
+	asm_list = []
+	asm_pop_callee(asm_list)
+	for asm in asm_list:
+		s += str(asm)
+	return s
+
 def asm_push_caller(asm):
 	asm += [comment('Push caller saved registers')]
+	asm += [pushq('%rbx')]
 	asm += [pushq('%rcx')]
 	asm += [pushq('%rdx')]
 	asm += [pushq('%rsi')]
@@ -454,6 +478,7 @@ def asm_pop_caller(asm):
 	asm += [popq('%rsi')]
 	asm += [popq('%rdx')]
 	asm += [popq('%rcx')]
+	asm += [popq('%rbx')]
 
 def asm_push_callee(asm):
 	asm += [comment('Push callee saved registers')]

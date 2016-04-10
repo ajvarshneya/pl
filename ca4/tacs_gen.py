@@ -140,8 +140,7 @@ def tac_attribute_init(class_name, ast_feature):
 	expr = tac_expression(ast_feature.expr, tac)
 
 	# Assign to identifier
-	assignee = add_symbol(ast_feature.name)
-	tac += [TACAssign(assignee, expr)]
+	tac += [TACStoreAttribute(ast_feature.name, expr)]
 	tac += [TACComment("End of attribute init " + class_name + "_" + ast_feature.name)]
 
 	return tac
