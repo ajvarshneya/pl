@@ -67,6 +67,8 @@ def asm_constructors_gen(c_map):
 		constructors += str(pushq("%rbp"))
 		constructors += str(movq("%rsp", "%rbp")) + "\n"
 
+		constructors += asm_push_callee_str()
+
 		object_type_tag = "$" + str(type_tags[cool_type])
 		object_size = "$" + str(3 + len(attributes))
 		object_vtable_ptr = "$" + cool_type + "..vtable"
@@ -105,10 +107,6 @@ def asm_constructors_gen(c_map):
 				constructors += asm_pop_caller_str()
 				constructors += str(movq("%rax", str(offset) + "(%rbx)"))
 
-		# Save object pointer
-		constructors += str(movq("%rbx", "%rax"))
-		constructors += "\n"
-
 		# TAC Generation for attribute initialization
 		tac = []
 		tac += [TACLabel(cool_type + "_attr_init")]
@@ -134,11 +132,11 @@ def asm_constructors_gen(c_map):
 
 		constructors += "\n"
 
-		# Pop callee saved registers
-		asm_list = []
-		asm_pop_callee(asm_list)
-		for asm in asm_list:
-			constructors += str(asm)
+		# Save object pointer
+		constructors += str(movq("%rbx", "%rax"))
+		constructors += "\n"
+
+		constructors += asm_pop_callee_str()
 
 		constructors += str(leave())
 		constructors += str(ret()) + "\n"
@@ -204,6 +202,7 @@ def asm_start():
 	start_definition += "\t\t\t.type main, @function\n"
 	start_definition += "main:\n"
 	start_definition += str(call("Main..new"))
+	start_definition += str(movq("%rax", "%rbx"))
 	start_definition += str(call("Main.main"))
 	start_definition += str(call("exit"))
 

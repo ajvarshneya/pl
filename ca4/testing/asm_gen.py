@@ -207,7 +207,7 @@ def asm_int(inst, asm):
 	# Move pointer to object (rax) into box addr register
 	asm += [movq('%rax', box)]
 
-	asm += [comment("Move value into box, save object pointer")]
+	asm += [comment("Move " + inst.val + " into box")]
 	asm += [movl(value, '24(' + box + ')')]
 
 
@@ -401,7 +401,7 @@ def asm_unbox(inst, asm):
 	asm += [movq('24(' + box + ')', value)]
 
 def asm_load_attribute(inst, asm, attributes):
-	asm += [comment("Loading " + inst.identifier)]
+	asm += [comment("Loading attribute " + inst.identifier)]
 	for i, x in enumerate(attributes):
 		if x.name == inst.identifier: 
 			break
@@ -415,7 +415,7 @@ def asm_store_attribute(inst, asm, attributes):
 	# Have: object to store in attribute, identifier of attribute
 	# Want to update this class's attribute to be that identifier
 	# Need to use self register (rbx) and offset from it by an amount according to class map index
-	asm += [comment("Storing " + inst.identifier)]
+	asm += [comment("Storing attribute " + inst.identifier)]
 	for i, x in enumerate(attributes):
 		if x.name == inst.identifier: 
 			break

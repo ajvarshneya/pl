@@ -43,48 +43,6 @@ def pop_table():
 	global symbol_tables
 	symbol_tables.pop()
 
-# # Add tac instruction to global list
-# def tacs_append(tac):
-# 	global tacs
-# 	tacs += [tac]
-
-# # Top level tac generator
-# def tacs_gen(ast):
-# 	for ast_class in ast.classes:
-# 		tac_class(ast_class)
-# 	return tacs
-
-# # Generate tac lists for every feature in class
-# def tac_class(ast_class):
-# 	push_table()
-
-# 	# TODO initialize all attributes with TACDefault
-
-# 	# Separate features into methods and attributes
-# 	attributes = []
-# 	methods = []
-# 	for feature in ast_class.features:
-# 		if feature.kind == "attribute_init" | feature.kind == "attribute_no_init":
-# 			attributes += [feature]
-# 		if feature.kind == "method" | feature.kind == "method_formals":
-# 			methods += [feature]
-
-# 	# Initialize all attributes with TACDefault
-# 	for attribute in attributes:
-# 		tac += 
-
-# 	for feature in ast_class.features:
-# 		if ast_feature.kind == "method":
-# 			tac_method(ast_class.name, feature)
-# 		if ast_feature.kind == "method_formals":
-# 			tac_method_formals(ast_class.name, feature)
-# 		if ast_feature.kind == "attribute_no_init":
-# 			tac_attribute_no_init(ast_class.name, feature)
-# 		if ast_feature.kind == "attribute_init":
-# 			tac_attribute_init(ast_class.name, feature)
-
-# 	pop_table()
-
 def tac_method(class_name, ast_feature):
 	# New scope
 	push_table()

@@ -9,8 +9,8 @@ coloring = {}
 
 def get_color(register, size=64):
 	global coloring
-	colors32 = ['%r8d', '%r9d', '%r10d', '%r11d', '%r12d', '%r13d', '%r14d', '%r15d', '%eax', '%ebx', '%ecx', '%edx', '%esi', '%edi']
-	colors64 = ['%r8', '%r9', '%r10', '%r11', '%r12', '%r13', '%r14', '%r15', '%rax', '%rbx', '%rcx', '%rdx', '%rsi', '%rdi']
+	colors32 = ['%r8d', '%r9d', '%r10d', '%r11d', '%r12d', '%r13d', '%r14d', '%r15d', '%ecx', '%edx', '%esi', '%edi']
+	colors64 = ['%r8', '%r9', '%r10', '%r11', '%r12', '%r13', '%r14', '%r15', '%rcx', '%rdx', '%rsi', '%rdi']
 	if size == 64:
 		return str(colors64[int(coloring[register])])
 	if size == 32:
