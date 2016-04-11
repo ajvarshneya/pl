@@ -28,9 +28,9 @@ def asm_gen(blocks, spilled_registers, cool_type, c_map, i_map):
 			if isinstance(inst, TACAssign):	
 				asm_assign(inst, asm)
 			elif isinstance(inst, TACDynamicDispatch):
-				asm_dynamic_dispatch(inst, i_map, asm)
+				asm_dynamic_dispatch(inst, cool_type, i_map, asm)
 			elif isinstance(inst, TACStaticDispatch):
-				asm_static_dispatch(inst, i_map, asm)
+				asm_static_dispatch(inst, cool_type, i_map, asm)
 			elif isinstance(inst, TACSelfDispatch):
 				asm_self_dispatch(inst, cool_type, i_map, asm)
 			elif isinstance(inst, TACLoadParam):
@@ -94,7 +94,7 @@ def asm_assign(inst, asm):
 	asm += [comment('assign')] # debugging label
 	asm += [movq(op1, assignee)]
 
-def asm_dynamic_dispatch(inst, i_map, asm):
+def asm_dynamic_dispatch(inst, cool_type, i_map, asm):
 	assignee = get_color(inst.assignee)
 	receiver = get_color(inst.receiver)
 
@@ -117,9 +117,14 @@ def asm_dynamic_dispatch(inst, i_map, asm):
 	asm += [movq(receiver, "%rbx")]
 
 	# Find method with the method name
-	for idx, method in enumerate(i_map[inst.static_type]):
-		if method.name == inst.method_name:
-			break
+	if inst.static_type == "SELF_TYPE":
+		for idx, method in enumerate(i_map[cool_type]):
+			if method.name == inst.method_name:
+				break
+	else:
+		for idx, method in enumerate(i_map[inst.static_type]):
+			if method.name == inst.method_name:
+				break
 
 	vtable_offset = str(8 * (idx + 2))
 
@@ -139,7 +144,7 @@ def asm_dynamic_dispatch(inst, i_map, asm):
 	# Return
 	asm += [movq("%rax", assignee)]
 
-def asm_static_dispatch(inst, i_map, asm):
+def asm_static_dispatch(inst, cool_type, i_map, asm):
 	assignee = get_color(inst.assignee)
 	receiver = get_color(inst.receiver)
 	
@@ -160,7 +165,10 @@ def asm_static_dispatch(inst, i_map, asm):
 	# Move recevier object into self and call fxn
 	asm += [comment("Move receiver object into self, call function " + inst.method_name)]
 	asm += [movq(receiver, "%rbx")]
-	asm += [call(inst.static_type + "." + inst.method_name)]
+	if inst.static_type == "SELF_TYPE":
+		asm += [call(cool_type + "." + inst.method_name)]
+	else:
+		asm += [call(inst.static_type + "." + inst.method_name)]
 
 	asm += [addq("$" + str(8 * len(inst.params)), "%rsp")]
 
@@ -217,9 +225,11 @@ def asm_self_dispatch(inst, cool_type, i_map, asm):
 
 def asm_load_param(inst, asm):
 	offset = 8 * (inst.offset + 2)
+	asm += [comment("Loading parameter from function call")]
 	asm += [movq(str(offset) + '(%rbp)', get_color(inst.assignee))]
 
 def asm_store_param(inst, asm):
+	asm += [comment("Storing parameter for function call")]
 	asm += [pushq(get_color(inst.op1))]
 
 def asm_plus(inst, asm):
@@ -357,9 +367,10 @@ def asm_string_constant(inst, asm):
 	# Move pointer to object (rax) into box addr register
 	asm += [movq('%rax', box)]
 
-	# Move string constant label into value
-	asm += [comment("Move value into box, save object pointer")]
-	asm += [movq('string_constant..' + str(inst.index), '24(' + box + ')')]
+	# Move string constant label into rax, then into the box
+	asm += [comment("Move value into %rax, then box")]
+	asm += [movq('$string_constant..' + str(inst.index), '%rax')]
+	asm += [movq('%rax', '24(' + box + ')')]
 
 def asm_not(inst, asm):
 	assignee = get_color(inst.assignee, 32)
@@ -379,24 +390,60 @@ def asm_new(inst, asm):
 	assignee = get_color(inst.assignee)
 
 	asm += [comment("Initialize " + inst.static_type)]
-	asm_push_caller(asm)
-	asm += [call(inst.static_type + "..new")]
-	asm_pop_caller(asm)
 
-	asm += [comment("Move result into assignee")]
-	asm += [movq('%rax', assignee)]
+	if inst.static_type == "SELF_TYPE":
+		# Calling convention
+		asm_push_caller(asm)
+
+		asm += [comment("Move vtable pointer into rax")]
+		asm += [movq('16(%rbx)', '%rax')]
+		asm += [comment("Move vtable pointer + constructor offset into rax")]
+		asm += [movq('8(%rax)', '%rax')]
+
+		asm += [call('*%rax')]
+
+		# Calling convention
+		asm_pop_caller(asm)
+
+		box = get_color(inst.assignee)
+		asm += [movq('%rax', box)]		
+	else:
+		asm_push_caller(asm)
+		asm += [call(inst.static_type + "..new")]
+		asm_pop_caller(asm)
+
+		asm += [comment("Move result into assignee")]
+		asm += [movq('%rax', assignee)]
 
 def asm_default(inst, asm):
-	# Call constructor
-	asm_push_caller(asm)
-	asm += [call(inst.static_type + "..new")]
-	asm_pop_caller(asm)
+	if inst.static_type == "SELF_TYPE":
+		# Calling convention
+		asm_push_caller(asm)
 
-	# Get box register
-	box = get_color(inst.assignee)
+		asm += [comment("Move vtable pointer into rax")]
+		asm += [movq('16(%rbx)', '%rax')]
+		asm += [comment("Move vtable pointer + constructor offset into rax")]
+		asm += [movq('8(%rax)', '%rax')]
 
-	# Move pointer to object (rax) into box addr register
-	asm += [movq('%rax', box)]
+		asm += [call('*%rax')]
+
+		# Calling convention
+		asm_pop_caller(asm)
+
+		box = get_color(inst.assignee)
+		asm += [movq('%rax', box)]
+
+	else:
+		# Call constructor
+		asm_push_caller(asm)
+		asm += [call(inst.static_type + "..new")]
+		asm_pop_caller(asm)
+
+		# Get box register
+		box = get_color(inst.assignee)
+
+		# Move pointer to object (rax) into box addr register
+		asm += [movq('%rax', box)]
 
 def asm_jmp(inst, asm):
 	asm += [jmp(str(inst.label))]

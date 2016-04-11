@@ -171,14 +171,28 @@ main
 Main
 3
 SELF_TYPE
+block
+2
+4
+SELF_TYPE
 self_dispatch
-3
+4
 out_string
 1
-3
+4
 String
 string
-Hello, world!
+Hello, world!\n
+5
+SELF_TYPE
+self_dispatch
+5
+out_string
+1
+5
+String
+string
+plz lol wat another string
 Object
 3
 abort
@@ -276,11 +290,25 @@ main
 Object
 3
 SELF_TYPE
+block
+2
+4
+SELF_TYPE
 self_dispatch
-3
+4
 out_string
 1
-3
+4
 String
 string
-Hello, world!
+Hello, world!\n
+5
+SELF_TYPE
+self_dispatch
+5
+out_string
+1
+5
+String
+string
+plz lol wat another string

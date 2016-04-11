@@ -369,7 +369,7 @@ String..new:
 			movq %rax, 8(%rbx)
 			movq $String..vtable, %rax
 			movq %rax, 16(%rbx)
-			movq empty.string, %rax
+			movq $empty.string, %rax
 			movq %rax, 24(%rbx)
 String_attr_init:
 			# Attribute initializations for String
@@ -509,7 +509,50 @@ IO.out_int:
 .globl IO.out_string
 IO.out_string:
 			# Method definition for IO.out_string
-			call exit
+			# out_string
+			pushq %rbp
+			movq %rsp, %rbp
+			# Push callee saved registers
+			pushq %r12
+			pushq %r13
+			pushq %r14
+			pushq %r15
+			# Load formal parameter into %rax
+			movq 16(%rbp), %rax
+			# Unbox string into %rax
+			movq 24(%rax), %rax
+			# Move unboxed string into %rdi
+			movq %rax, %rdi
+			movq $0, %rax
+			# Call printf
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call printf
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			# Pop callee saved registers
+			popq %r15
+			popq %r14
+			popq %r13
+			popq %r12
+			leave
+			ret
 .globl Main.main
 Main.main:
 			# Method definition for Main.main
@@ -522,7 +565,7 @@ Main.main:
 			pushq %r15
 Main_main_0:
 			# Start of method Main_main
-			# Initialize string, Hello, world!
+			# Initialize string, Hello, world!\n
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -545,8 +588,71 @@ Main_main_0:
 			popq %rcx
 			popq %rbx
 			movq %rax, %r9
-			# Move value into box, save object pointer
-			movq string_constant..0, 24(%r9)
+			# Move value into %rax, then box
+			movq $string_constant..0, %rax
+			movq %rax, 24(%r9)
+			# Storing parameter for function call
+			pushq %r9
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			# Push parameters on in reverse
+			subq $8, %rsp
+			movq 80(%rsp), %rax
+			movq %rax, 0(%rsp)
+			# Call function out_string
+			# Move vtable pointer into rax
+			movq 16(%rbx), %rax
+			# Move vtable pointer + offset into rax
+			movq 64(%rax), %rax
+			call *%rax
+			addq $8, %rsp
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			addq $8, %rsp
+			movq %rax, %r8
+			# Initialize string, plz lol wat another string
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call String..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			movq %rax, %r9
+			# Move value into %rax, then box
+			movq $string_constant..1, %rax
+			movq %rax, 24(%r9)
+			# Storing parameter for function call
 			pushq %r9
 			# Push caller saved registers
 			pushq %rbx
@@ -593,7 +699,48 @@ Main_main_0:
 .globl Object.abort
 Object.abort:
 			# Method definition for Object.abort
+			# out_string
+			pushq %rbp
+			movq %rsp, %rbp
+			# Push callee saved registers
+			pushq %r12
+			pushq %r13
+			pushq %r14
+			pushq %r15
+			# Move abort
+ into %rdi
+			movq $abort.string, %rdi
+			movq $0, %rax
+			# Call printf
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call printf
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			# Pop callee saved registers
+			popq %r15
+			popq %r14
+			popq %r13
+			popq %r12
 			call exit
+			leave
+			ret
 .globl Object.copy
 Object.copy:
 			# Method definition for Object.copy
@@ -644,7 +791,15 @@ string_constant..String:
 
 .globl string_constant..0
 string_constant..0:
-			.string "Hello, world!"
+			.string "Hello, world!\n"
+
+.globl string_constant..1
+string_constant..1:
+			.string "plz lol wat another string"
+
+.globl abort.string
+abort.string:
+			.string "abort\n"
 
 .global empty.string
 empty.string:

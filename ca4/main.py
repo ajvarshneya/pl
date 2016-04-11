@@ -100,7 +100,7 @@ def asm_constructors_gen(c_map, i_map):
 			if attribute.typ == "raw.Int":
 				constructors += str(movl("$0", "24(%rbx)"))
 			elif attribute.typ == "raw.String":
-				constructors += str(movq("empty.string", "%rax"))
+				constructors += str(movq("$empty.string", "%rax"))
 				constructors += str(movq("%rax", "24(%rbx)"))
 			else:
 				constructors += asm_push_caller_str()
@@ -169,13 +169,13 @@ def asm_method_definitions_gen(c_map, i_map):
 				if method.associated_class in ["Bool", "Int", "IO", "Object", "String"]:
 					if method.name in ["abort", "type_name", "copy", "out_string", "in_string", "out_int", "in_int", "length", "concat", "substr"]:
 						if method.name == "abort":
-							method_definitions += str(call("exit"))
+							method_definitions += asm_abort_definition()
 						if method.name == "type_name":
 							method_definitions += str(call("exit"))
 						if method.name == "copy":
 							method_definitions += str(call("exit"))
 						if method.name == "out_string":
-							method_definitions += str(call("exit"))
+							method_definitions += asm_out_string_definition()
 						if method.name == "in_string":
 							method_definitions += str(call("exit"))
 						if method.name == "out_int":
@@ -223,6 +223,34 @@ def asm_method_definitions_gen(c_map, i_map):
 
 	return method_definitions
 
+def asm_abort_definition():
+	method = str(comment("out_string"))
+
+	# Calling convention
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
+	method += asm_push_callee_str()
+
+	# Load boxed string into rax, unbox its pointer into %rax, move that into esi
+	method += str(comment("Move abort\\n into %rdi"))
+	method += str(movq("$abort.string", "%rdi"))
+	method += str(movq("$0", "%rax"))
+
+	# Call printf
+	method += str(comment("Call printf"))
+	method += asm_push_caller_str()
+	method += str(call('printf'))
+	method += asm_pop_caller_str()
+
+	# Calling convention
+	method += asm_pop_callee_str()
+
+	method += str(call('exit'))
+
+	method += str(leave())
+	method += str(ret())
+	return method
+
 def asm_out_string_definition():
 	method = str(comment("out_string"))
 
@@ -238,7 +266,7 @@ def asm_out_string_definition():
 	method += str(movq("24(%rax)", "%rax"))
 	method += str(comment("Move unboxed string into %rdi"))
 	method += str(movq("%rax", "%rdi"))
-	method += str(movl("$0", "%eax"))
+	method += str(movq("$0", "%rax"))
 
 	# Call printf
 	method += str(comment("Call printf"))
@@ -251,8 +279,53 @@ def asm_out_string_definition():
 
 	method += str(leave())
 	method += str(ret())
+	return method
 
 def asm_in_string_definition():
+	# method = str(comment("in_string"))
+
+	# # Create new stack frame
+	# method += str(pushq("%rbp"))
+	# method += str(movq("%rsp", "%rbp"))
+
+	# method += asm_push_callee_str()
+
+	# # # No formal parameters
+	# method += str(subq('$4', '%rsp'))
+
+	# # Calling convention
+	# method += asm_push_caller_str()
+
+	# # Setup
+	# offset = len(CALLER_SAVED_REGISTERS) * 8
+	# method += str(leaq(str(offset) + '(%rsp)', '%rsi'))
+	# method += str(movl('$.int_fmt_string', '%edi'))
+	# method += str(movl('$0', '%eax'))
+
+	# method += str(call('__isoc99_scanf'))
+
+	# # Calling convention
+	# method += asm_pop_caller_str()
+
+	# method += str(movl('(%rsp)', '%eax'))
+	# method += str(addq('$4', '%rsp'))
+
+	# # Save in_int value in ebx
+	# method += str(movl('%eax', '%ebx'))
+
+	# # Create new int object, object address in %rax
+	# method += asm_push_caller_str()
+	# method += str(call("Int..new"))
+	# method += asm_pop_caller_str()
+
+	# # Put in_int value in box, %rax has the boxed integer
+	# method += str(movl('%ebx', '24(%rax)'))
+
+	# method += asm_pop_callee_str()
+
+	# method += str(leave())
+	# method += str(ret())
+	# return method
 	pass
 
 def asm_out_int_definition():
@@ -347,11 +420,17 @@ def asm_string_constants_gen(type_names, string_list):
 
 	# Static string constants
 	for idx, string in enumerate(string_list):
+		print string
 		strings += ".globl " + "string_constant.." + str(idx) + "\n"
 		strings += "string_constant.." + str(idx) + ":\n"
 		strings += "\t\t\t.string \"" + string + "\"\n\n"
 
 	# TODO dynamically allocated strings?
+
+	# Hardcoded strings
+	strings += ".globl " + "abort.string" + "\n"
+	strings += "abort.string" + ":\n"
+	strings += "\t\t\t.string \"" + "abort\\n" + "\"\n\n"
 
 	# Handle empty string explicitly
 	strings += ".global empty.string\n"
@@ -439,6 +518,7 @@ def main():
 
 	global string_list
 	type_names = sorted(c_map.keys())
+
 	string_constants = asm_string_constants_gen(type_names, string_list)
 
 	comparison_handlers = asm_comparison_handlers_gen()
