@@ -8,6 +8,11 @@ from asm import *
 from asm_gen import *
 from allocate_registers import *
 
+type_tags = {}
+c_map = {}
+i_map = {}
+p_map = {}
+
 # Reads in raw input
 def read_input(filename):
     f = open(filename)
@@ -22,11 +27,6 @@ def write_output(filename, output):
 	f = open(filename[:-8] + ".s", 'w')
 	f.write(output)
 	f.close()
-
-type_tags = {}
-c_map = {}
-i_map = {}
-p_map = {}
 
 def asm_vtables_gen(i_map):
 	vtables = "###############################################################################\n"
