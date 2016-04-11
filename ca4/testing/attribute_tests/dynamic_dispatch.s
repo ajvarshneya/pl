@@ -506,15 +506,19 @@ A_a_0:
 .globl IO.in_int
 IO.in_int:
 			# Method definition for IO.in_int
+			call exit
 .globl IO.in_string
 IO.in_string:
 			# Method definition for IO.in_string
+			call exit
 .globl IO.out_int
 IO.out_int:
 			# Method definition for IO.out_int
+			call exit
 .globl IO.out_string
 IO.out_string:
 			# Method definition for IO.out_string
+			call exit
 .globl Main.main
 Main.main:
 			# Method definition for Main.main
@@ -579,6 +583,30 @@ Main_main_1:
 			# Move 444 into box
 			movl $444, 24(%r8)
 			pushq %r8
+			# Initialize A
+			# Push caller saved registers
+			pushq %rbx
+			pushq %rcx
+			pushq %rdx
+			pushq %rsi
+			pushq %rdi
+			pushq %r8
+			pushq %r9
+			pushq %r10
+			pushq %r11
+			call A..new
+			# Pop caller saved registers
+			popq %r11
+			popq %r10
+			popq %r9
+			popq %r8
+			popq %rdi
+			popq %rsi
+			popq %rdx
+			popq %rcx
+			popq %rbx
+			# Move result into assignee
+			movq %rax, %r8
 			# Push caller saved registers
 			pushq %rbx
 			pushq %rcx
@@ -597,7 +625,12 @@ Main_main_1:
 			movq %rax, 8(%rsp)
 			# Move receiver object into self, call function
 			movq %r8, %rbx
-			call Object.a
+			# Move vtable pointer into rax
+			movq 16(%r8), %rax
+			# Move vtable pointer + offset into rax
+			movq 40(%rax), %rax
+			call *%rax
+			addq $16, %rsp
 			# Pop caller saved registers
 			popq %r11
 			popq %r10
@@ -608,6 +641,7 @@ Main_main_1:
 			popq %rdx
 			popq %rcx
 			popq %rbx
+			addq $16, %rsp
 			movq %rax, %r8
 			# End of method Main_main
 			# Pop callee saved registers
@@ -620,21 +654,27 @@ Main_main_1:
 .globl Object.abort
 Object.abort:
 			# Method definition for Object.abort
+			call exit
 .globl Object.copy
 Object.copy:
 			# Method definition for Object.copy
+			call exit
 .globl Object.type_name
 Object.type_name:
 			# Method definition for Object.type_name
+			call exit
 .globl String.concat
 String.concat:
 			# Method definition for String.concat
+			call exit
 .globl String.length
 String.length:
 			# Method definition for String.length
+			call exit
 .globl String.substr
 String.substr:
 			# Method definition for String.substr
+			call exit
 
 ###############################################################################
 #;;;;;;;;;;;;;;;;;;;;;;;;;;;;; STRING CONSTANTS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#

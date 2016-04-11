@@ -1,13 +1,12 @@
 from asm import *
 from allocate_registers import *
-from main import i_map
 
 spilled_register_address = {}
 
 CALLER_SAVED_REGISTERS = ['%rbx','%rcx','%rdx','%rsi','%rdi','%r8','%r9','%r10','%r11']
 CALLEE_SAVED_REGISTERS = ['%r12','%r13','%r14','%r15']
 
-def asm_gen(blocks, spilled_registers, attributes):
+def asm_gen(blocks, spilled_registers, attributes, i_map):
 	global spilled_register_address
 
 	asm = []
@@ -27,11 +26,11 @@ def asm_gen(blocks, spilled_registers, attributes):
 			if isinstance(inst, TACAssign):	
 				asm_assign(inst, asm)
 			elif isinstance(inst, TACDynamicDispatch):
-				asm_dynamic_dispatch(inst, asm)
+				asm_dynamic_dispatch(inst, i_map, asm)
 			elif isinstance(inst, TACStaticDispatch):
-				asm_static_dispatch(inst, asm)
+				asm_static_dispatch(inst, i_map, asm)
 			elif isinstance(inst, TACSelfDispatch):
-				asm_self_dispatch(inst, asm)
+				asm_self_dispatch(inst, i_map, asm)
 			elif isinstance(inst, TACLoadParam):
 				asm_load_param(inst, asm)
 			elif isinstance(inst, TACStoreParam):
@@ -86,8 +85,7 @@ def asm_assign(inst, asm):
 	asm += [comment('assign')] # debugging label
 	asm += [movq(op1, assignee)]
 
-def asm_dynamic_dispatch(inst, asm):
-	global i_map
+def asm_dynamic_dispatch(inst, i_map, asm):
 	assignee = get_color(inst.assignee)
 	receiver = get_color(inst.receiver)
 
@@ -102,27 +100,38 @@ def asm_dynamic_dispatch(inst, asm):
 	for idx, param in enumerate(inst.params):
 		offset1 = 8 * (2 * len(inst.params) + len(CALLER_SAVED_REGISTERS) - 1 - idx)
 		offset2 = 8 * idx
-		asm += [(movq(str(offset1) + '(%rsp)', '%rax'))]
-		asm += [(movq('%rax', str(offset2) + '(%rsp)'))]
+		asm += [movq(str(offset1) + '(%rsp)', '%rax')]
+		asm += [movq('%rax', str(offset2) + '(%rsp)')]
 
-	# Move recevier object into self and call fxn
+	# Move receiver object into self and call fxn
 	asm += [comment("Move receiver object into self, call function")]
 	asm += [movq(receiver, "%rbx")]
 
-	vtable_offset = "$" + str(8 * i_map[inst.static_type].index(inst.method_name))
+	# Find method with the method name
+	for idx, method in enumerate(i_map[inst.static_type]):
+		print method.name
+		if method.name == inst.method_name:
+			break
 
+	vtable_offset = str(8 * (idx + 2))
+
+	asm += [comment("Move vtable pointer into rax")]
 	asm += [movq('16(' + receiver + ')', '%rax')]
-	asm += [addq(vtable_offset, '%rax')]
+	asm += [comment("Move vtable pointer + offset into rax")]
+	asm += [movq(vtable_offset + '(%rax)', '%rax')]
 	asm += [call('*%rax')]
 
+	asm += [addq("$" + str(8 * len(inst.params)), "%rsp")]
+
 	# Calling convention
 	asm_pop_caller(asm)
+
+	asm += [addq("$" + str(8 * len(inst.params)), "%rsp")]
 
 	# Return
 	asm += [movq("%rax", assignee)]
 
-def asm_static_dispatch(inst, asm):
-	global i_map
+def asm_static_dispatch(inst, i_map, asm):
 	assignee = get_color(inst.assignee)
 	receiver = get_color(inst.receiver)
 	
@@ -145,14 +154,17 @@ def asm_static_dispatch(inst, asm):
 	asm += [movq(receiver, "%rbx")]
 	asm += [call(inst.static_type + "." + inst.method_name)]
 
+	asm += [addq("$" + str(8 * len(inst.params)), "%rsp")]
+
 	# Calling convention
 	asm_pop_caller(asm)
+
+	asm += [addq("$" + str(8 * len(inst.params)), "%rsp")]
 
 	# Return
 	asm += [movq("%rax", assignee)]
 
-def asm_self_dispatch(inst, asm):
-	global i_map
+def asm_self_dispatch(inst, i_map, asm):
 	assignee = get_color(inst.assignee)
 	receiver = get_color(inst.receiver)
 	
@@ -175,8 +187,12 @@ def asm_self_dispatch(inst, asm):
 	asm += [movq(receiver, "%rbx")]
 	asm += [call(inst.static_type + "." + inst.method_name)]
 
+	asm += [addq("$" + str(8 * len(inst.params)), "%rsp")]
+
 	# Calling convention
 	asm_pop_caller(asm)
+
+	asm += [addq("$" + str(8 * len(inst.params)), "%rsp")]
 
 	# Return
 	asm += [movq("%rax", assignee)]
@@ -324,7 +340,15 @@ def asm_neg(inst, asm):
 	asm += [negl(assignee)]
 
 def asm_new(inst, asm):
-	pass
+	assignee = get_color(inst.assignee)
+
+	asm += [comment("Initialize " + inst.static_type)]
+	asm_push_caller(asm)
+	asm += [call(inst.static_type + "..new")]
+	asm_pop_caller(asm)
+
+	asm += [comment("Move result into assignee")]
+	asm += [movq('%rax', assignee)]
 
 def asm_default(inst, asm):
 	# Call constructor

@@ -8,6 +8,8 @@ from asm import *
 from asm_gen import *
 from allocate_registers import *
 
+type_tags = {}
+
 # Reads in raw input
 def read_input(filename):
     f = open(filename)
@@ -22,11 +24,6 @@ def write_output(filename, output):
 	f = open(filename[:-8] + ".s", 'w')
 	f.write(output)
 	f.close()
-
-type_tags = {}
-c_map = {}
-i_map = {}
-p_map = {}
 
 def asm_vtables_gen(i_map):
 	vtables = "###############################################################################\n"
@@ -50,7 +47,7 @@ def asm_vtables_gen(i_map):
 
 	return vtables
 
-def asm_constructors_gen(c_map):
+def asm_constructors_gen(c_map, i_map):
 	constructors = "\n###############################################################################\n"
 	constructors += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CONSTRUCTORS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	constructors += "###############################################################################\n"
@@ -126,7 +123,7 @@ def asm_constructors_gen(c_map):
 		allocate_registers(blocks) # Get coloring
 
 		# ASSEMBLY GENERATION
-		asm_list = asm_gen(blocks, spilled_registers, attributes)
+		asm_list = asm_gen(blocks, spilled_registers, attributes, i_map)
 		for inst in asm_list:
 			constructors += str(inst)
 
@@ -171,6 +168,7 @@ def asm_method_definitions_gen(c_map, i_map):
 				# Skip built in methods, these will be hard coded
 				if method.associated_class in ["Bool", "Int", "IO", "Object", "String"]:
 					if method.name in ["abort", "type_name", "copy", "out_string", "in_string", "out_int", "in_int", "length", "concat", "substr"]:
+						method_definitions += str(call("exit"))
 						continue
 
 				# TAC GENERATION
@@ -185,7 +183,7 @@ def asm_method_definitions_gen(c_map, i_map):
 				allocate_registers(blocks)
 
 				# ASSEMBLY GENERATION
-				asm_list = asm_gen(blocks, spilled_registers, attributes)
+				asm_list = asm_gen(blocks, spilled_registers, attributes, i_map)
 
 				# Create new stack frame
 				method_definitions += str(pushq("%rbp"))
@@ -292,10 +290,6 @@ def main():
 	iterator = iter(raw_aast) # Get iterator to traverse raw annotated AST
 
 	# Deserialize input into maps, ast
-	global c_map
-	global i_map
-	global p_map
-	
 	c_map = class_map_gen(iterator) # Generate class map dictionary
 	i_map = implementation_map_gen(iterator) # Generate implementation map dictionary
 	p_map = parent_map_gen(iterator) # Generate parent map dictionary
@@ -306,7 +300,7 @@ def main():
 
 	# Generate code to emit
 	vtables = asm_vtables_gen(i_map)
-	constructors = asm_constructors_gen(c_map)
+	constructors = asm_constructors_gen(c_map, i_map)
 	method_definitions = asm_method_definitions_gen(c_map, i_map)
 
 	global string_list
