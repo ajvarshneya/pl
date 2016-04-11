@@ -226,66 +226,31 @@ def asm_method_definitions_gen(c_map, i_map):
 def asm_out_int_definition():
 	method_definitions = str(comment("out_int"))
 
-	# Create new stack frame
+	# Calling convention
 	method_definitions += str(pushq("%rbp"))
 	method_definitions += str(movq("%rsp", "%rbp"))
+	method_definitions += asm_push_callee_str()
 
-	# Load formal parameter into %rax, unbox it into %eax
+	# Load formal parameter into %rax, unbox it into %eax, move that into esi
+	method_definitions += str(comment("Load formal parameter into %rax, unbox it into %eax, move that into esi"))
 	method_definitions += str(movq("16(%rbp)", "%rax"))
-	method_definitions += str(movq("24(%rax)", "%eax"))
+	method_definitions += str(movl("24(%rax)", "%eax"))
+	method_definitions += str(movl("%eax", "%esi"))
+	method_definitions += str(comment("Put string format in %edi"))
+	method_definitions += str(movl("$.int_fmt_string", "%edi"))
+	method_definitions += str(movl("$0", "%eax"))
 
-	# 
-
-	# Calling convention
+	# Call printf
+	method_definitions += str(comment("Call printf"))
 	method_definitions += asm_push_caller_str()
-
-	# Setup
-	offset = len(CALLER_SAVED_REGISTERS) * 8
-	method_definitions += str(leaq(str(offset) + '(%rsp)', '%rsi'))
-	method_definitions += str(movl('$.int_fmt_string', '%rdi'))
-	method_definitions += str(movl('$0', '%eax'))
-
-	method_definitions += str(call('__isoc99_scanf'))
-
-	# Calling convention
+	method_definitions += str(call('printf'))
 	method_definitions += asm_pop_caller_str()
 
-	method_definitions += str(movl('(%rsp)', '%rax'))
-	method_definitions += str(addq('$4', '%rsp'))
+	# Calling convention
+	method_definitions += asm_pop_callee_str()
 
 	method_definitions += str(leave())
 	method_definitions += str(ret())
-
-
-				# op1 = get_color(inst.op1, coloring)
-				# asm += [comment('out_int')] # debugging label
-
-				# asm += [pushq('%rax')] # save registers
-				# asm += [pushq('%rcx')]
-				# asm += [pushq('%rdx')]
-				# asm += [pushq('%rsi')]
-				# asm += [pushq('%rdi')]
-				# asm += [pushq('%r8')]
-				# asm += [pushq('%r9')]
-				# asm += [pushq('%r10')]
-				# asm += [pushq('%r11')]
-
-				# asm += [movl(op1, '%esi')] # put op1 in esi
-				# asm += [movl('$.int_fmt_string', '%edi')] # string format into edi
-				# asm += [movl('$0', '%eax')] # 0 into eax
-				# asm += [call('printf')] # print
-
-				# asm += [popq('%r11')] # restore registers
-				# asm += [popq('%r10')]
-				# asm += [popq('%r9')]
-				# asm += [popq('%r8')]
-				# asm += [popq('%rdi')]
-				# asm += [popq('%rsi')]
-				# asm += [popq('%rdx')]
-				# asm += [popq('%rcx')]
-				# asm += [popq('%rax')]
-
-
 
 def asm_in_int_definition():
 	method_definitions = str(comment("in_int"))
@@ -294,8 +259,10 @@ def asm_in_int_definition():
 	method_definitions += str(pushq("%rbp"))
 	method_definitions += str(movq("%rsp", "%rbp"))
 
-	# No formal parameters
-	asm += str(subq('$4', '%rsp'))
+	method_definitions += asm_push_callee_str()
+
+	# # No formal parameters
+	# asm += str(subq('$4', '%rsp'))
 
 	# Calling convention
 	method_definitions += asm_push_caller_str()
@@ -311,27 +278,24 @@ def asm_in_int_definition():
 	# Calling convention
 	method_definitions += asm_pop_caller_str()
 
-	method_definitions += str(movl('(%rsp)', '%eax'))
-	method_definitions += str(addq('$4', '%rsp'))
-
-	# Push caller saved registers for fxn call
-	asm_push_caller(asm)
+	method_definitions += str(movl('4(%rsp)', '%eax'))
+	# method_definitions += str(addq('$4', '%rsp'))
 
 	# Save in_int value in ebx
 	movl('%eax', '%ebx')
 
 	# Create new int object, object address in %rax
+	method_definitions += asm_push_caller_str()
 	asm += [call("Int..new")]
+	asm_pop_caller(asm)
 
 	# Put in_int value in box, %rax has the boxed integer
 	movl('%ebx', '24(%rax)')
 
-	# Pop caller saved registers for fxn call
-	asm_pop_caller(asm)
+	method_definitions += asm_pop_callee_str()
 
 	method_definitions += str(leave())
 	method_definitions += str(ret())
-
 
 def asm_string_constants_gen(type_names, string_list):
 	strings = "\n###############################################################################\n"
