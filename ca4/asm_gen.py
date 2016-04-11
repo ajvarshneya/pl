@@ -344,7 +344,7 @@ def asm_bool_constant(inst, asm):
 	asm += [movl(value, '24(' + box + ')')]
 
 def asm_string_constant(inst, asm):
-	asm += [comment("Initialize string, " + inst.val)]
+	asm += [comment("Initialize string, " + str(inst.val))]
 
 	# Create new string object, object address in %rax
 	asm_push_caller(asm)
@@ -359,7 +359,7 @@ def asm_string_constant(inst, asm):
 
 	# Move string constant label into value
 	asm += [comment("Move value into box, save object pointer")]
-	asm += [movq('string_constant..' + inst.index, '24(' + box + ')')]
+	asm += [movq('string_constant..' + str(inst.index), '24(' + box + ')')]
 
 def asm_not(inst, asm):
 	assignee = get_color(inst.assignee, 32)

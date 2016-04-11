@@ -435,7 +435,7 @@ def tac_string(ast_string, tac):
 		string_list += [ast_string.constant]
 
 	assignee = ns()
-	tac += [TACString(assignee, ast_string.constant, ast_string.static_type)]
+	tac += [TACString(assignee, ast_string.constant, string_list.index(ast_string.constant), ast_string.static_type)]
 	return assignee
 
 def tac_boolean(ast_boolean, tac):

@@ -136,9 +136,10 @@ class TACBool(object):
 		return str(self.assignee) + ' <- bool ' + str(self.val)
 
 class TACString(object):
-	def __init__(self, assignee, val, static_type):
+	def __init__(self, assignee, val, index, static_type):
 		self.assignee = assignee
 		self.val = val
+		self.index = index
 		self.static_type = static_type
 
 	def __str__(self):
