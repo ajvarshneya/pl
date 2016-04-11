@@ -56,6 +56,7 @@ def tac_method(class_name, ast_feature):
 	# Generate tac for method body
 	expr = tac_expression(ast_feature.expr, tac)
 	
+	tac += [TACReturn(expr)]
 	tac += [TACComment("End of method " + class_name + "_" + ast_feature.name)]
 
 	# End scope
@@ -81,6 +82,7 @@ def tac_method_formals(class_name, ast_feature):
 
 	# Generate tac for method body
 	expr = tac_expression(ast_feature.expr, tac)
+	tac += [TACReturn(expr)]
 	tac += [TACComment("End of method " + class_name + "_" + ast_feature.name)]
 
 	# End scope
@@ -210,7 +212,21 @@ def tac_static_dispatch(ast_static_dispatch, tac):
 	return assignee
 
 def tac_self_dispatch(ast_self_dispatch, tac):
-	pass
+	assignee = ns()
+	method_name = ast_self_dispatch.method
+	static_type = ast_self_dispatch.static_type
+
+	# Evaluate parameters, get their virtual registers
+	params = []
+	for idx, arg in enumerate(ast_self_dispatch.args):
+		param = tac_expression(arg, tac)
+		params += [param]
+		tac += [TACStoreParam(idx, param)]
+
+	# Dispatch call
+	tac += [TACSelfDispatch(assignee, method_name, params, ast_self_dispatch.static_type)]
+
+	return assignee
 
 def tac_if(ast_if, tac):
 	then_label = "if_then_" + nl()
@@ -431,7 +447,10 @@ def tac_identifier(ast_identifier, tac):
 	assignee = ns()
 	symbol = get_symbol(ast_identifier.name)
 	if symbol == None:
-		tac += [TACLoadAttribute(assignee, ast_identifier.name, ast_identifier.static_type)]
+		if ast_identifier.name == "self":
+			tac += [TACSelf(assignee)]
+		else:
+			tac += [TACLoadAttribute(assignee, ast_identifier.name, ast_identifier.static_type)]
 	else:
 		tac += [TACAssign(assignee, symbol, ast_identifier.static_type)]
 	return assignee

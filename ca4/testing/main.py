@@ -123,7 +123,7 @@ def asm_constructors_gen(c_map, i_map):
 		allocate_registers(blocks) # Get coloring
 
 		# ASSEMBLY GENERATION
-		asm_list = asm_gen(blocks, spilled_registers, attributes, i_map)
+		asm_list = asm_gen(blocks, spilled_registers, cool_type, c_map, i_map)
 		for inst in asm_list:
 			constructors += str(inst)
 
@@ -181,9 +181,10 @@ def asm_method_definitions_gen(c_map, i_map):
 				blocks = bbs_gen(tac)
 				blocks = liveness(blocks)
 				allocate_registers(blocks)
-
+				# for block in blocks:
+				# 	print block
 				# ASSEMBLY GENERATION
-				asm_list = asm_gen(blocks, spilled_registers, attributes, i_map)
+				asm_list = asm_gen(blocks, spilled_registers, cool_type, c_map, i_map)
 
 				# Create new stack frame
 				method_definitions += str(pushq("%rbp"))

@@ -6,17 +6,19 @@ spilled_register_address = {}
 CALLER_SAVED_REGISTERS = ['%rbx','%rcx','%rdx','%rsi','%rdi','%r8','%r9','%r10','%r11']
 CALLEE_SAVED_REGISTERS = ['%r12','%r13','%r14','%r15']
 
-def asm_gen(blocks, spilled_registers, attributes, i_map):
+def asm_gen(blocks, spilled_registers, cool_type, c_map, i_map):
 	global spilled_register_address
+
+	attributes = c_map[cool_type]
 
 	asm = []
 
 	# Setup mapping between spilled registers and their memory addresses wrt rbp
 	for i, register in enumerate(spilled_registers):
-		spilled_register_address[register] = str(-4 * (i + 1)) + '(%rbp)'
+		spilled_register_address[register] = str(-8 * (i + 1)) + '(%rbp)'
 
 	# Allocate space for spilled registers on stack
-	spill_space = 4 * len(spilled_registers)
+	spill_space = 8 * len(spilled_registers)
 	if spill_space: asm += [subq('$' + str(spill_space), '%rsp')]
 
 	spill_count = 0
@@ -30,7 +32,7 @@ def asm_gen(blocks, spilled_registers, attributes, i_map):
 			elif isinstance(inst, TACStaticDispatch):
 				asm_static_dispatch(inst, i_map, asm)
 			elif isinstance(inst, TACSelfDispatch):
-				asm_self_dispatch(inst, i_map, asm)
+				asm_self_dispatch(inst, cool_type, i_map, asm)
 			elif isinstance(inst, TACLoadParam):
 				asm_load_param(inst, asm)
 			elif isinstance(inst, TACStoreParam):
@@ -75,8 +77,13 @@ def asm_gen(blocks, spilled_registers, attributes, i_map):
 				asm_load_attribute(inst, asm, attributes)
 			elif isinstance(inst, TACStoreAttribute):
 				asm_store_attribute(inst, asm, attributes)
+			elif isinstance(inst, TACSelf):
+				asm_self(inst, asm)
 			elif isinstance(inst, TACComment):
 				asm_comment(inst, asm)
+
+	if spill_space: asm += [addq('$' + str(spill_space), '%rsp')]
+
 	return asm
 
 def asm_assign(inst, asm):
@@ -104,12 +111,11 @@ def asm_dynamic_dispatch(inst, i_map, asm):
 		asm += [movq('%rax', str(offset2) + '(%rsp)')]
 
 	# Move receiver object into self and call fxn
-	asm += [comment("Move receiver object into self, call function")]
+	asm += [comment("Move receiver object into self, call function " + inst.method_name)]
 	asm += [movq(receiver, "%rbx")]
 
 	# Find method with the method name
 	for idx, method in enumerate(i_map[inst.static_type]):
-		print method.name
 		if method.name == inst.method_name:
 			break
 
@@ -150,7 +156,7 @@ def asm_static_dispatch(inst, i_map, asm):
 		asm += [(movq('%rax', str(offset2) + '(%rsp)'))]
 
 	# Move recevier object into self and call fxn
-	asm += [comment("Move receiver object into self, call function")]
+	asm += [comment("Move receiver object into self, call function " + inst.method_name)]
 	asm += [movq(receiver, "%rbx")]
 	asm += [call(inst.static_type + "." + inst.method_name)]
 
@@ -164,10 +170,9 @@ def asm_static_dispatch(inst, i_map, asm):
 	# Return
 	asm += [movq("%rax", assignee)]
 
-def asm_self_dispatch(inst, i_map, asm):
+def asm_self_dispatch(inst, cool_type, i_map, asm):
 	assignee = get_color(inst.assignee)
-	receiver = get_color(inst.receiver)
-	
+
 	# Calling convention
 	asm_push_caller(asm)
 
@@ -179,13 +184,24 @@ def asm_self_dispatch(inst, i_map, asm):
 	for idx, param in enumerate(inst.params):
 		offset1 = 8 * (2 * len(inst.params) + len(CALLER_SAVED_REGISTERS) - 1 - idx)
 		offset2 = 8 * idx
-		asm += [(movq(str(offset1) + '(%rsp)', '%rax'))]
-		asm += [(movq('%rax', str(offset2) + '(%rsp)'))]
+		asm += [movq(str(offset1) + '(%rsp)', '%rax')]
+		asm += [movq('%rax', str(offset2) + '(%rsp)')]
 
-	# Move recevier object into self and call fxn
-	asm += [comment("Move receiver object into self, call function")]
-	asm += [movq(receiver, "%rbx")]
-	asm += [call(inst.static_type + "." + inst.method_name)]
+	# Move receiver object into self and call fxn
+	asm += [comment("Call function " + inst.method_name)]
+
+	# Find method with the method name
+	for idx, method in enumerate(i_map[cool_type]):
+		if method.name == inst.method_name:
+			break
+
+	vtable_offset = str(8 * (idx + 2))
+
+	asm += [comment("Move vtable pointer into rax")]
+	asm += [movq('16(%rbx)', '%rax')]
+	asm += [comment("Move vtable pointer + offset into rax")]
+	asm += [movq(vtable_offset + '(%rax)', '%rax')]
+	asm += [call('*%rax')]
 
 	asm += [addq("$" + str(8 * len(inst.params)), "%rsp")]
 
@@ -392,8 +408,6 @@ def asm_load(inst, spilled_register_address, asm):
 def asm_return(inst, asm):
 	value = get_color(inst.op1)
 	asm += [movq(value, '%rax')]
-	asm += [leave()]
-	asm += [ret()]
 
 def asm_box(inst, asm):
 	# Push caller saved registers for fxn call
@@ -433,6 +447,7 @@ def asm_unbox(inst, asm):
 
 def asm_load_attribute(inst, asm, attributes):
 	asm += [comment("Loading attribute " + inst.identifier)]
+	i = 0
 	for i, x in enumerate(attributes):
 		if x.name == inst.identifier: 
 			break
@@ -454,6 +469,11 @@ def asm_store_attribute(inst, asm, attributes):
 	offset = (3 + i) * 8
 
 	asm += [movq(get_color(inst.op1), str(offset) + '(%rbx)')]
+
+def asm_self(inst, asm):
+	assignee = get_color(inst.assignee)
+	asm += [comment("Storing self in assignee")]
+	asm += [movq("%rbx", assignee)]
 
 def asm_comment(inst, asm):
 	asm += [comment(inst.text)]

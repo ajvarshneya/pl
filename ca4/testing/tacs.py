@@ -18,9 +18,10 @@ class TACDynamicDispatch(object):
 	def __str__(self):
 		s = str(self.assignee)
 		s += ' <- ' + self.receiver + '.' + self.method_name + '('
-		s += params[0]
-		for p in params[1:-1]:
-			s += ', ' + p 
+		if self.params:
+			s += self.params[0]
+			for p in self.params[1:-1]:
+				s += ', ' + p 
 		s += ")"
 		return 	s
 
@@ -35,9 +36,10 @@ class TACStaticDispatch(object):
 	def __str__(self):
 		s = self.assignee
 		s += ' <- ' + self.receiver + '@' + self.static_type + '.' + self.method_name + '('
-		s += self.params[0]
-		for p in self.params[1:-1]:
-			s += ', ' + p 
+		if self.params:
+			s += self.params[0]
+			for p in self.params[1:-1]:
+				s += ', ' + p 
 		s += ")"
 		return 	s
 
@@ -50,10 +52,11 @@ class TACSelfDispatch(object):
 
 	def __str__(self):
 		s = self.assignee
-		s += ' <- ' + method_name + '('
-		s += params[0]
-		for p in params[1:-1]:
-			s += ', ' + p 
+		s += ' <- ' + self.method_name + '('
+		if self.params:
+			s += self.params[0]
+			for p in self.params[1:-1]:
+				s += ', ' + p 
 		s += ")"
 		return 	s
 
@@ -72,7 +75,7 @@ class TACStoreParam(object):
 		self.op1 = op1
 
 	def __str__(self):
-		return 'param[' + str(offset) + '] <- store_param ' + str(op1)
+		return 'param[' + str(self.offset) + '] <- store_param ' + str(self.op1)
 
 class TACPlus(object):
 	def __init__(self, assignee, op1, op2, static_type):
@@ -265,6 +268,13 @@ class TACStoreAttribute(object):
 
 	def __str__(self):
 		return str(self.identifier) + ' <- store_attr ' + str(self.op1)
+
+class TACSelf(object):
+	def __init__(self, assignee):
+		self.assignee = assignee
+
+	def __str__(self):
+		return str(self.assignee) + ' <- self'
 
 class TACComment(object):
 	def __init__(self, text):

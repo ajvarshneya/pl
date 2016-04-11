@@ -123,7 +123,7 @@ def asm_constructors_gen(c_map, i_map):
 		allocate_registers(blocks) # Get coloring
 
 		# ASSEMBLY GENERATION
-		asm_list = asm_gen(blocks, spilled_registers, attributes, i_map)
+		asm_list = asm_gen(blocks, spilled_registers, cool_type, c_map, i_map)
 		for inst in asm_list:
 			constructors += str(inst)
 
@@ -168,7 +168,26 @@ def asm_method_definitions_gen(c_map, i_map):
 				# Skip built in methods, these will be hard coded
 				if method.associated_class in ["Bool", "Int", "IO", "Object", "String"]:
 					if method.name in ["abort", "type_name", "copy", "out_string", "in_string", "out_int", "in_int", "length", "concat", "substr"]:
-						method_definitions += str(call("exit"))
+						if method.name == "abort":
+							method_definitions += str(call("exit"))
+						if method.name == "type_name":
+							method_definitions += str(call("exit"))
+						if method.name == "copy":
+							method_definitions += str(call("exit"))
+						if method.name == "out_string":
+							method_definitions += str(call("exit"))
+						if method.name == "in_string":
+							method_definitions += str(call("exit"))
+						if method.name == "out_int":
+							method_definitions += asm_out_int_definition()
+						if method.name == "in_int":
+							method_definitions += asm_in_int_definition()
+						if method.name == "length":
+							method_definitions += str(call("exit"))
+						if method.name == "concat":
+							method_definitions += str(call("exit"))
+						if method.name == "substr":
+							method_definitions += str(call("exit"))
 						continue
 
 				# TAC GENERATION
@@ -183,7 +202,7 @@ def asm_method_definitions_gen(c_map, i_map):
 				allocate_registers(blocks)
 
 				# ASSEMBLY GENERATION
-				asm_list = asm_gen(blocks, spilled_registers, attributes, i_map)
+				asm_list = asm_gen(blocks, spilled_registers, cool_type, c_map, i_map)
 
 				# Create new stack frame
 				method_definitions += str(pushq("%rbp"))
@@ -203,6 +222,116 @@ def asm_method_definitions_gen(c_map, i_map):
 				method_definitions += str(ret())
 
 	return method_definitions
+
+def asm_out_int_definition():
+	method_definitions = str(comment("out_int"))
+
+	# Create new stack frame
+	method_definitions += str(pushq("%rbp"))
+	method_definitions += str(movq("%rsp", "%rbp"))
+
+	# Load formal parameter into %rax, unbox it into %eax
+	method_definitions += str(movq("16(%rbp)", "%rax"))
+	method_definitions += str(movq("24(%rax)", "%eax"))
+
+	# 
+
+	# Calling convention
+	method_definitions += asm_push_caller_str()
+
+	# Setup
+	offset = len(CALLER_SAVED_REGISTERS) * 8
+	method_definitions += str(leaq(str(offset) + '(%rsp)', '%rsi'))
+	method_definitions += str(movl('$.int_fmt_string', '%rdi'))
+	method_definitions += str(movl('$0', '%eax'))
+
+	method_definitions += str(call('__isoc99_scanf'))
+
+	# Calling convention
+	method_definitions += asm_pop_caller_str()
+
+	method_definitions += str(movl('(%rsp)', '%rax'))
+	method_definitions += str(addq('$4', '%rsp'))
+
+	method_definitions += str(leave())
+	method_definitions += str(ret())
+
+
+				# op1 = get_color(inst.op1, coloring)
+				# asm += [comment('out_int')] # debugging label
+
+				# asm += [pushq('%rax')] # save registers
+				# asm += [pushq('%rcx')]
+				# asm += [pushq('%rdx')]
+				# asm += [pushq('%rsi')]
+				# asm += [pushq('%rdi')]
+				# asm += [pushq('%r8')]
+				# asm += [pushq('%r9')]
+				# asm += [pushq('%r10')]
+				# asm += [pushq('%r11')]
+
+				# asm += [movl(op1, '%esi')] # put op1 in esi
+				# asm += [movl('$.int_fmt_string', '%edi')] # string format into edi
+				# asm += [movl('$0', '%eax')] # 0 into eax
+				# asm += [call('printf')] # print
+
+				# asm += [popq('%r11')] # restore registers
+				# asm += [popq('%r10')]
+				# asm += [popq('%r9')]
+				# asm += [popq('%r8')]
+				# asm += [popq('%rdi')]
+				# asm += [popq('%rsi')]
+				# asm += [popq('%rdx')]
+				# asm += [popq('%rcx')]
+				# asm += [popq('%rax')]
+
+
+
+def asm_in_int_definition():
+	method_definitions = str(comment("in_int"))
+
+	# Create new stack frame
+	method_definitions += str(pushq("%rbp"))
+	method_definitions += str(movq("%rsp", "%rbp"))
+
+	# No formal parameters
+	asm += str(subq('$4', '%rsp'))
+
+	# Calling convention
+	method_definitions += asm_push_caller_str()
+
+	# Setup
+	offset = len(CALLER_SAVED_REGISTERS) * 8
+	method_definitions += str(leaq(str(offset) + '(%rsp)', '%rsi'))
+	method_definitions += str(movl('$.int_fmt_string', '%edi'))
+	method_definitions += str(movl('$0', '%eax'))
+
+	method_definitions += str(call('__isoc99_scanf'))
+
+	# Calling convention
+	method_definitions += asm_pop_caller_str()
+
+	method_definitions += str(movl('(%rsp)', '%eax'))
+	method_definitions += str(addq('$4', '%rsp'))
+
+	# Push caller saved registers for fxn call
+	asm_push_caller(asm)
+
+	# Save in_int value in ebx
+	movl('%eax', '%ebx')
+
+	# Create new int object, object address in %rax
+	asm += [call("Int..new")]
+
+	# Put in_int value in box, %rax has the boxed integer
+	movl('%ebx', '24(%rax)')
+
+	# Pop caller saved registers for fxn call
+	asm_pop_caller(asm)
+
+	method_definitions += str(leave())
+	method_definitions += str(ret())
+
 
 def asm_string_constants_gen(type_names, string_list):
 	strings = "\n###############################################################################\n"
@@ -258,6 +387,10 @@ def asm_start():
 	start_definition = "\n###############################################################################\n"
 	start_definition += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; START ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	start_definition += "###############################################################################\n"	
+
+	start_definition += ".int_fmt_string:\n"
+	start_definition += "\t.string \"%d\"\n"
+	start_definition += "\t.text\n"
 
 	start_definition += ".globl start\n"
 	start_definition += "start:\n"

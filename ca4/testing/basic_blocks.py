@@ -101,6 +101,10 @@ def percolate(block):
  		if hasattr(inst, 'op2'):
  			live_set.add(inst.op2)
 
+ 		if hasattr(inst, 'params'):
+ 			for param in inst.params:
+ 				live_set.add(param)
+
 	 	# Add live set to list of live sets
 	 	live_sets.insert(0, copy(live_set))
 
