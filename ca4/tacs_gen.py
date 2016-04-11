@@ -55,7 +55,6 @@ def tac_method(class_name, ast_feature):
 
 	# Generate tac for method body
 	expr = tac_expression(ast_feature.expr, tac)
-	tac += [TACReturn(expr)]
 	
 	tac += [TACComment("End of method " + class_name + "_" + ast_feature.name)]
 
@@ -75,14 +74,13 @@ def tac_method_formals(class_name, ast_feature):
 
 	# Dispatch handles generating TAC for the formals before call
 	# However, we have to create an entry point for our actual parameters to be used in the method (formal parameters)
-	for formal in ast_feature.formals:
-		param = add_symbol(formal.name)
-		assignee = ns()
-		tac += [TACLoadParam(assignee, param)]
+	# Move actual parameters from the stack to access them
+	for idx, formal in enumerate(ast_feature.formals):
+		assignee = add_symbol(formal.name)
+		tac += [TACLoadParam(assignee, idx, formal.typ)]
 
 	# Generate tac for method body
 	expr = tac_expression(ast_feature.expr, tac)
-	tac += [TACReturn(expr)]
 	tac += [TACComment("End of method " + class_name + "_" + ast_feature.name)]
 
 	# End scope
@@ -99,15 +97,10 @@ def tac_attribute_init(class_name, ast_feature):
 	expr = tac_expression(ast_feature.expr, tac)
 
 	# Assign to identifier
-	tac += [TACStoreAttribute(ast_feature.name, expr)]
+	tac += [TACStoreAttribute(ast_feature.name, expr, ast_feature.typ)]
 	tac += [TACComment("End of attribute init " + class_name + "_" + ast_feature.name)]
 
 	return tac
-
-# def tac_formal(ast_formal):
-# 	assignee = get_symbol(ast_formal.name)
-# 	tacs_append(TACDefault(assignee, ast_formal.typ))
-# 	return assignee
 
 def tac_expression(ast_expression, tac):
 	if isinstance(ast_expression, ASTAssign):
@@ -170,33 +163,54 @@ def tac_assign(ast_assign, tac):
 	assignee = get_symbol(ast_assign.var)
 	expr = tac_expression(ast_assign.rhs, tac)
 	if assignee == None:
-		tac += [TACStoreAttribute(ast_assign.var, expr)]
+		tac += [TACStoreAttribute(ast_assign.var, expr, ast_assign.static_type)]
 		return expr
 	else:
-		tac += [TACAssign(assignee, expr)]
+		tac += [TACAssign(assignee, expr, ast_assign.static_type)]
 		return assignee
 
 def tac_dynamic_dispatch(ast_dynamic_dispatch, tac):
-	return tac_self_dispatch(ast_dynamic_dispatch)
-
-def tac_static_dispatch(ast_static_dispatch, tac):
-	return tac_self_dispatch(ast_static_dispatch)
-
-def tac_self_dispatch(ast_self_dispatch, tac):
 	assignee = ns()
+	method_name = ast_dynamic_dispatch.method
+	static_type = ast_dynamic_dispatch.static_type
 
-	if ast_self_dispatch.method == "out_string":
-		expr = tac_expression(ast_self_dispatch.args[0], tac)
-		tac += [TACOutString(assignee, expr)]
-	if ast_self_dispatch.method == "out_int":
-		expr = tac_expression(ast_self_dispatch.args[0], tac)
-		tac += [TACOutInt(assignee, expr)]
-	if ast_self_dispatch.method == "in_string":
-		tac += [TACInString(assignee)]
-	if ast_self_dispatch.method == "in_int":
-		tac += [TACInInt(assignee)]
+	# Evaluate parameters, get their virtual registers
+	params = []
+	for idx, arg in enumerate(ast_dynamic_dispatch.args):
+		param = tac_expression(arg, tac)
+		params += [param]
+		tac += [TACStoreParam(idx, param)]
+
+	# Evaluate receiver object
+	receiver = tac_expression(ast_dynamic_dispatch.expr, tac)
+
+	# Dispatch call
+	tac += [TACDynamicDispatch(assignee, receiver, method_name, params, ast_dynamic_dispatch.expr.static_type)]
 
 	return assignee
+
+def tac_static_dispatch(ast_static_dispatch, tac):
+	assignee = ns()
+	method_name = ast_static_dispatch.method
+	static_type = ast_static_dispatch.typ
+
+	# Evaluate parameters, get their virtual registers
+	params = []
+	for idx, arg in enumerate(ast_static_dispatch.args):
+		param = tac_expression(arg, tac)
+		params += [param]
+		tac += [TACStoreParam(idx, param)]
+
+	# Evaluate receiver object
+	receiver = tac_expression(ast_static_dispatch.expr, tac)
+
+	# Dispatch call
+	tac += [TACStaticDispatch(assignee, receiver, method_name, params, static_type)]
+
+	return assignee
+
+def tac_self_dispatch(ast_self_dispatch, tac):
+	pass
 
 def tac_if(ast_if, tac):
 	then_label = "if_then_" + nl()
@@ -207,7 +221,7 @@ def tac_if(ast_if, tac):
 
 	predicate = tac_expression(ast_if.predicate, tac)
 	predicate_not = ns()
-	tac += [TACNot(predicate_not, predicate)]
+	tac += [TACNot(predicate_not, predicate, ast_if.predicate.static_type)]
 
 	# if(predicate)
 	tac += [TACBt(predicate, then_label)]
@@ -216,20 +230,19 @@ def tac_if(ast_if, tac):
 	# then
 	tac += [TACLabel(then_label)]
 	then = tac_expression(ast_if.then, tac)
-	tac += [TACAssign(assignee, then)]
+	tac += [TACAssign(assignee, then, ast_if.then.static_type)]
 	tac += [TACJmp(fi_label)]
 
 	# else
 	tac += [TACLabel(els_label)]
 	els = tac_expression(ast_if.els, tac)
-	tac += [TACAssign(assignee, els)]
+	tac += [TACAssign(assignee, els, ast_if.els.static_type)]
 	tac += [TACJmp(fi_label)]
 
 	# fi
 	tac += [TACLabel(fi_label)]
 
 	return assignee
-
 
 def tac_while(ast_while, tac):
 	start_label = "while_start_" + nl()
@@ -243,7 +256,7 @@ def tac_while(ast_while, tac):
 
 	predicate = tac_expression(ast_while.predicate, tac)
 	predicate_not = ns()
-	tac += [TACNot(predicate_not, predicate)]
+	tac += [TACNot(predicate_not, predicate, ast_while.predicate.static_type)]
 
 	tac += [TACBt(predicate_not, exit_label)]
 	tac += [TACBt(predicate, body_label)]
@@ -267,7 +280,7 @@ def tac_binding(ast_binding, tac):
 	assignee = add_symbol(ast_binding.var)
 	if ast_binding.kind == "let_binding_init":
 		expr = tac_expression(ast_binding.expr, tac)
-		tac += [TACAssign(assignee, expr)]
+		tac += [TACAssign(assignee, expr, ast, ast_binding.typ)]
 	if ast_binding.kind == "let_binding_no_init":
 		typ = ast_binding.typ
 		tac += [TACDefault(assignee, typ)]
@@ -281,7 +294,7 @@ def tac_let(ast_let, tac):
 		tac_binding(binding, tac)
 		
 	expr = tac_expression(ast_let.expr, tac)
-	tac += [TACAssign(assignee, expr)]
+	tac += [TACAssign(assignee, expr, ast_let.static_type)]
 	
 	pop_table()
 
@@ -301,7 +314,7 @@ def tac_new(ast_new, tac):
 def tac_isvoid(ast_isvoid, tac):
 	assignee = ns()
 	expr = tac_expression(ast_isvoid.expr, tac)
-	tac += [TACIsVoid(assignee, expr)]
+	tac += [TACIsVoid(assignee, expr, ast_isvoid.static_type)]
 	return assignee
 
 def tac_plus(ast_plus, tac):
@@ -316,7 +329,7 @@ def tac_plus(ast_plus, tac):
 
 	tac += [TACUnbox(val1, e1)]
 	tac += [TACUnbox(val2, e2)]
-	tac += [TACPlus(result, val1, val2)]
+	tac += [TACPlus(result, val1, val2, ast_plus.static_type)]
 	tac += [TACBox(box, result, box_type)]
 	return box
 
@@ -332,7 +345,7 @@ def tac_minus(ast_minus, tac):
 
 	tac += [TACUnbox(val1, e1)]
 	tac += [TACUnbox(val2, e2)]
-	tac += [TACMinus(result, val1, val2)]
+	tac += [TACMinus(result, val1, val2, ast_minus.static_type)]
 	tac += [TACBox(box, result, box_type)]
 	return box
 
@@ -348,7 +361,7 @@ def tac_multiply(ast_times, tac):
 
 	tac += [TACUnbox(val1, e1)]
 	tac += [TACUnbox(val2, e2)]
-	tac += [TACMultiply(result, val1, val2)]
+	tac += [TACMultiply(result, val1, val2, ast_times.static_type)]
 	tac += [TACBox(box, result, box_type)]
 	return box
 
@@ -364,131 +377,9 @@ def tac_divide(ast_divide, tac):
 
 	tac += [TACUnbox(val1, e1)]
 	tac += [TACUnbox(val2, e2)]
-	tac += [TACDivide(result, val1, val2)]
+	tac += [TACDivide(result, val1, val2, ast_divide.static_type)]
 	tac += [TACBox(box, result, box_type)]
 	return box
-
-# def tac_lt(ast_lt, tac):
-# 	type1 = ns()
-# 	type2 = ns()
-# 	val1 = ns()
-# 	val2 = ns()
-# 	result = ns()
-# 	box = ns()
-
-# 	equal_label = "types_equal_" + nl()
-# 	not_equal_label = "types_not_equal_" + nl()
-# 	exit_label = "exit_label_" + nl() 
-
-# 	int_label = "int_cmp_" + nl()
-# 	bool_label = "bool_cmp_" + nl()
-# 	string_label = "string_cmp_" + nl()
-# 	other_label = "other_cmp_" + nl()
-
-# 	e1 = tac_expression(ast_lt.e1, tac)
-# 	e2 = tac_expression(ast_lt.e2, tac)
-
-# 	# Compare the types of the operands and branch accordingly
-# 	tac += [TACGetType(type1, e1)]  
-# 	tac += [TACGetType(type2, e2)]
-# 	tac += [TACCmpType(type1, type2, equal_label, not_equal_label)]
-
-# 	# Equal types, jump to the correct comparison call
-# 	tac += [TACLabel(equal_label)]
-# 	tac += [TACUnbox(val1, e1)]
-# 	tac += [TACUnbox(val2, e2)]
-# 	tac += [TACBranchToComparison(type1, int_label, bool_label, string_label, other_label)]
-# 	tac += [TACLT(result, val1, val2)] # Comparison call labels
-# 	tac += [TACJmp(exit_label)]
-
-# 	# Not equal types, put $0 in result
-# 	tac += [TACLabel(not_equal_label)]
-# 	tac += [TACBool(result, "false")]
-# 	tac += [TACJmp(exit_label)]
-
-# 	tac += [TACLabel(exit_label)]
-# 	tac += [TACBox(box, result)]
-
-# 	return box
-
-# def tac_le(ast_le, tac):
-# 	type1 = ns()
-# 	type2 = ns()
-# 	val1 = ns()
-# 	val2 = ns()
-# 	result = ns()
-# 	box = ns()
-
-# 	equal_label = "types_equal_" + nl()
-# 	not_equal_label = "types_not_equal_" + nl()
-# 	exit_label = "exit_label_" + nl() 
-
-# 	int_label = "int_cmp_" + nl()
-# 	bool_label = "bool_cmp_" + nl()
-# 	string_label = "string_cmp_" + nl()
-# 	other_label = "other_cmp_" + nl()
-
-# 	e1 = tac_expression(ast_le.e1, tac)
-# 	e2 = tac_expression(ast_le.e2, tac)
-
-# 	# Compare the types of the operands and branch accordingly
-# 	tac += [TACGetType(type1, e1)]
-# 	tac += [TACGetType(type2, e2)]
-# 	tac += [TACCmpType(type1, type2, equal_label, not_equal_label)]
-
-# 	# Equal types, jump to the correct comparison call
-# 	tac += [TACLabel(equal_label)]
-# 	tac += [TACUnbox(val1, e1)]
-# 	tac += [TACUnbox(val2, e2)]
-# 	tac += [TACBranchToComparison(type1, int_label, bool_label, string_label, other_label)]
-# 	tac += [TACLEQ(result, val1, val2)] # Comparison call labels
-# 	tac += [TACJmp(exit_label)]
-
-# 	# Not equal types, put $0 in result
-# 	tac += [TACLabel(not_equal_label)]
-# 	tac += [TACBool(result, "false")]
-# 	tac += [TACJmp(exit_label)]
-
-# 	tac += [TACLabel(exit_label)]
-# 	tac += [TACBox(box, result)]
-
-# 	return box
-
-# def tac_eq(ast_eq, tac):
-# 	type1 = ns()
-# 	type2 = ns()
-# 	result = ns()
-# 	box = ns()
-
-# 	equal_label = "types_equal_" + nl()
-# 	not_equal_label = "types_not_equal_" + nl()
-# 	exit_label = "exit_label_" + nl() 
-
-# 	# Get TAC expressions, boxed
-# 	e1 = tac_expression(ast_eq.e1, tac)
-# 	e2 = tac_expression(ast_eq.e2, tac)
-
-# 	# Compare the types of the operands and branch accordingly
-# 	tac += [TACGetType(type1, e1)]  
-# 	tac += [TACGetType(type2, e2)]
-# 	tac += [TACCmpType(type1, type2, equal_label, not_equal_label)]
-
-# 	# Equal types, jump to the correct comparison call
-# 	tac += [TACLabel(equal_label)]
-# 	tac += [TACCallComparison(type1, exit_label)]
-
-# 	tac += [TACBranchToComparison(type1, int_label, bool_label, string_label, other_label)]
-# 	tac += [TACEqual(result, e1, e2, int_label, bool_label, string_label, other_label, exit_label)] # Comparison call labels
-
-# 	# Not equal types, put $0 in result
-# 	tac += [TACLabel(not_equal_label)]
-# 	tac += [TACBool(result, "false")]
-# 	tac += [TACJmp(exit_label)]
-
-# 	tac += [TACLabel(exit_label)]
-# 	tac += [TACBox(box, result)]
-
-# 	return box
 
 def tac_not(ast_not, tac):
 	val = ns()
@@ -499,7 +390,7 @@ def tac_not(ast_not, tac):
 	expr = tac_expression(ast_not.expr, tac)
 
 	tac += [TACUnbox(val, expr)]
-	tac += [TACNot(result, val)]
+	tac += [TACNot(result, val, ast_not.static_type)]
 	tac += [TACBox(box, result, box_type)]
 	return box
 
@@ -512,13 +403,13 @@ def tac_negate(ast_negate, tac):
 	expr = tac_expression(ast_negate.expr, tac)
 
 	tac += [TACUnbox(val, expr)]
-	tac += [TACNeg(result, val)]
+	tac += [TACNeg(result, val, ast_negate.static_type)]
 	tac += [TACBox(box, result, box_type)]
 	return box
 
 def tac_int(ast_integer, tac):
 	assignee = ns()
-	tac += [TACInt(assignee, ast_integer.constant)]
+	tac += [TACInt(assignee, ast_integer.constant, ast_integer.static_type)]
 	return assignee
 
 def tac_string(ast_string, tac):
@@ -528,19 +419,19 @@ def tac_string(ast_string, tac):
 		string_list += [ast_string.constant]
 
 	assignee = ns()
-	tac += [TACString(assignee, ast_string.constant)]
+	tac += [TACString(assignee, ast_string.constant, ast_string.static_type)]
 	return assignee
 
 def tac_boolean(ast_boolean, tac):
 	assignee = ns()
-	tac += [TACBool(assignee, ast_boolean.constant)]
+	tac += [TACBool(assignee, ast_boolean.constant, ast_boolean.static_type)]
 	return assignee
 
 def tac_identifier(ast_identifier, tac):
 	assignee = ns()
 	symbol = get_symbol(ast_identifier.name)
 	if symbol == None:
-		tac += [TACLoadAttribute(assignee, ast_identifier.name)]
+		tac += [TACLoadAttribute(assignee, ast_identifier.name, ast_identifier.static_type)]
 	else:
-		tac += [TACAssign(assignee, symbol)]
+		tac += [TACAssign(assignee, symbol, ast_identifier.static_type)]
 	return assignee

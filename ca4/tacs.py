@@ -1,5 +1,4 @@
-
-# Arithmetic instructions
+# Static types let us statically determine virtual method table offsets
 class TACAssign(object):
 	def __init__(self, assignee, op1, static_type):
 		self.assignee = assignee
@@ -8,7 +7,6 @@ class TACAssign(object):
 	def __str__(self):
 		return 	(str(self.assignee) + ' <- ' + str(self.op1))
 
-# Need static types to statically determine offsets in the virtual method table
 class TACDynamicDispatch(object):
 	def __init__(self, assignee, receiver, method_name, params, static_type):
 		self.assignee = assignee
@@ -27,7 +25,7 @@ class TACDynamicDispatch(object):
 		return 	s
 
 class TACStaticDispatch(object):
-	def __init__(self, assignee, receiver, params, static_type):
+	def __init__(self, assignee, receiver, method_name, params, static_type):
 		self.assignee = assignee
 		self.receiver = receiver
 		self.method_name = method_name
@@ -58,6 +56,23 @@ class TACSelfDispatch(object):
 			s += ', ' + p 
 		s += ")"
 		return 	s
+
+class TACLoadParam(object):
+	def __init__(self, assignee, offset, static_type):
+		self.assignee = assignee
+		self.offset = offset
+		self.static_type = static_type
+
+	def __str__(self):
+		return str(self.assignee) + ' <- load_param[' + str(self.offset) + ']'
+
+class TACStoreParam(object):
+	def __init__(self, offset, op1):
+		self.offset = offset
+		self.op1 = op1
+
+	def __str__(self):
+		return 'param[' + str(offset) + '] <- store_param ' + str(op1)
 
 class TACPlus(object):
 	def __init__(self, assignee, op1, op2, static_type):
@@ -99,79 +114,6 @@ class TACDivide(object):
 	def __str__(self):
 		return 	str(self.assignee) + ' <- / ' + str(self.op1) + ' ' + str(self.op2)
 
-# # Comparison instructions
-# class TACLT(object):
-# 	def __init__(self, assignee, op1, op2, int_label, bool_label, string_label, other_label, exit_label):
-# 		self.assignee = assignee
-# 		self.op1 = op1
-# 		self.op2 = op2
-# 		self.int_label = int_label
-# 		self.bool_label = bool_label
-# 		self.string_label = string_label
-# 		self.other_label = other_label
-# 		self.exit_label = exit_label
-		
-# 	def __str__(self):
-# 		return 	str(self.assignee) + ' <- < ' + str(self.op1) + ' ' + str(self.op2)
-
-# class TACLEQ(object):
-# 	def __init__(self, assignee, op1, op2, int_label, bool_label, string_label, other_label, exit_label):
-# 		self.assignee = assignee
-# 		self.op1 = op1
-# 		self.op2 = op2
-# 		self.int_label = int_label
-# 		self.bool_label = bool_label
-# 		self.string_label = string_label
-# 		self.other_label = other_label
-# 		self.exit_label = exit_label
-
-# 	def __str__(self):
-# 		return 	str(self.assignee) + ' <- <= ' + str(self.op1) + ' ' + str(self.op2)
-
-# class TACEqual(object):
-# 	def __init__(self, assignee, op1, op2, int_label, bool_label, string_label, other_label, exit_label):
-# 		self.assignee = assignee
-# 		self.op1 = op1
-# 		self.op2 = op2
-# 		self.int_label = int_label
-# 		self.bool_label = bool_label
-# 		self.string_label = string_label
-# 		self.other_label = other_label
-# 		self.exit_label = exit_label
-
-# 	def __str__(self):
-# 		return 	str(self.assignee) + ' <- = ' + str(self.op1) + ' ' + str(self.op2)
-
-# class TACGetType(object):
-# 	def __init__(self, assignee, op1):
-# 		self.assignee = assignee
-# 		self.op1 = op1
-
-# 	def __str__(self):
-# 		return 	str(self.assignee) + ' <- get_type ' + str(self.op1)
-
-# class TACCmpType(object):
-# 	def __init__(self, op1, op2, eq_label, neq_label):
-# 		self.op1 = op1
-# 		self.op2 = op2
-# 		self.eq_label = eq_label
-# 		self.neq_label = neq_label
-
-# 	def __str__(self):
-# 		return 'cmp_type ' + str(self.op1) + str(self.op2)
-
-# class TACBranchToComparison(object):
-# 	def __init__(self, op1, int_label, bool_label, string_label, other_label):
-# 		self.op1 = op1
-# 		self.int_label = int_label
-# 		self.bool_label = bool_label
-# 		self.string_label = string_label
-# 		self.other_label = other_label
-
-# 	def __str__(self):
-# 		return 	"select_comparison " + str(self.op1)
-
-# Constant assignment instructions
 class TACInt(object):
 	def __init__(self, assignee, val, static_type):
 		self.assignee = assignee
@@ -194,52 +136,53 @@ class TACString(object):
 	def __init__(self, assignee, val, static_type):
 		self.assignee = assignee
 		self.val = val
-self.static_type = static_type
+		self.static_type = static_type
 
 	def __str__(self):
 		return str(self.assignee) + ' <- string' + '\n' + str(self.val)
 
 # Boolean NOT instruction
 class TACNot(object):
-	def __init__(self, assignee, op1):
+	def __init__(self, assignee, op1, static_type):
 		self.assignee = assignee
 		self.op1 = op1
+		self.static_type = static_type
 
 	def __str__(self):
 		return str(self.assignee) + ' <- not ' + str(self.op1)
 
 # Integer negation instruction
 class TACNeg(object):
-	def __init__(self, assignee, op1):
+	def __init__(self, assignee, op1, static_type):
 		self.assignee = assignee
 		self.op1 = op1
+		self.static_type = static_type
 
 	def __str__(self):
 		return str(self.assignee) + ' <- ~ ' + str(self.op1)
 
-# New object instruction
 class TACNew(object):
-	def __init__(self, assignee, c_type):
+	def __init__(self, assignee, static_type):
 		self.assignee = assignee
-		self.c_type = c_type
+		self.static_type = static_type
 
 	def __str__(self):
-		return str(self.assignee) + ' <- new ' + str(self.c_type)
+		return str(self.assignee) + ' <- new ' + str(self.static_type)
 
-# Default assignment instruction
 class TACDefault(object):
-	def __init__(self, assignee, c_type):
+	def __init__(self, assignee, static_type):
 		self.assignee = assignee
-		self.c_type = c_type
+		self.static_type = static_type
 
 	def __str__(self):
-		return str(self.assignee) + ' <- default ' + str(self.c_type)
+		return str(self.assignee) + ' <- default ' + str(self.static_type)
 
 # isvoid instruction
 class TACIsVoid(object):
-	def __init__(self, assignee, op1):
+	def __init__(self, assignee, op1, static_type):
 		self.assignee = assignee
 		self.op1 = op1
+		self.static_type = static_type
 
 	def __str__(self):
 		return str(self.assignee) + ' <- isvoid ' + str(self.op1)
@@ -304,15 +247,6 @@ class TACUnbox(object):
 
 	def __str__(self):
 		return str(self.assignee) + ' <- unbox ' + str(self.op1)
-
-class TACLoadParam(object):
-	def __init__(self, assignee, op1, static_type):
-		self.assignee = assignee
-		self.op1 = op1
-		self.static_type = static_type
-
-	def __str__(self):
-		return str(self.assignee) + ' <- load_param ' + str(self.op1)
 
 class TACLoadAttribute(object):
 	def __init__(self, assignee, identifier, static_type):

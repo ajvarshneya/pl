@@ -24,6 +24,9 @@ def write_output(filename, output):
 	f.close()
 
 type_tags = {}
+c_map = {}
+i_map = {}
+p_map = {}
 
 def asm_vtables_gen(i_map):
 	vtables = "###############################################################################\n"
@@ -44,6 +47,7 @@ def asm_vtables_gen(i_map):
 		for method in i_map[cool_type]:
 			# Method labels
 			vtables += "\t\t\t.quad " + method.associated_class + "." + method.name + "\n"
+
 	return vtables
 
 def asm_constructors_gen(c_map):
@@ -66,7 +70,6 @@ def asm_constructors_gen(c_map):
 		# Calling conventions
 		constructors += str(pushq("%rbp"))
 		constructors += str(movq("%rsp", "%rbp"))
-
 		constructors += asm_push_callee_str()
 
 		object_type_tag = "$" + str(type_tags[cool_type])
@@ -108,7 +111,7 @@ def asm_constructors_gen(c_map):
 				constructors += asm_pop_caller_str()
 				constructors += str(movq("%rax", str(offset) + "(%rbx)"))
 
-		# TAC Generation for attribute initialization
+		# TAC GENERATION for attribute initialization
 		tac = []
 		tac += [TACLabel(cool_type + "_attr_init")]
 		tac += [TACComment("Attribute initializations for " + cool_type)]
@@ -122,7 +125,7 @@ def asm_constructors_gen(c_map):
 		blocks = liveness(blocks) # Generate liveness information
 		allocate_registers(blocks) # Get coloring
 
-		# Generate assembly
+		# ASSEMBLY GENERATION
 		asm_list = asm_gen(blocks, spilled_registers, attributes)
 		for inst in asm_list:
 			constructors += str(inst)
@@ -131,11 +134,11 @@ def asm_constructors_gen(c_map):
 		global spilled_register_address
 		spilled_registers_address = {}
 
-		# Save object pointer
+		# Calling conventions
 		constructors += str(movq("%rbx", "%rax"))
 		constructors += asm_pop_callee_str()
 		constructors += str(leave())
-		constructors += str(ret()) + "\n"
+		constructors += str(ret())
 
 		# End scope
 		pop_table()
@@ -165,11 +168,12 @@ def asm_method_definitions_gen(c_map, i_map):
 				method_definitions += method.associated_class + "." + method.name + ":\n"
 				method_definitions += "\t\t\t# Method definition for " + method.associated_class + "." + method.name + "\n"
 
+				# Skip built in methods, these will be hard coded
 				if method.associated_class in ["Bool", "Int", "IO", "Object", "String"]:
 					if method.name in ["abort", "type_name", "copy", "out_string", "in_string", "out_int", "in_int", "length", "concat", "substr"]:
 						continue
 
-				# Generate TAC
+				# TAC GENERATION
 				if method.kind == "method":
 					tac = tac_method(cool_type, method)
 				if method.kind == "method_formals":
@@ -180,7 +184,7 @@ def asm_method_definitions_gen(c_map, i_map):
 				blocks = liveness(blocks)
 				allocate_registers(blocks)
 
-				# Generate assembly from TAC
+				# ASSEMBLY GENERATION
 				asm_list = asm_gen(blocks, spilled_registers, attributes)
 
 				# Create new stack frame
@@ -196,6 +200,9 @@ def asm_method_definitions_gen(c_map, i_map):
 
 				# Calling convention
 				method_definitions += asm_pop_callee_str()
+
+				method_definitions += str(leave())
+				method_definitions += str(ret())
 
 	return method_definitions
 
@@ -216,7 +223,7 @@ def asm_string_constants_gen(type_names, string_list):
 		strings += "string_constant.." + string + ":\n"
 		strings += "\t\t\t.string \"" + string + "\"\n\n"
 
-	# TODO Empty strings?
+	# TODO dynamically allocated strings?
 
 	# Handle empty string explicitly
 	strings += ".global empty.string\n"
@@ -285,6 +292,10 @@ def main():
 	iterator = iter(raw_aast) # Get iterator to traverse raw annotated AST
 
 	# Deserialize input into maps, ast
+	global c_map
+	global i_map
+	global p_map
+	
 	c_map = class_map_gen(iterator) # Generate class map dictionary
 	i_map = implementation_map_gen(iterator) # Generate implementation map dictionary
 	p_map = parent_map_gen(iterator) # Generate parent map dictionary

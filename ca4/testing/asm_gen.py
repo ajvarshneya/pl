@@ -1,7 +1,11 @@
 from asm import *
 from allocate_registers import *
+from main import i_map
 
 spilled_register_address = {}
+
+CALLER_SAVED_REGISTERS = ['%rbx','%rcx','%rdx','%rsi','%rdi','%r8','%r9','%r10','%r11']
+CALLEE_SAVED_REGISTERS = ['%r12','%r13','%r14','%r15']
 
 def asm_gen(blocks, spilled_registers, attributes):
 	global spilled_register_address
@@ -22,6 +26,16 @@ def asm_gen(blocks, spilled_registers, attributes):
 		for inst in block.insts:
 			if isinstance(inst, TACAssign):	
 				asm_assign(inst, asm)
+			elif isinstance(inst, TACDynamicDispatch):
+				asm_dynamic_dispatch(inst, asm)
+			elif isinstance(inst, TACStaticDispatch):
+				asm_static_dispatch(inst, asm)
+			elif isinstance(inst, TACSelfDispatch):
+				asm_self_dispatch(inst, asm)
+			elif isinstance(inst, TACLoadParam):
+				asm_load_param(inst, asm)
+			elif isinstance(inst, TACStoreParam):
+				asm_store_param(inst, asm)
 			elif isinstance(inst, TACPlus):
 				asm_plus(inst, asm)
 			elif isinstance(inst, TACMinus):
@@ -30,12 +44,6 @@ def asm_gen(blocks, spilled_registers, attributes):
 				asm_multiply(inst, asm)
 			elif isinstance(inst, TACDivide):
 				asm_divide(inst, asm)
-			# elif isinstance(inst, TACLT):
-			# 	asm_lt(inst, asm)
-			# elif isinstance(inst, TACLEQ):
-			# 	asm_leq(inst, asm)
-			# elif isinstance(inst, TACEqual):
-			# 	asm_equal(inst, asm)
 			elif isinstance(inst, TACInt):
 				asm_int(inst, asm)
 			elif isinstance(inst, TACBool):
@@ -44,12 +52,10 @@ def asm_gen(blocks, spilled_registers, attributes):
 				asm_not(inst, asm)
 			elif isinstance(inst, TACNeg):
 				asm_neg(inst, asm)
+			elif isinstance(inst, TACNew):
+				asm_new(inst, asm)
 			elif isinstance(inst, TACDefault):
 				asm_default(inst, asm)
-			# elif isinstance(inst, TACOutInt):
-			# 	asm_out_int(inst, asm)
-			# elif isinstance(inst, TACInInt):
-			# 	asm_in_int(inst, asm)
 			elif isinstance(inst, TACJmp):
 				asm_jmp(inst, asm)
 			elif isinstance(inst, TACLabel):
@@ -69,8 +75,9 @@ def asm_gen(blocks, spilled_registers, attributes):
 			elif isinstance(inst, TACLoadAttribute):
 				asm_load_attribute(inst, asm, attributes)
 			elif isinstance(inst, TACStoreAttribute):
-				asm_store_attribute(inst, asm, attributes)		
-
+				asm_store_attribute(inst, asm, attributes)
+			elif isinstance(inst, TACComment):
+				asm_comment(inst, asm)
 	return asm
 
 def asm_assign(inst, asm):
@@ -78,6 +85,108 @@ def asm_assign(inst, asm):
 	op1 = get_color(inst.op1)
 	asm += [comment('assign')] # debugging label
 	asm += [movq(op1, assignee)]
+
+def asm_dynamic_dispatch(inst, asm):
+	global i_map
+	assignee = get_color(inst.assignee)
+	receiver = get_color(inst.receiver)
+
+	# Calling convention
+	asm_push_caller(asm)
+
+	# Make space on stack for parameters
+	asm += [comment("Push parameters on in reverse")]
+	asm += [subq("$" + str(8 * len(inst.params)), "%rsp")]
+
+	# Push parameters on stack in reverse
+	for idx, param in enumerate(inst.params):
+		offset1 = 8 * (2 * len(inst.params) + len(CALLER_SAVED_REGISTERS) - 1 - idx)
+		offset2 = 8 * idx
+		asm += [(movq(str(offset1) + '(%rsp)', '%rax'))]
+		asm += [(movq('%rax', str(offset2) + '(%rsp)'))]
+
+	# Move recevier object into self and call fxn
+	asm += [comment("Move receiver object into self, call function")]
+	asm += [movq(receiver, "%rbx")]
+
+	vtable_offset = "$" + str(8 * i_map[inst.static_type].index(inst.method_name))
+
+	asm += [movq('16(' + receiver + ')', '%rax')]
+	asm += [addq(vtable_offset, '%rax')]
+	asm += [call('*%rax')]
+
+	# Calling convention
+	asm_pop_caller(asm)
+
+	# Return
+	asm += [movq("%rax", assignee)]
+
+def asm_static_dispatch(inst, asm):
+	global i_map
+	assignee = get_color(inst.assignee)
+	receiver = get_color(inst.receiver)
+	
+	# Calling convention
+	asm_push_caller(asm)
+
+	# Make space on stack for parameters
+	asm += [comment("Push parameters on in reverse")]
+	asm += [subq("$" + str(8 * len(inst.params)), "%rsp")]
+
+	# Push parameters on stack in reverse
+	for idx, param in enumerate(inst.params):
+		offset1 = 8 * (2 * len(inst.params) + len(CALLER_SAVED_REGISTERS) - 1 - idx)
+		offset2 = 8 * idx
+		asm += [(movq(str(offset1) + '(%rsp)', '%rax'))]
+		asm += [(movq('%rax', str(offset2) + '(%rsp)'))]
+
+	# Move recevier object into self and call fxn
+	asm += [comment("Move receiver object into self, call function")]
+	asm += [movq(receiver, "%rbx")]
+	asm += [call(inst.static_type + "." + inst.method_name)]
+
+	# Calling convention
+	asm_pop_caller(asm)
+
+	# Return
+	asm += [movq("%rax", assignee)]
+
+def asm_self_dispatch(inst, asm):
+	global i_map
+	assignee = get_color(inst.assignee)
+	receiver = get_color(inst.receiver)
+	
+	# Calling convention
+	asm_push_caller(asm)
+
+	# Make space on stack for parameters
+	asm += [comment("Push parameters on in reverse")]
+	asm += [subq("$" + str(8 * len(inst.params)), "%rsp")]
+
+	# Push parameters on stack in reverse
+	for idx, param in enumerate(inst.params):
+		offset1 = 8 * (2 * len(inst.params) + len(CALLER_SAVED_REGISTERS) - 1 - idx)
+		offset2 = 8 * idx
+		asm += [(movq(str(offset1) + '(%rsp)', '%rax'))]
+		asm += [(movq('%rax', str(offset2) + '(%rsp)'))]
+
+	# Move recevier object into self and call fxn
+	asm += [comment("Move receiver object into self, call function")]
+	asm += [movq(receiver, "%rbx")]
+	asm += [call(inst.static_type + "." + inst.method_name)]
+
+	# Calling convention
+	asm_pop_caller(asm)
+
+	# Return
+	asm += [movq("%rax", assignee)]
+
+def asm_load_param(inst, asm):
+	offset = 8 * (inst.offset + 2)
+	asm += [movq(str(offset) + '(%rbp)', get_color(inst.assignee))]
+
+def asm_store_param(inst, asm):
+	asm += [pushq(get_color(inst.op1))]
 
 def asm_plus(inst, asm):
 	assignee = get_color(inst.assignee, 32)
@@ -148,45 +257,6 @@ def asm_divide(inst, asm):
 	asm += [movl('4(%rsp)', assignee)] # result -> rX
 	asm += [addq('$8', '%rsp')]
 
-# def asm_lt(inst, asm):
-# 	assignee = get_color(inst.assignee)
-# 	op1 = get_color(inst.op1)
-# 	op2 = get_color(inst.op2)
-# 	true_label = 'asm_label_' + nl()
-
-# 	 += [end(comment('less than'))] # debugging label
-# 	 += [end(cmpl(op1, op2))]
-# 	 += [end(movl('$1', assignee))]
-# 	 += [end(jl(true_label))]
-# 	 += [end(movl('$0', assignee))]
-# 	 += [end(label(true_label))]
-
-# def asm_leq(inst, asm):
-# 	assignee = get_color(inst.assignee)
-# 	op1 = get_color(inst.op1)
-# 	op2 = get_color(inst.op2)
-# 	true_label = 'asm_label_' + nl()
-
-# 	 += [end(comment('less than equals'))] # debugging label
-# 	 += [end(cmpl(op1, op2))]
-# 	 += [end(movl('$1', assignee))]
-# 	 += [end(jle(true_label))]
-# 	 += [end(movl('$0', assignee))]
-# 	 += [end(label(true_label))]
-
-# def asm_equal(inst, asm):
-# 	assignee = get_color(inst.assignee)
-# 	op1 = get_color(inst.op1)
-# 	op2 = get_color(inst.op2)
-# 	true_label = 'asm_label_' + nl()
-	
-# 	 += [end(comment('equals'))] # debugging label
-# 	 += [end(cmpl(op1, op2))]
-# 	 += [end(movl('$1', assignee))]
-# 	 += [end(je(true_label))]
-# 	 += [end(movl('$0', assignee))]
-# 	 += [end(label(true_label))]
-
 def asm_int(inst, asm):
 	asm += [comment("Initialize integer, " + inst.val)]
 	# Push caller saved registers for fxn call
@@ -253,10 +323,13 @@ def asm_neg(inst, asm):
 	asm += [movl(op1, assignee)]
 	asm += [negl(assignee)]
 
+def asm_new(inst, asm):
+	pass
+
 def asm_default(inst, asm):
 	# Call constructor
 	asm_push_caller(asm)
-	asm += [call(inst.c_type + "..new")]
+	asm += [call(inst.static_type + "..new")]
 	asm_pop_caller(asm)
 
 	# Get box register
@@ -264,72 +337,6 @@ def asm_default(inst, asm):
 
 	# Move pointer to object (rax) into box addr register
 	asm += [movq('%rax', box)]
-
-# def asm_out_int(inst, asm):
-# 	op1 = get_color(inst.op1)
-# 	 += [end(comment('out_int'))] # debugging label
-
-# 	 += [end(pushq('%rax'))] # save registers
-# 	 += [end(pushq('%rcx'))]
-# 	 += [end(pushq('%rdx'))]
-# 	 += [end(pushq('%rsi'))]
-# 	 += [end(pushq('%rdi'))]
-# 	 += [end(pushq('%r8'))]
-# 	 += [end(pushq('%r9'))]
-# 	 += [end(pushq('%r10'))]
-# 	 += [end(pushq('%r11'))]
-
-# 	 += [end(movl(op1, '%esi'))] # put op1 in esi
-# 	 += [end(movl('$.int_fmt_string', '%edi'))] # string format into edi
-# 	 += [end(movl('$0', '%eax'))] # 0 into eax
-# 	 += [end(call('printf'))] # print
-
-# 	 += [end(popq('%r11'))] # restore registers
-# 	 += [end(popq('%r10'))]
-# 	 += [end(popq('%r9'))]
-# 	 += [end(popq('%r8'))]
-# 	 += [end(popq('%rdi'))]
-# 	 += [end(popq('%rsi'))]
-# 	 += [end(popq('%rdx'))]
-# 	 += [end(popq('%rcx'))]
-# 	 += [end(popq('%rax'))]
-
-# def asm_in_int(inst, asm):
-# 	assignee = get_color(inst.assignee)
-	
-# 	 += [end(comment('in_int'))] # debugging label
-
-# 	 += [end(subq('$4', '%rsp'))]
-
-# 	 += [end(pushq('%rax'))] # save registers
-# 	 += [end(pushq('%rcx'))]
-# 	 += [end(pushq('%rdx'))]
-# 	 += [end(pushq('%rsi'))]
-# 	 += [end(pushq('%rdi'))]
-# 	 += [end(pushq('%r8'))]
-# 	 += [end(pushq('%r9'))]
-# 	 += [end(pushq('%r10'))]
-# 	 += [end(pushq('%r11'))]
-
-# 	# 76 = 4 + 8*9
-# 	 += [end(leaq('72(%rsp)', '%rsi'))]
-# 	 += [end(movl('$.int_fmt_string', '%edi'))]
-# 	 += [end(movl('$0', '%eax'))]
-
-# 	 += [end(call('__isoc99_scanf'))]
-	
-# 	 += [end(popq('%r11'))] # restore registers
-# 	 += [end(popq('%r10'))]
-# 	 += [end(popq('%r9'))]
-# 	 += [end(popq('%r8'))]
-# 	 += [end(popq('%rdi'))]
-# 	 += [end(popq('%rsi'))]
-# 	 += [end(popq('%rdx'))]
-# 	 += [end(popq('%rcx'))]
-# 	 += [end(popq('%rax'))]
-
-# 	 += [end(movl('(%rsp)', assignee))]
-# 	 += [end(addq('$4', '%rsp'))]
 
 def asm_jmp(inst, asm):
 	asm += [jmp(str(inst.label))]
@@ -424,6 +431,9 @@ def asm_store_attribute(inst, asm, attributes):
 
 	asm += [movq(get_color(inst.op1), str(offset) + '(%rbx)')]
 
+def asm_comment(inst, asm):
+	asm += [comment(inst.text)]
+
 def asm_push_caller_str():
 	s = ""
 	asm_list = []
@@ -457,39 +467,22 @@ def asm_pop_callee_str():
 	return s
 
 def asm_push_caller(asm):
+	global CALLER_SAVED_REGISTERS
 	asm += [comment('Push caller saved registers')]
-	asm += [pushq('%rbx')]
-	asm += [pushq('%rcx')]
-	asm += [pushq('%rdx')]
-	asm += [pushq('%rsi')]
-	asm += [pushq('%rdi')]
-	asm += [pushq('%r8')]
-	asm += [pushq('%r9')]
-	asm += [pushq('%r10')]
-	asm += [pushq('%r11')]
+	for reg in CALLER_SAVED_REGISTERS:
+		asm += [pushq(reg)]
 
 def asm_pop_caller(asm):
 	asm += [comment('Pop caller saved registers')]
-	asm += [popq('%r11')]
-	asm += [popq('%r10')]
-	asm += [popq('%r9')]
-	asm += [popq('%r8')]
-	asm += [popq('%rdi')]
-	asm += [popq('%rsi')]
-	asm += [popq('%rdx')]
-	asm += [popq('%rcx')]
-	asm += [popq('%rbx')]
+	for reg in reversed(CALLER_SAVED_REGISTERS):
+		asm += [popq(reg)]
 
 def asm_push_callee(asm):
 	asm += [comment('Push callee saved registers')]
-	asm += [pushq('%r15')]
-	asm += [pushq('%r14')]
-	asm += [pushq('%r13')]
-	asm += [pushq('%r12')]
+	for reg in CALLEE_SAVED_REGISTERS:
+		asm += [pushq(reg)]
 
 def asm_pop_callee(asm):
 	asm += [comment('Pop callee saved registers')]
-	asm += [popq('%r12')]
-	asm += [popq('%r13')]
-	asm += [popq('%r14')]
-	asm += [popq('%r15')]
+	for reg in reversed(CALLEE_SAVED_REGISTERS):
+		asm += [popq(reg)]
