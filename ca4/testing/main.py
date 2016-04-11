@@ -168,7 +168,26 @@ def asm_method_definitions_gen(c_map, i_map):
 				# Skip built in methods, these will be hard coded
 				if method.associated_class in ["Bool", "Int", "IO", "Object", "String"]:
 					if method.name in ["abort", "type_name", "copy", "out_string", "in_string", "out_int", "in_int", "length", "concat", "substr"]:
-						method_definitions += str(call("exit"))
+						if method.name == "abort":
+							method_definitions += str(call("exit"))
+						if method.name == "type_name":
+							method_definitions += str(call("exit"))
+						if method.name == "copy":
+							method_definitions += str(call("exit"))
+						if method.name == "out_string":
+							method_definitions += str(call("exit"))
+						if method.name == "in_string":
+							method_definitions += str(call("exit"))
+						if method.name == "out_int":
+							method_definitions += asm_out_int_definition()
+						if method.name == "in_int":
+							method_definitions += asm_in_int_definition()
+						if method.name == "length":
+							method_definitions += str(call("exit"))
+						if method.name == "concat":
+							method_definitions += str(call("exit"))
+						if method.name == "substr":
+							method_definitions += str(call("exit"))
 						continue
 
 				# TAC GENERATION
@@ -181,8 +200,7 @@ def asm_method_definitions_gen(c_map, i_map):
 				blocks = bbs_gen(tac)
 				blocks = liveness(blocks)
 				allocate_registers(blocks)
-				# for block in blocks:
-				# 	print block
+
 				# ASSEMBLY GENERATION
 				asm_list = asm_gen(blocks, spilled_registers, cool_type, c_map, i_map)
 
@@ -205,6 +223,117 @@ def asm_method_definitions_gen(c_map, i_map):
 
 	return method_definitions
 
+def asm_out_string_definition():
+	method = str(comment("out_string"))
+
+	# Calling convention
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
+	method += asm_push_callee_str()
+
+	# Load boxed string into rax, unbox its pointer into %rax, move that into esi
+	method += str(comment("Load formal parameter into %rax"))
+	method += str(movq("16(%rbp)", "%rax"))
+	method += str(comment("Unbox string into %rax"))
+	method += str(movq("24(%rax)", "%rax"))
+	method += str(comment("Move unboxed string into %rdi"))
+	method += str(movq("%rax", "%rdi"))
+	method += str(movl("$0", "%eax"))
+
+	# Call printf
+	method += str(comment("Call printf"))
+	method += asm_push_caller_str()
+	method += str(call('printf'))
+	method += asm_pop_caller_str()
+
+	# Calling convention
+	method += asm_pop_callee_str()
+
+	method += str(leave())
+	method += str(ret())
+
+def asm_in_string_definition():
+	pass
+
+def asm_out_int_definition():
+	method = str(comment("out_int"))
+
+	# Calling convention
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
+	method += asm_push_callee_str()
+
+	# Load formal parameter into %rax, unbox it into %eax, move that into esi
+	method += str(comment("Load formal parameter into %rax"))
+	method += str(movq("16(%rbp)", "%rax"))
+	method += str(comment("Unbox parameter into %eax"))
+	method += str(movl("24(%rax)", "%eax"))
+	method += str(comment("Move unboxed parameter into %esi"))
+	method += str(movl("%eax", "%esi"))
+	method += str(comment("Put string format in %edi"))
+	method += str(movl("$.int_fmt_string", "%edi"))
+	method += str(movl("$0", "%eax"))
+
+	# Call printf
+	method += str(comment("Call printf"))
+	method += asm_push_caller_str()
+	method += str(call('printf'))
+	method += asm_pop_caller_str()
+
+	# Calling convention
+	method += asm_pop_callee_str()
+
+	method += str(leave())
+	method += str(ret())
+
+	return method
+
+def asm_in_int_definition():
+	method = str(comment("in_int"))
+
+	# Create new stack frame
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
+
+	method += asm_push_callee_str()
+
+	# # No formal parameters
+	method += str(subq('$4', '%rsp'))
+
+	# Calling convention
+	method += asm_push_caller_str()
+
+	# Setup
+	offset = len(CALLER_SAVED_REGISTERS) * 8
+	method += str(leaq(str(offset) + '(%rsp)', '%rsi'))
+	method += str(movl('$.int_fmt_string', '%edi'))
+	method += str(movl('$0', '%eax'))
+
+	method += str(call('__isoc99_scanf'))
+
+	# Calling convention
+	method += asm_pop_caller_str()
+
+	method += str(movl('(%rsp)', '%eax'))
+	method += str(addq('$4', '%rsp'))
+
+	# Save in_int value in ebx
+	method += str(movl('%eax', '%ebx'))
+
+	# Create new int object, object address in %rax
+	method += asm_push_caller_str()
+	method += str(call("Int..new"))
+	method += asm_pop_caller_str()
+
+	# Put in_int value in box, %rax has the boxed integer
+	method += str(movl('%ebx', '24(%rax)'))
+
+	method += asm_pop_callee_str()
+
+	method += str(leave())
+	method += str(ret())
+	return method
+
 def asm_string_constants_gen(type_names, string_list):
 	strings = "\n###############################################################################\n"
 	strings += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;; STRING CONSTANTS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
@@ -217,9 +346,9 @@ def asm_string_constants_gen(type_names, string_list):
 		strings += "\t\t\t.string \"" + cool_type + "\"\n\n"
 
 	# Static string constants
-	for string in string_list:
-		strings += ".globl " + "string_constant.." + string + "\n"
-		strings += "string_constant.." + string + ":\n"
+	for idx, string in enumerate(string_list):
+		strings += ".globl " + "string_constant.." + str(idx) + "\n"
+		strings += "string_constant.." + str(idx) + ":\n"
 		strings += "\t\t\t.string \"" + string + "\"\n\n"
 
 	# TODO dynamically allocated strings?
@@ -259,6 +388,10 @@ def asm_start():
 	start_definition = "\n###############################################################################\n"
 	start_definition += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; START ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	start_definition += "###############################################################################\n"	
+
+	start_definition += ".int_fmt_string:\n"
+	start_definition += "\t.string \"%d\"\n"
+	start_definition += "\t.text\n"
 
 	start_definition += ".globl start\n"
 	start_definition += "start:\n"
