@@ -296,7 +296,7 @@ def tac_binding(ast_binding, tac):
 	assignee = add_symbol(ast_binding.var)
 	if ast_binding.kind == "let_binding_init":
 		expr = tac_expression(ast_binding.expr, tac)
-		tac += [TACAssign(assignee, expr, ast, ast_binding.typ)]
+		tac += [TACAssign(assignee, expr, ast_binding.typ)]
 	if ast_binding.kind == "let_binding_no_init":
 		typ = ast_binding.typ
 		tac += [TACDefault(assignee, typ)]

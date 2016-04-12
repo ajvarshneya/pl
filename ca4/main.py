@@ -177,7 +177,7 @@ def asm_method_definitions_gen(c_map, i_map):
 						if method.name == "out_string":
 							method_definitions += asm_out_string_definition()
 						if method.name == "in_string":
-							method_definitions += str(call("exit"))
+							method_definitions += asm_in_string_definition()
 						if method.name == "out_int":
 							method_definitions += asm_out_int_definition()
 						if method.name == "in_int":
@@ -187,7 +187,7 @@ def asm_method_definitions_gen(c_map, i_map):
 						if method.name == "concat":
 							method_definitions += str(call("exit"))
 						if method.name == "substr":
-							method_definitions += str(call("exit"))
+							method_definitions += asm_substr_definition()
 						continue
 
 				# TAC GENERATION
@@ -282,51 +282,34 @@ def asm_out_string_definition():
 	return method
 
 def asm_in_string_definition():
-	# method = str(comment("in_string"))
+	method = str(comment("in_string"))
 
-	# # Create new stack frame
-	# method += str(pushq("%rbp"))
-	# method += str(movq("%rsp", "%rbp"))
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
 
-	# method += asm_push_callee_str()
+	method += asm_push_callee_str()
 
-	# # # No formal parameters
-	# method += str(subq('$4', '%rsp'))
+	# Call the helper function
+	method += asm_push_caller_str()
+	method += str(call("cool_in_string"))
+	method += asm_pop_caller_str()
 
-	# # Calling convention
-	# method += asm_push_caller_str()
+	# Save in_string value in rbx
+	method += str(movq('%rax', '%rbx'))
 
-	# # Setup
-	# offset = len(CALLER_SAVED_REGISTERS) * 8
-	# method += str(leaq(str(offset) + '(%rsp)', '%rsi'))
-	# method += str(movl('$.int_fmt_string', '%edi'))
-	# method += str(movl('$0', '%eax'))
+	# Create new string object, object address in %rax
+	method += asm_push_caller_str()
+	method += str(call("String..new"))
+	method += asm_pop_caller_str()
 
-	# method += str(call('__isoc99_scanf'))
+	# Put in_string value in box, %rax has the boxed string
+	method += str(movq('%rbx', '24(%rax)'))
 
-	# # Calling convention
-	# method += asm_pop_caller_str()
+	method += asm_pop_callee_str()
 
-	# method += str(movl('(%rsp)', '%eax'))
-	# method += str(addq('$4', '%rsp'))
-
-	# # Save in_int value in ebx
-	# method += str(movl('%eax', '%ebx'))
-
-	# # Create new int object, object address in %rax
-	# method += asm_push_caller_str()
-	# method += str(call("Int..new"))
-	# method += asm_pop_caller_str()
-
-	# # Put in_int value in box, %rax has the boxed integer
-	# method += str(movl('%ebx', '24(%rax)'))
-
-	# method += asm_pop_callee_str()
-
-	# method += str(leave())
-	# method += str(ret())
-	# return method
-	pass
+	method += str(leave())
+	method += str(ret())
+	return method
 
 def asm_out_int_definition():
 	method = str(comment("out_int"))
@@ -349,6 +332,7 @@ def asm_out_int_definition():
 
 	# Call printf
 	method += str(comment("Call printf"))
+
 	method += asm_push_caller_str()
 	method += str(call('printf'))
 	method += asm_pop_caller_str()
@@ -407,6 +391,74 @@ def asm_in_int_definition():
 	method += str(ret())
 	return method
 
+def asm_substr_definition():
+	method = str(comment("substring"))
+
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
+
+	method += asm_push_callee_str()
+
+	# Load formal parameter into %rax, unbox it into %eax, move that into esi
+	method += str(comment("Load string into %rax"))
+	method += str(movq("16(%rbp)", "%rax"))
+	method += str(comment("Unbox string into %rax"))
+	method += str(movq("24(%rax)", "%rax"))
+	method += str(comment("Move unboxed string into r11"))
+	method += str(movq("%rax", "%r11"))
+
+	method += str(comment("Load int1 into %rax"))
+	method += str(movq("16(%rbp)", "%rax"))
+	method += str(comment("Unbox int into %eax"))
+	method += str(movl("24(%rax)", "%eax"))
+	method += str(comment("Move unboxed int into r12d"))
+	method += str(movl("%eax", "%r12d"))
+
+	method += str(comment("Load int2 into %rax"))
+	method += str(movq("16(%rbp)", "%rax"))
+	method += str(comment("Unbox int into %eax"))
+	method += str(movl("24(%rax)", "%eax"))
+	method += str(comment("Move unboxed int into r13d"))
+	method += str(movl("%eax", "%r13d"))
+	method += str(movq("$0", "%rax"))
+
+	# Call the helper function
+	method += asm_push_caller_str()
+
+	# Put parameters on stack
+	method += str(subq("$16", "%rsp"))
+	method += str(movq("%r11", "-8(%rbp)"))
+	method += str(movl("%r12d", "-16(%rbp)"))
+	method += str(movl("%r13d", "-12(%rbp)"))
+
+	method += str(movl("-12(%rbp)", "%edx"))
+	method += str(movl("-16(%rbp)", "%ecx"))
+	method += str(movq("-8(%rbp)", "%rax"))
+	method += str(movl("%ecx", "%esi"))
+	method += str(movq("%rax", "%rdi"))
+
+	method += str(call("cool_substr"))
+
+	method += asm_pop_caller_str()
+
+	# Save substr value in rbx
+	method += str(movq('%rax', '%rbx'))
+
+	# Create new string object, object address in %rax
+	method += asm_push_caller_str()
+	method += str(call("String..new"))
+	method += asm_pop_caller_str()
+
+	# Put substr value in box, %rax has the boxed string
+	method += str(movq('%rbx', '24(%rax)'))
+
+	method += asm_pop_callee_str()
+
+	method += str(leave())
+	method += str(ret())
+	return method
+
+
 def asm_string_constants_gen(type_names, string_list):
 	strings = "\n###############################################################################\n"
 	strings += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;; STRING CONSTANTS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
@@ -420,7 +472,6 @@ def asm_string_constants_gen(type_names, string_list):
 
 	# Static string constants
 	for idx, string in enumerate(string_list):
-		print string
 		strings += ".globl " + "string_constant.." + str(idx) + "\n"
 		strings += "string_constant.." + str(idx) + ":\n"
 		strings += "\t\t\t.string \"" + string + "\"\n\n"
@@ -485,6 +536,157 @@ def asm_start():
 
 	return start_definition
 
+def in_string_built_in():
+	method = ".globl cool_in_string\n"
+	method += "cool_in_string:\n"
+	method += "\t\t\tpushq %rbp\n"
+	method += "\t\t\tmovq %rsp, %rbp\n"
+	method += "\t\t\tsubq $32, %rsp\n"
+	method += "\t\t\tmovl $20, -16(%rbp)\n"
+	method += "\t\t\tmovl $0, -12(%rbp)\n"
+	method += "\t\t\tmovl -16(%rbp), %eax\n"
+	method += "\t\t\tcltq\n"
+	method += "\t\t\tmovq %rax, %rdi\n"
+	method += "\t\t\tcall malloc\n"
+	method += "\t\t\tmovq %rax, -8(%rbp)\n"
+
+	method += "\nin_string_1:\n"
+	method += "\t\t\tcall getchar\n"
+	method += "\t\t\tmovb %al, -17(%rbp)\n"
+	method += "\t\t\tcmpb $10, -17(%rbp)\n"
+	method += "\t\t\tje in_string_2\n"
+	method += "\t\t\tcmpb $-1, -17(%rbp)\n"
+	method += "\t\t\tje in_string_2\n"
+	method += "\t\t\tmovl -12(%rbp), %eax\n"
+	method += "\t\t\tmovslq %eax, %rdx\n"
+	method += "\t\t\tmovq -8(%rbp), %rax\n"
+	method += "\t\t\taddq %rax, %rdx\n"
+	method += "\t\t\tmovzbl -17(%rbp), %eax\n"
+	method += "\t\t\tmovb %al, (%rdx)\n"
+	method += "\t\t\taddl $1, -12(%rbp)\n"
+	method += "\t\t\tcmpb $0, -17(%rbp)\n"
+	method += "\t\t\tjne in_string_3\n"
+	method += "\t\t\tmovl $0, -12(%rbp)\n"
+	method += "\t\t\tjmp in_string_2\n"
+
+	method += "\nin_string_3:\n"
+	method += "\t\t\tmovl -12(%rbp), %eax\n"
+	method += "\t\t\tcmpl -16(%rbp), %eax\n"
+	method += "\t\t\tjne in_string_1\n"
+	method += "\t\t\taddl $20, -16(%rbp)\n"
+	method += "\t\t\tmovl -16(%rbp), %eax\n"
+	method += "\t\t\tmovslq %eax, %rdx\n"
+	method += "\t\t\tmovq -8(%rbp), %rax\n"
+	method += "\t\t\tmovq %rdx, %rsi\n"
+	method += "\t\t\tmovq %rax, %rdi\n"
+	method += "\t\t\tcall realloc\n"
+	method += "\t\t\tmovq %rax, -8(%rbp)\n"
+	method += "\t\t\tjmp in_string_1\n"
+
+	method += "\nin_string_2:\n"
+	method += "\t\t\tmovl -12(%rbp), %eax\n"
+	method += "\t\t\tmovslq %eax, %rdx\n"
+	method += "\t\t\tmovq -8(%rbp), %rax\n"
+	method += "\t\t\tmovq %rdx, %rsi\n"
+	method += "\t\t\tmovq %rax, %rdi\n"
+	method += "\t\t\tcall strndup\n"
+	method += "\t\t\tmovq %rax, -8(%rbp)\n"
+	method += "\t\t\tmovq -8(%rbp), %rax\n"
+
+	method += "\t\t\tleave\n"
+	method += "\t\t\tret\n"
+
+	return method
+
+def substr_built_in():
+	method = ".globl cool_substr\n"
+	method += "cool_substr:\n"
+	method += "\t\t\tpushq %rbp\n"
+	method += "\t\t\tmovq %rsp, %rbp\n"
+	method += "\t\t\tsubq $48, %rsp\n"
+	method += "\t\t\tmovq %rdi, -40(%rbp)\n"
+	method += "\t\t\tmovl %esi, -44(%rbp)\n"
+	method += "\t\t\tmovl %edx, -48(%rbp)\n"
+	method += "\t\t\tmovl $20, -16(%rbp)\n"
+	method += "\t\t\tmovl $0, -12(%rbp)\n"
+	method += "\t\t\tmovl -16(%rbp), %eax\n"
+	method += "\t\t\tcltq\n"
+	method += "\t\t\tmovq %rax, %rdi\n"
+	method += "\t\t\tcall malloc\n"
+	method += "\t\t\tmovq %rax, -8(%rbp)\n"
+	method += "\t\t\tjmp substr_l4\n"
+
+	method += "substr_l1:\n"
+	method += "\t\t\tmovl -48(%rbp), %eax\n"
+	method += "\t\t\tmovslq %eax, %rdx\n"
+	method += "\t\t\tmovq -40(%rbp), %rax\n"
+	method += "\t\t\taddq %rdx, %rax\n"
+	method += "\t\t\tmovzbl (%rax), %eax\n"
+	method += "\t\t\tmovb %al, -17(%rbp)\n"
+	method += "\t\t\tcmpb $-1, -17(%rbp)\n"
+	method += "\t\t\tje substr_l5\n"
+	method += "\t\t\tmovl -12(%rbp), %eax\n"
+	method += "\t\t\tmovslq %eax, %rdx\n"
+	method += "\t\t\tmovq -8(%rbp), %rax\n"
+	method += "\t\t\taddq %rax, %rdx\n"
+	method += "\t\t\tmovzbl -17(%rbp), %eax\n"
+	method += "\t\t\tmovb %al, (%rdx)\n"
+	method += "\t\t\taddl $1, -12(%rbp)\n"
+	method += "\t\t\tcmpb $0, -17(%rbp)\n"
+	method += "\t\t\tjne substr_l2\n"
+	method += "\t\t\tmovl $0, -12(%rbp)\n"
+	method += "\t\t\tjmp substr_l6\n"
+
+	method += "substr_l2:\n"
+	method += "\t\t\tmovl -12(%rbp), %eax\n"
+	method += "\t\t\tcmpl -16(%rbp), %eax\n"
+	method += "\t\t\tjne substr_l3\n"
+	method += "\t\t\taddl $20, -16(%rbp)\n"
+	method += "\t\t\tmovl -16(%rbp), %eax\n"
+	method += "\t\t\tmovslq %eax, %rdx\n"
+	method += "\t\t\tmovq -8(%rbp), %rax\n"
+	method += "\t\t\tmovq %rdx, %rsi\n"
+	method += "\t\t\tmovq %rax, %rdi\n"
+	method += "\t\t\tcall realloc\n"
+	method += "\t\t\tmovq %rax, -8(%rbp)\n"
+
+	method += "substr_l3:\n"
+	method += "\t\t\taddl $1, -48(%rbp)\n"
+
+	method += "substr_l4:\n"
+	method += "\t\t\tmovl -48(%rbp), %eax\n"
+	method += "\t\t\tcmpl -44(%rbp), %eax\n"
+	method += "\t\t\tjl substr_l1\n"
+	method += "\t\t\tjmp substr_l6\n"
+
+	method += "substr_l5:\n"
+	method += "\t\t\tnop\n"
+
+	method += "substr_l6:\n"
+	method += "\t\t\tmovl -12(%rbp), %eax\n"
+	method += "\t\t\tmovslq %eax, %rdx\n"
+	method += "\t\t\tmovq -8(%rbp), %rax\n"
+	method += "\t\t\tmovq %rdx, %rsi\n"
+	method += "\t\t\tmovq %rax, %rdi\n"
+	method += "\t\t\tcall strndup\n"
+	method += "\t\t\tmovq %rax, -8(%rbp)\n"
+	method += "\t\t\tmovq -8(%rbp), %rax\n"
+	method += "\t\t\tleave\n"
+	method += "\t\t\tret\n"
+
+	return method
+
+def asm_built_ins():
+	built_ins = "\n###############################################################################\n"
+	built_ins += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; BUILT INS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
+	built_ins += "###############################################################################\n"	
+
+	built_ins += in_string_built_in()
+	built_ins += substr_built_in()
+
+	return built_ins
+
+
 def get_type_tags(c_map):
 	global type_tags
 	tag_idx = 0
@@ -523,6 +725,7 @@ def main():
 
 	comparison_handlers = asm_comparison_handlers_gen()
 	start = asm_start()
+	built_ins = asm_built_ins()
 
 	# Build output string
 	output = vtables
@@ -531,6 +734,7 @@ def main():
 	output += string_constants
 	output += comparison_handlers
 	output += start
+	output += built_ins
 
 	# Write to output
 	write_output(filename, output)
