@@ -46,9 +46,11 @@ def asm_gen(blocks, spilled_registers, cool_type, c_map, i_map):
 			elif isinstance(inst, TACDivide):
 				asm_divide(inst, asm)
 			elif isinstance(inst, TACInt):
-				asm_int(inst, asm)
+				asm_int_constant(inst, asm)
 			elif isinstance(inst, TACBool):
-				asm_bool(inst, asm)
+				asm_bool_constant(inst, asm)
+			elif isinstance(inst, TACString):
+				asm_string_constant(inst, asm)
 			elif isinstance(inst, TACNot):
 				asm_not(inst, asm)
 			elif isinstance(inst, TACNeg):
@@ -289,7 +291,7 @@ def asm_divide(inst, asm):
 	asm += [movl('4(%rsp)', assignee)] # result -> rX
 	asm += [addq('$8', '%rsp')]
 
-def asm_int(inst, asm):
+def asm_int_constant(inst, asm):
 	asm += [comment("Initialize integer, " + inst.val)]
 	# Push caller saved registers for fxn call
 	asm_push_caller(asm)
@@ -313,7 +315,7 @@ def asm_int(inst, asm):
 	asm += [movl(value, '24(' + box + ')')]
 
 
-def asm_bool(inst, asm):
+def asm_bool_constant(inst, asm):
 	asm += [comment("Initialize boolean, " + inst.val)]
 
 	# Push caller saved registers for fxn call
@@ -340,6 +342,24 @@ def asm_bool(inst, asm):
 
 	asm += [comment("Move value into box, save object pointer")]
 	asm += [movl(value, '24(' + box + ')')]
+
+def asm_string_constant(inst, asm):
+	asm += [comment("Initialize string, " + str(inst.val))]
+
+	# Create new string object, object address in %rax
+	asm_push_caller(asm)
+	asm += [call("String..new")]
+	asm_pop_caller(asm)
+
+	# Get box register
+	box = get_color(inst.assignee)
+
+	# Move pointer to object (rax) into box addr register
+	asm += [movq('%rax', box)]
+
+	# Move string constant label into value
+	asm += [comment("Move value into box, save object pointer")]
+	asm += [movq('string_constant..' + str(inst.index), '24(' + box + ')')]
 
 def asm_not(inst, asm):
 	assignee = get_color(inst.assignee, 32)

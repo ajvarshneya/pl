@@ -223,115 +223,116 @@ def asm_method_definitions_gen(c_map, i_map):
 
 	return method_definitions
 
+def asm_out_string_definition():
+	method = str(comment("out_string"))
+
+	# Calling convention
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
+	method += asm_push_callee_str()
+
+	# Load boxed string into rax, unbox its pointer into %rax, move that into esi
+	method += str(comment("Load formal parameter into %rax"))
+	method += str(movq("16(%rbp)", "%rax"))
+	method += str(comment("Unbox string into %rax"))
+	method += str(movq("24(%rax)", "%rax"))
+	method += str(comment("Move unboxed string into %rdi"))
+	method += str(movq("%rax", "%rdi"))
+	method += str(movl("$0", "%eax"))
+
+	# Call printf
+	method += str(comment("Call printf"))
+	method += asm_push_caller_str()
+	method += str(call('printf'))
+	method += asm_pop_caller_str()
+
+	# Calling convention
+	method += asm_pop_callee_str()
+
+	method += str(leave())
+	method += str(ret())
+
+def asm_in_string_definition():
+	pass
+
 def asm_out_int_definition():
-	method_definitions = str(comment("out_int"))
-
-	# Create new stack frame
-	method_definitions += str(pushq("%rbp"))
-	method_definitions += str(movq("%rsp", "%rbp"))
-
-	# Load formal parameter into %rax, unbox it into %eax
-	method_definitions += str(movq("16(%rbp)", "%rax"))
-	method_definitions += str(movq("24(%rax)", "%eax"))
-
-	# 
+	method = str(comment("out_int"))
 
 	# Calling convention
-	method_definitions += asm_push_caller_str()
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
+	method += asm_push_callee_str()
 
-	# Setup
-	offset = len(CALLER_SAVED_REGISTERS) * 8
-	method_definitions += str(leaq(str(offset) + '(%rsp)', '%rsi'))
-	method_definitions += str(movl('$.int_fmt_string', '%rdi'))
-	method_definitions += str(movl('$0', '%eax'))
+	# Load formal parameter into %rax, unbox it into %eax, move that into esi
+	method += str(comment("Load formal parameter into %rax"))
+	method += str(movq("16(%rbp)", "%rax"))
+	method += str(comment("Unbox parameter into %eax"))
+	method += str(movl("24(%rax)", "%eax"))
+	method += str(comment("Move unboxed parameter into %esi"))
+	method += str(movl("%eax", "%esi"))
+	method += str(comment("Put string format in %edi"))
+	method += str(movl("$.int_fmt_string", "%edi"))
+	method += str(movl("$0", "%eax"))
 
-	method_definitions += str(call('__isoc99_scanf'))
+	# Call printf
+	method += str(comment("Call printf"))
+	method += asm_push_caller_str()
+	method += str(call('printf'))
+	method += asm_pop_caller_str()
 
 	# Calling convention
-	method_definitions += asm_pop_caller_str()
+	method += asm_pop_callee_str()
 
-	method_definitions += str(movl('(%rsp)', '%rax'))
-	method_definitions += str(addq('$4', '%rsp'))
+	method += str(leave())
+	method += str(ret())
 
-	method_definitions += str(leave())
-	method_definitions += str(ret())
-
-
-				# op1 = get_color(inst.op1, coloring)
-				# asm += [comment('out_int')] # debugging label
-
-				# asm += [pushq('%rax')] # save registers
-				# asm += [pushq('%rcx')]
-				# asm += [pushq('%rdx')]
-				# asm += [pushq('%rsi')]
-				# asm += [pushq('%rdi')]
-				# asm += [pushq('%r8')]
-				# asm += [pushq('%r9')]
-				# asm += [pushq('%r10')]
-				# asm += [pushq('%r11')]
-
-				# asm += [movl(op1, '%esi')] # put op1 in esi
-				# asm += [movl('$.int_fmt_string', '%edi')] # string format into edi
-				# asm += [movl('$0', '%eax')] # 0 into eax
-				# asm += [call('printf')] # print
-
-				# asm += [popq('%r11')] # restore registers
-				# asm += [popq('%r10')]
-				# asm += [popq('%r9')]
-				# asm += [popq('%r8')]
-				# asm += [popq('%rdi')]
-				# asm += [popq('%rsi')]
-				# asm += [popq('%rdx')]
-				# asm += [popq('%rcx')]
-				# asm += [popq('%rax')]
-
-
+	return method
 
 def asm_in_int_definition():
-	method_definitions = str(comment("in_int"))
+	method = str(comment("in_int"))
 
 	# Create new stack frame
-	method_definitions += str(pushq("%rbp"))
-	method_definitions += str(movq("%rsp", "%rbp"))
+	method += str(pushq("%rbp"))
+	method += str(movq("%rsp", "%rbp"))
 
-	# No formal parameters
-	asm += str(subq('$4', '%rsp'))
+	method += asm_push_callee_str()
+
+	# # No formal parameters
+	method += str(subq('$4', '%rsp'))
 
 	# Calling convention
-	method_definitions += asm_push_caller_str()
+	method += asm_push_caller_str()
 
 	# Setup
 	offset = len(CALLER_SAVED_REGISTERS) * 8
-	method_definitions += str(leaq(str(offset) + '(%rsp)', '%rsi'))
-	method_definitions += str(movl('$.int_fmt_string', '%edi'))
-	method_definitions += str(movl('$0', '%eax'))
+	method += str(leaq(str(offset) + '(%rsp)', '%rsi'))
+	method += str(movl('$.int_fmt_string', '%edi'))
+	method += str(movl('$0', '%eax'))
 
-	method_definitions += str(call('__isoc99_scanf'))
+	method += str(call('__isoc99_scanf'))
 
 	# Calling convention
-	method_definitions += asm_pop_caller_str()
+	method += asm_pop_caller_str()
 
-	method_definitions += str(movl('(%rsp)', '%eax'))
-	method_definitions += str(addq('$4', '%rsp'))
-
-	# Push caller saved registers for fxn call
-	asm_push_caller(asm)
+	method += str(movl('(%rsp)', '%eax'))
+	method += str(addq('$4', '%rsp'))
 
 	# Save in_int value in ebx
-	movl('%eax', '%ebx')
+	method += str(movl('%eax', '%ebx'))
 
 	# Create new int object, object address in %rax
-	asm += [call("Int..new")]
+	method += asm_push_caller_str()
+	method += str(call("Int..new"))
+	method += asm_pop_caller_str()
 
 	# Put in_int value in box, %rax has the boxed integer
-	movl('%ebx', '24(%rax)')
+	method += str(movl('%ebx', '24(%rax)'))
 
-	# Pop caller saved registers for fxn call
-	asm_pop_caller(asm)
+	method += asm_pop_callee_str()
 
-	method_definitions += str(leave())
-	method_definitions += str(ret())
-
+	method += str(leave())
+	method += str(ret())
+	return method
 
 def asm_string_constants_gen(type_names, string_list):
 	strings = "\n###############################################################################\n"
@@ -345,9 +346,9 @@ def asm_string_constants_gen(type_names, string_list):
 		strings += "\t\t\t.string \"" + cool_type + "\"\n\n"
 
 	# Static string constants
-	for string in string_list:
-		strings += ".globl " + "string_constant.." + string + "\n"
-		strings += "string_constant.." + string + ":\n"
+	for idx, string in enumerate(string_list):
+		strings += ".globl " + "string_constant.." + str(idx) + "\n"
+		strings += "string_constant.." + str(idx) + ":\n"
 		strings += "\t\t\t.string \"" + string + "\"\n\n"
 
 	# TODO dynamically allocated strings?
