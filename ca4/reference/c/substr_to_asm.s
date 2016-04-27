@@ -23,7 +23,7 @@ substring:
 	movq	%rax, -8(%rbp)
 	jmp	.L2
 .L7:
-	movl	-48(%rbp), %eax
+	movl	-44(%rbp), %eax
 	movslq	%eax, %rdx
 	movq	-40(%rbp), %rax
 	addq	%rdx, %rax
@@ -55,10 +55,10 @@ substring:
 	call	realloc
 	movq	%rax, -8(%rbp)
 .L6:
-	addl	$1, -48(%rbp)
+	addl	$1, -44(%rbp)
 .L2:
-	movl	-48(%rbp), %eax
-	cmpl	-44(%rbp), %eax
+	movl	-44(%rbp), %eax
+	cmpl	-48(%rbp), %eax
 	jl	.L7
 	jmp	.L4
 .L9:

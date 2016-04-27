@@ -854,10 +854,8 @@ String.substr:
 			pushq %r13
 			pushq %r14
 			pushq %r15
-			# Load string into %rax
-			movq 16(%rbp), %rax
 			# Unbox string into %rax
-			movq 24(%rax), %rax
+			movq 24(%rbx), %rax
 			# Move unboxed string into r11
 			movq %rax, %r11
 			# Load int1 into %rax
@@ -867,7 +865,7 @@ String.substr:
 			# Move unboxed int into r12d
 			movl %eax, %r12d
 			# Load int2 into %rax
-			movq 16(%rbp), %rax
+			movq 24(%rbp), %rax
 			# Unbox int into %eax
 			movl 24(%rax), %eax
 			# Move unboxed int into r13d

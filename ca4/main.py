@@ -201,6 +201,9 @@ def asm_method_definitions_gen(c_map, i_map):
 				blocks = liveness(blocks)
 				allocate_registers(blocks)
 
+				for block in blocks:
+					print block
+
 				# ASSEMBLY GENERATION
 				asm_list = asm_gen(blocks, spilled_registers, cool_type, c_map, i_map)
 
@@ -399,11 +402,9 @@ def asm_substr_definition():
 
 	method += asm_push_callee_str()
 
-	# Load formal parameter into %rax, unbox it into %eax, move that into esi
-	method += str(comment("Load string into %rax"))
-	method += str(movq("16(%rbp)", "%rax"))
+	# Load self into %rax, unbox it into %rax, then move it into r11
 	method += str(comment("Unbox string into %rax"))
-	method += str(movq("24(%rax)", "%rax"))
+	method += str(movq("24(%rbx)", "%rax"))
 	method += str(comment("Move unboxed string into r11"))
 	method += str(movq("%rax", "%r11"))
 
@@ -415,7 +416,7 @@ def asm_substr_definition():
 	method += str(movl("%eax", "%r12d"))
 
 	method += str(comment("Load int2 into %rax"))
-	method += str(movq("16(%rbp)", "%rax"))
+	method += str(movq("24(%rbp)", "%rax"))
 	method += str(comment("Unbox int into %eax"))
 	method += str(movl("24(%rax)", "%eax"))
 	method += str(comment("Move unboxed int into r13d"))

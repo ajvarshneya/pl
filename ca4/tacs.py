@@ -20,7 +20,7 @@ class TACDynamicDispatch(object):
 		s += ' <- ' + self.receiver + '.' + self.method_name + '('
 		if self.params:
 			s += self.params[0]
-			for p in self.params[1:-1]:
+			for p in self.params[1:]:
 				s += ', ' + p 
 		s += ")"
 		return 	s
@@ -37,8 +37,9 @@ class TACStaticDispatch(object):
 		s = self.assignee
 		s += ' <- ' + self.receiver + '@' + self.static_type + '.' + self.method_name + '('
 		if self.params:
+			print self.params
 			s += self.params[0]
-			for p in self.params[1:-1]:
+			for p in self.params[1:]:
 				s += ', ' + p 
 		s += ")"
 		return 	s
@@ -55,7 +56,7 @@ class TACSelfDispatch(object):
 		s += ' <- ' + self.method_name + '('
 		if self.params:
 			s += self.params[0]
-			for p in self.params[1:-1]:
+			for p in self.params[1:]:
 				s += ', ' + p 
 		s += ")"
 		return 	s

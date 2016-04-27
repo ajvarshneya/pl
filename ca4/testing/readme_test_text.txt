@@ -1,0 +1,5 @@
+case.cl
+This test contains case statements to test the scoping of case statements and verify that the correct branch is chosen. The outer case statement is on the 'self' identifier in Main. Depending on the order in which the case branches are encountered, we can verify that the correct branch is chosen. There is an attribute, let, and case variable which tests scoping on the case. The test also exposes a failure when there is no branch that matches the type type of the given expression.
+
+self_type.cl
+This test contains chained dispatch expressions to test whether self, static, and dynamic dispatch are working correctly with emphasis on the use of SELF_TYPE. We test that functions returning SELF_TYPE in chains evaluate to objects of the correct type and that we can statically call inherited methods. The test also checks method overriding and self dispatch in nested let statements. 
