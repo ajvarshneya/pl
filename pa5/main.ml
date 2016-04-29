@@ -4,7 +4,8 @@
 
 open Printf 
 
-type cool_program = (cool_class list) 																	(* program *)
+(* AST *)
+type cool_ast = (cool_class list) 																		(* program *)
 and lineno = string 																					(* line number *)
 and cool_identifier = lineno * string 																	(* identifier *)
 and cool_type = cool_identifier																			(* type *)
@@ -23,7 +24,7 @@ and cool_expression_kind = 																				(* kinds of expressions *)
 	| If of cool_expression * cool_expression * cool_expression											(* if \n predicate:exp then:exp else:exp *)
 	| While of cool_expression * cool_expression														(* while \n predicate:exp body:exp *)
 	| Block of (cool_expression list) 																	(* block \n body:exp-list *)
-	| New of cool_identifier																			(* new \n class:identifier *)
+	| New of cool_type																					(* new \n class:identifier *)
 	| IsVoid of cool_expression 																		(* isvoid \n e:exp *)
 	| Plus of cool_expression * cool_expression															(* plus \n x:exp y:exp *)
 	| Minus of cool_expression * cool_expression														(* minus \n x:exp y:exp *)
@@ -34,26 +35,108 @@ and cool_expression_kind = 																				(* kinds of expressions *)
 	| Equal of cool_expression * cool_expression														(* eq \n x:exp y:exp *)
 	| Not of cool_expression																			(* not \n x:exp *)
 	| Negate of cool_expression																			(* negate \n x:exp *)
-	| Integer of string																					(* integer \n the_integer_constant \n *)
+	| Integer of int32																					(* integer \n the_integer_constant \n *)
 	| String of string																					(* string \n the_string_constant \n *)
 	| Identifier of cool_identifier																		(* identifier \n variable:identifier *)
-	| Boolean of string																					(* true \n OR false \n*)
+	| Boolean of bool																					(* true \n OR false \n*)
 	| Let of (cool_let_binding list)																	(* let \n binding-list *)
 	| Case of cool_expression * (cool_case_element list)												(* case \n case_element-list *)
-	| Internal of string 																				(* *)
+	| Internal of string 																				(* 0 \n type \n internal \n Class.method \n *)
 and cool_let_binding = cool_identifier * cool_identifier * (cool_expression option)						(* let_binding[_no]_init \n variable:identifier type:identifier [value:exp] *)
 and cool_case_element = cool_identifier * cool_identifier * cool_expression								(* variable:identifier type:identifier body:exp *)
 
+(* Class map *)
 type cool_class_map = (cool_class_cm list) 																(* class map *)
-and cool_class_cm = string * (cool_attribute_cm list) 													(* class map entry *)
-and cool_attribute_cm = cool_identifier * cool_identifier * (cool_expression option)
+and cool_class_cm = string * (cool_attribute_cm list) 													(* class, attribute list*)
+and cool_attribute_cm = cool_identifier * cool_identifier * (cool_expression option)					(* attribute name, type name, rhs expression *)
 
-type cool_imp_map = (cool_class_im list)
-and cool_class_im = string * (cool_method_im list)
-and cool_method_im = string * (string list) * string * cool_expression
+(* Implementation map *)
+type cool_imp_map = (cool_class_im list)																(* implementation map *)
+and cool_class_im = string * (cool_method_im list)														(* class, method list *)
+and cool_method_im = string * (string list) * string * cool_expression 									(* method name, formal list, inherited class, body expression *)
 
-type cool_parent_map = (cool_class_pm list)
-and cool_class_pm = string * string
+(* Parent map *)
+type cool_parent_map = (cool_class_pm list) 															(* parent map *)
+and cool_class_pm = string * string 																	(* child class, parent class *)
+
+(* Store maps ints to values *)
+type value = 											(* raw values *)
+| Object of string * (attribute list)
+| StringObject of string * string
+| IntegerObject of string * int32
+| BooleanObject of string * bool
+| Void of string
+and attribute = string * int 							(* identifier, store location *)
+
+(* let rec evaluate (class_map, imp_map, parent_map) = 
+	let so = None in
+	let env = 
+ *)
+(* 	let main_methods = get_main_class (imp_map) in
+	let main_method = get_main_method (main_methods) in
+	let (mname, mformals, mdefined_in, mbody) = main_method in
+	printf "hello\n" ;
+(* 		eval_expression (so, env, store, mbody) ;
+*)
+and get_main_class (imp_map) = 
+	match imp_map with 
+	| [] -> raise Not_found
+	| (cname, methods) :: tl ->
+		if cname = "Main" then
+			methods
+		else
+			find_main_class (tl)
+
+and get_main_method (methods) =
+	match methods with
+	| [] -> raise Not_found
+	| hd :: tl -> 
+		let (mname, mformals, mdefined_in, mbody) = hd in 
+		if mname = "main" then
+			hd
+		else 
+			get_main_method (tl) *)
+
+(* 	and eval_expression (so, env, store, exp) =
+	let (lineno, static_type, exp_kind) = exp in
+	match exp_kind with
+	(* | "assign" -> 
+	| "dynamic_dispatch" ->
+	| "static_dispatch" ->
+	| "self_dispatch" ->
+	| "if" ->
+	| "while" ->
+	| "block" ->
+	| "new" ->
+	| "isvoid" -> *)
+	| "plus" ->
+	| "minus" ->
+	| "times" ->
+	| "divide" ->
+	(* | "lt" ->
+	| "le" ->
+	| "eq" ->
+	| "not" ->
+	| "negate" ->
+	| "integer" ->
+	| "string" ->
+	| "identifier" ->
+	| "true" ->
+	| "false" ->
+	| "let" ->
+	| "case" ->
+	| "internal" -> *) *)
+
+(* 	and eval_plus (so, env, store, exp) =
+
+and eval_minus (so, env, store, exp) =
+and eval_times (so, env, store, exp) =
+and eval_divide (so, env, store, exp) = *)
+
+module EnvMap = Map.Make(String) ;;
+module StoreMap = Map.Make(struct type t = int let compare = compare end) ;;
+
+let location_counter = ref 0 ;;
 
 let main () = begin
 
@@ -73,7 +156,7 @@ let main () = begin
 	in
 
 	(* Reads in a list *)
-	let read_list worker = 
+	let read_list (worker) = 
 		let input = read () in
 		let k = int_of_string (input) in 			(* Read number of elements *)
 		let lst = range k in 						(* Get a range for that number *)
@@ -82,10 +165,10 @@ let main () = begin
 
 
 	(* AST deserialization *)
-	let rec read_cool_program () =					(* program *)
+	let rec read_cool_ast () =						(* program *)
 		read_list read_cool_class
 
-	and read_cool_identifier () =						(* identifier *)
+	and read_cool_identifier () =					(* identifier *)
 		let lineno = read () in
 		let name = read () in
 		(lineno, name)
@@ -102,7 +185,7 @@ let main () = begin
 		let features = read_list read_cool_feature in 
 		(cname, inherits, features)
 
-	and read_cool_feature () =							(* feature *)
+	and read_cool_feature () =						(* feature *)
 		match read () with
 		| "attribute_no_init" -> 
 			let fname = read_cool_identifier () in 
@@ -202,7 +285,7 @@ let main () = begin
 			let exp = read_cool_expression () in
 			Negate (exp)
 		| "integer" ->													(* integer \n the_integer_constant \n *)
-			let ival = read () in
+			let ival = Int32.of_string (read ()) in
 			Integer (ival)
 		| "string" ->													(* string \n the_string_constant \n *)
 			let sval = read () in
@@ -211,10 +294,10 @@ let main () = begin
 			let id = read_cool_identifier() in
 			Identifier (id)
 		| "true" ->														(* true \n *)
-			let bval = read () in
+			let bval = bool_of_string (read ()) in
 			Boolean (bval)
 		| "false" ->													(* false \n *)
-			let bval = read () in
+			let bval = bool_of_string (read ()) in
 			Boolean (bval)
 		| "let" ->														(* let \n binding-list *)
 			let binding_list = read_list read_cool_let_binding in
@@ -257,7 +340,7 @@ let main () = begin
 	(* Class map deserialization *)
 	let rec read_cool_class_map () = 
 		let _ = read () in (* Skip class map tag *)
-		read_list read_cool_class_cm ;
+		read_list read_cool_class_cm
 
 	and read_cool_class_cm () =
 		let cname = read () in
@@ -277,13 +360,23 @@ let main () = begin
 			(aname, atype, Some (ainit))
 		| x -> 
 			failwith ("Invalid attribute kind " ^ x)
+
+	and class_map_get (class_map, key) = 
+		match class_map with
+		| [] -> raise Not_found
+		| hd :: tl ->
+			let (cname, attributes) = hd in
+			if cname = key then
+				attributes
+			else
+				class_map_get (tl, key)
 	in
 
 
 	(* Implementation map deserialization *)
 	let rec read_cool_imp_map () =
 		let _ = read () in (* Skip implementation map tag *)
-		read_list read_cool_class_im ;
+		read_list read_cool_class_im
 
 	and read_cool_class_im () = 
 		let cname = read () in
@@ -298,36 +391,184 @@ let main () = begin
 		(mname, mformals, mdefined_in, mbody)
 
 	and read_cool_formal_im () =
-		read ()
+		let fname = read() in
+		(fname)
+
+	and imp_map_get (imp_map, key) = 
+		match imp_map with
+		| [] -> raise Not_found
+		| hd :: tl ->
+			let (cname, methods) = hd in
+			if cname = key then
+				methods
+			else
+				imp_map_get (tl, key)
 	in
 
 
 	(* Parent map deserialization *)
 	let rec read_cool_parent_map () = 
 		let _ = read () in (* Skip parent map tag *)
-		read_list read_cool_class_pm ;
+		read_list read_cool_class_pm
 
 	and read_cool_class_pm () =
 		let cname = read () in 
 		let pname = read () in
 		(cname, pname)
+
+	and parent_map_get (parent_map, key) = 
+		match parent_map with
+		| [] -> raise Not_found
+		| hd :: tl ->
+			let (cname, pname) = hd in
+			if cname = key then
+				pname
+			else
+				parent_map_get (tl, key)
 	in
 
+	(* Helper functions *)
+	let get_value_type (value) = 
+		match value with
+		| Object (type_name, alist) ->
+			type_name
+		| StringObject (type_name, raw_string) ->
+			type_name
+		| IntegerObject (type_name, raw_int32) ->
+			type_name
+		| BooleanObject (type_name, raw_bool) ->
+			type_name
+		| Void (empty) ->
+			""
+
+	and next_location () =
+		location_counter := !location_counter + 1 ;
+		!location_counter
+	in
+
+	(* Interpret *)
+	let rec eval_expression (class_map, imp_map, parent_map, self_object, env, store, exp) =
+		let (lineno, static_type, exp_kind) = exp in
+ 		match exp_kind with
+ 		(* "dynamic_dispatch" ->	
+			eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, env, store, exp_kind) *)
+		| New (type_ident) -> 
+			eval_new (class_map, imp_map, parent_map, self_object, env, store, exp_kind)
+		| x -> failwith ("Expression not yet handled ")
+
+(* 	and eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, env, store, expression) =
+		(* Extract from tuple *)
+		let (receiver, mname, args) = expression in 
+		(* Evaluate argument expressions *)
+		let (value_list, store) = eval_expression_list (class_map, imp_map, parent_map, self_object, env, store, args) in
+		(* Evaluate receiver expression *)
+(* 		let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, env, store, receiver) in
+ *)		printf "testing ... \n" ; *)
+
+		(* Object definition? *)
+		(* Lookup object params in implementation map *)
+(* 		let value_type = get_value_type (value) in
+		let methods = imp_map_get () *)
+		(* Get new store locations *)
+		(* Extend store with arg results at store locations *)
+		(* Evaluate method body with receiver as so, newest store, and new environment with class attributes shadowed by method params *)
+
+(* 	and eval_expression_list (class_map, imp_map, parent_map, self_object, env, store, expression_list) =
+		match expression_list with
+		| [] -> ([], store)
+		| expression :: tl ->
+			let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, env, store, expression) in
+			let (value_list, store) = eval_expression_list (class_map, imp_map, parent_map, self_object, env, store, tl) in
+			(value :: value_list, store) *)
+
+	and eval_new (class_map, imp_map, parent_map, self_object, env, store, exp_new) =
+ 		match exp_new with 
+ 		| New (type_ident) ->
+	 		let (lineno, type_name) = type_ident in
+
+	 		(* Get correct type *)
+			let t0 = if (type_name = "SELF_TYPE") then get_value_type (self_object)
+					else type_name 
+			in 
+			
+			(* Get attributes for that type *)
+			let class_attributes = class_map_get (class_map, t0) in
+
+			(* Add locations for each attribute *)
+			let locations = List.fold_left (fun xs _ -> next_location () :: xs) [] class_attributes in
+
+			(* Get object attributes *)
+			let attribute_identifiers = List.fold_left (fun xs x -> let (aname, tname, rhs) = x in aname :: xs) [] class_attributes in
+			let object_attributes = List.combine attribute_identifiers locations in
+
+			(* Initialize new locations in store with default values *)
+			let attribute_types = List.fold_left (fun xs x -> let (aname, tname, rhs) = x in tname :: xs) [] class_attributes in
+			let object_initializers = List.combine attribute_types locations in
+			let store = eval_new_init_store (store, object_initializers) in
+
+			(* Evaluate initializer expressions *)
+			
+
+			printf "%d\n" (List.length object_attributes) ;
+
+		| _ -> failwith "Invalid type identifier passed to eval_new."
+
+	and eval_new_init_store (store, object_initializers) =
+		match object_initializers with 
+		| [] -> store
+		| hd :: tl ->
+			let (tname, loc) = hd in
+ 			match tname with 
+			| "String" -> 
+				let store = StoreMap.add loc (StringObject ("String", "")) store in
+				eval_new_init_store (store, tl)
+			| "Integer" -> 
+				let store = StoreMap.add loc (IntegerObject ("Int", Int32.of_int(0))) store in
+				eval_new_init_store (store, tl)
+			| "Bool" -> 
+				let store = StoreMap.add loc (BooleanObject ("Bool", false)) store in
+				eval_new_init_store (store, tl)
+			| _ -> 
+				let store = StoreMap.add loc (Void ("")) store in
+				eval_new_init_store (store, tl)
+	in
+
+(* 	and eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, environment, store, expression) =
+		let (receiver, mname, args) = expression in (* Extract from tuple *)
+		let arg_result_list = eval_expression_list (class_map, imp_map, parent_map, environment, store, args) in 						
+		let arg_result_list = eval_expression (class_map, imp_map, parent_map, environment, store, receiver) :: arg_result_list in 		(* Evaluate receiver object expression *)
+		let (* Evaluate receiver object expression *)
+		let (self_object, envionment, store, expression) = eval_expression_list (args) 
+ *)
+(* 	and eval_expression_list (class_map, imp_map, parent_map, self_object, environment, store, expression_list) = 
+		match expression_list in
+		| [] -> []
+		| expression :: tl -> 
+			eval_expression (class_map, imp_map, parent_map, self_object, environment, store, expression) 
+			:: eval_expression_list (class_map, imp_map, parent_map, self_object, environment, store, tl)
+ *)	
+
+	(* Deserialization *)
 	let class_map = read_cool_class_map () in
-	(* printf "class map deserialized, %d classes \n" (List.length class_map) ; *)
-
 	let imp_map = read_cool_imp_map () in
-	(* printf "imp map deserialized, %d classes \n" (List.length imp_map) ;  *)
-
 	let parent_map = read_cool_parent_map () in
-	(* printf "parent map deserialized, %d classes \n" (List.length parent_map) ; *)
+	let ast = read_cool_ast () in
 
-	let ast = read_cool_program () in
-	close_in fin ;
-	(* printf "CL-AST de-serialized, %d classes\n" (List.length ast) ; *)
+	(* Evaluation *)
+	let env = EnvMap.empty in
+	let store = StoreMap.empty in
+	let self_object = Object ("", []) in
+	let main_object = ("0", "Main", New ("0", "Main")) in
+	eval_expression (class_map, imp_map, parent_map, self_object, env, store, main_object)
+	(* 	let main_call = DynamicDispatch(main_object, (0, "main"), []) in
 
-	
+	eval_expression (class_map, imp_map, parent_map, self_object, env, store, main_call) ; *)
 
+(* 	let env = EnvMap.add "123" "456" env in
+	let store = StoreMap.add 123 "321" store in
+	printf "%s\n" (EnvMap.find "123" env) ;
+	printf "%s\n" (StoreMap.find 123 store) ;
+ *)
 
 end ;; 
 
