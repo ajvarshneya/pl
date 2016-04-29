@@ -4,6 +4,8 @@
 
 open Printf 
 
+(* Type definitions *)
+
 (* AST *)
 type cool_ast = (cool_class list) 																		(* program *)
 and lineno = string 																					(* line number *)
@@ -68,76 +70,13 @@ type value = 											(* raw values *)
 | Void of string
 and attribute = string * int 							(* identifier, store location *)
 
-(* let rec evaluate (class_map, imp_map, parent_map) = 
-	let so = None in
-	let env = 
- *)
-(* 	let main_methods = get_main_class (imp_map) in
-	let main_method = get_main_method (main_methods) in
-	let (mname, mformals, mdefined_in, mbody) = main_method in
-	printf "hello\n" ;
-(* 		eval_expression (so, env, store, mbody) ;
-*)
-and get_main_class (imp_map) = 
-	match imp_map with 
-	| [] -> raise Not_found
-	| (cname, methods) :: tl ->
-		if cname = "Main" then
-			methods
-		else
-			find_main_class (tl)
 
-and get_main_method (methods) =
-	match methods with
-	| [] -> raise Not_found
-	| hd :: tl -> 
-		let (mname, mformals, mdefined_in, mbody) = hd in 
-		if mname = "main" then
-			hd
-		else 
-			get_main_method (tl) *)
-
-(* 	and eval_expression (so, env, store, exp) =
-	let (lineno, static_type, exp_kind) = exp in
-	match exp_kind with
-	(* | "assign" -> 
-	| "dynamic_dispatch" ->
-	| "static_dispatch" ->
-	| "self_dispatch" ->
-	| "if" ->
-	| "while" ->
-	| "block" ->
-	| "new" ->
-	| "isvoid" -> *)
-	| "plus" ->
-	| "minus" ->
-	| "times" ->
-	| "divide" ->
-	(* | "lt" ->
-	| "le" ->
-	| "eq" ->
-	| "not" ->
-	| "negate" ->
-	| "integer" ->
-	| "string" ->
-	| "identifier" ->
-	| "true" ->
-	| "false" ->
-	| "let" ->
-	| "case" ->
-	| "internal" -> *) *)
-
-(* 	and eval_plus (so, env, store, exp) =
-
-and eval_minus (so, env, store, exp) =
-and eval_times (so, env, store, exp) =
-and eval_divide (so, env, store, exp) = *)
-
+(* Global variables *)
 module EnvMap = Map.Make(String) ;;
 module StoreMap = Map.Make(struct type t = int let compare = compare end) ;;
-
 let location_counter = ref 0 ;;
 
+(* Main *)
 let main () = begin
 
 	(* Get filename and open it *)
@@ -197,11 +136,11 @@ let main () = begin
 			let finit = read_cool_expression () in
 			Attribute(fname, ftype, (Some finit))
 		| "method" ->
-			let mname = read_cool_identifier () in
+			let mident = read_cool_identifier () in
 			let formals = read_list read_cool_formal in
 			let mtype = read_cool_identifier () in
 			let mbody = read_cool_expression () in
-			Method(mname, formals, mtype, mbody)
+			Method(mident, formals, mtype, mbody)
 		| x -> failwith ("Invalid feature kind " ^ x)
 
 	and read_cool_formal () =
@@ -219,19 +158,19 @@ let main () = begin
 			Assign (var, exp)
 		| "dynamic_dispatch" ->											(* dynamic_dispatch \n e:exp method:identifier args:exp-list *)
 			let exp = read_cool_expression () in
-			let mname = read_cool_identifier () in 
+			let mident = read_cool_identifier () in 
 			let args = read_list read_cool_expression in
-			DynamicDispatch (exp, mname, args)
+			DynamicDispatch (exp, mident, args)
 		| "static_dispatch" ->											(* static_dispatch \n e:exp type:identifier method:identifier args:exp-list *)
 			let exp = read_cool_expression () in
 			let etype = read_cool_identifier () in
-			let mname = read_cool_identifier () in 
+			let mident = read_cool_identifier () in 
 			let args = read_list read_cool_expression in
-			StaticDispatch (exp, etype, mname, args)
+			StaticDispatch (exp, etype, mident, args)
 		| "self_dispatch" ->											(* self_dispatch \n method:identifier args:exp-list *)
-			let mname = read_cool_identifier () in 
+			let mident = read_cool_identifier () in 
 			let args = read_list read_cool_expression in
-			SelfDispatch (mname, args)
+			SelfDispatch (mident, args)
 		| "if" ->														(* if \n predicate:exp then:exp else:exp *)
 			let ipred = read_cool_expression () in
 			let ithen = read_cool_expression () in
@@ -361,15 +300,15 @@ let main () = begin
 		| x -> 
 			failwith ("Invalid attribute kind " ^ x)
 
-	and class_map_get (class_map, key) = 
-		match class_map with
-		| [] -> raise Not_found
-		| hd :: tl ->
-			let (cname, attributes) = hd in
-			if cname = key then
-				attributes
-			else
-				class_map_get (tl, key)
+	and class_map_get (class_map, key) =
+		let cmp_key entry = 
+			let (cname, attributes) = entry in
+			(cname = key)
+		in
+
+		let entry = List.find cmp_key class_map in
+		let (cname, attributes) = entry in
+		attributes
 	in
 
 
@@ -394,17 +333,21 @@ let main () = begin
 		let fname = read() in
 		(fname)
 
-	and imp_map_get (imp_map, key) = 
-		match imp_map with
-		| [] -> raise Not_found
-		| hd :: tl ->
-			let (cname, methods) = hd in
-			if cname = key then
-				methods
-			else
-				imp_map_get (tl, key)
-	in
+	and imp_map_get (imp_map, tname, fname) = 
+		let cmp_class entry =
+			let (cname, methods) = entry in
+			(cname = tname)
+		in
 
+		let cmp_method entry =
+			let (mname, mformals, mdefined_in, mbody) = entry in
+			(mname = fname)
+		in
+
+		let entry = List.find cmp_class imp_map in
+		let (cname, method_list) = entry in
+		List.find cmp_method method_list
+	in
 
 	(* Parent map deserialization *)
 	let rec read_cool_parent_map () = 
@@ -416,15 +359,14 @@ let main () = begin
 		let pname = read () in
 		(cname, pname)
 
-	and parent_map_get (parent_map, key) = 
-		match parent_map with
-		| [] -> raise Not_found
-		| hd :: tl ->
-			let (cname, pname) = hd in
-			if cname = key then
-				pname
-			else
-				parent_map_get (tl, key)
+	and parent_map_get (parent_map, key) =
+		let cmp_key entry = 
+			let (cname, pname) = entry in 
+			(cname = key)
+		in
+		let entry = List.find cmp_key parent_map in
+		let (cname, pname) = entry in
+		pname
 	in
 
 	(* Helper functions *)
@@ -441,134 +383,163 @@ let main () = begin
 		| Void (empty) ->
 			""
 
-	and next_location () =
+	and new_location () =
 		location_counter := !location_counter + 1 ;
 		!location_counter
 	in
 
 	(* Interpret *)
-	let rec eval_expression (class_map, imp_map, parent_map, self_object, env, store, exp) =
+	let rec eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) =
 		let (lineno, static_type, exp_kind) = exp in
  		match exp_kind with
- 		(* "dynamic_dispatch" ->	
-			eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, env, store, exp_kind) *)
+ 		| DynamicDispatch (receiver, mident, args) ->	
+			eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
 		| New (type_ident) -> 
-			eval_new (class_map, imp_map, parent_map, self_object, env, store, exp_kind)
+			eval_new (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
 		| x -> failwith ("Expression not yet handled ")
 
-(* 	and eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, env, store, expression) =
-		(* Extract from tuple *)
-		let (receiver, mname, args) = expression in 
-		(* Evaluate argument expressions *)
-		let (value_list, store) = eval_expression_list (class_map, imp_map, parent_map, self_object, env, store, args) in
-		(* Evaluate receiver expression *)
-(* 		let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, env, store, receiver) in
- *)		printf "testing ... \n" ; *)
+	and eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, exp_list) =
+		match exp_list with
+		| [] -> ([], store)
+		| expression :: tl ->
+			let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, expression) in
+			let (value_list, store) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, tl) in
+			(value :: value_list, store)
 
-		(* Object definition? *)
-		(* Lookup object params in implementation map *)
-(* 		let value_type = get_value_type (value) in
-		let methods = imp_map_get () *)
-		(* Get new store locations *)
+	and eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_dynamic_dispatch) =
+		match exp_dynamic_dispatch with
+		| DynamicDispatch (receiver, mident, args) ->
+
+			(* Evaluate argument objects expressions *)
+			let (value_list, store) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
+
+ 			(* Evaluate receiver object expression *)
+			let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, receiver) in
+
+			(* Implementation map lookup *)
+			let receiver_type = get_value_type (value) in
+			let (lineno, mname) = mident in 
+ 			let mmethod = imp_map_get (imp_map, receiver_type, mname) in
+ 			let (mname, mformals, mdefined_in, mbody) = mmethod in
+
+ 			(* Add locations for each formal *)
+ 			let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] mformals in
+
+ 			(* Set new locations to values in store *)
+ 			let param_initializers = List.combine value_list locations in
+ 			let store = eval_dynamic_dispatch_init_params (store, param_initializers) in
+
+ 			(* Evaluate method body with receiver object as self and new environment *)
+ 			let env2 = EnvMap.empty in
+ 			let env2 = eval_dynamic_dispatch_init_env ()
+
+			(self_object, store)
+		| _ -> failwith "Invalid type identifier passed to eval_dynamic_dispatch."
+
 		(* Extend store with arg results at store locations *)
 		(* Evaluate method body with receiver as so, newest store, and new environment with class attributes shadowed by method params *)
 
-(* 	and eval_expression_list (class_map, imp_map, parent_map, self_object, env, store, expression_list) =
-		match expression_list with
-		| [] -> ([], store)
-		| expression :: tl ->
-			let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, env, store, expression) in
-			let (value_list, store) = eval_expression_list (class_map, imp_map, parent_map, self_object, env, store, tl) in
-			(value :: value_list, store) *)
+	and eval_dynamic_dispatch_init_params (store, param_initializers) = 
+		match param_initializers with
+		| [] -> store
+		| hd :: tl ->
+			let (value, loc) = hd in
+			let store = StoreMap.add loc value store in 
+			eval_dynamic_dispatch_init_params (store, tl)
 
-	and eval_new (class_map, imp_map, parent_map, self_object, env, store, exp_new) =
+	and eval_dynamic_dispatch_init_env (env, object_attributes, ) =
+
+	and eval_new (class_map, imp_map, parent_map, self_object, store, env, exp_new) =
  		match exp_new with 
  		| New (type_ident) ->
 	 		let (lineno, type_name) = type_ident in
 
-	 		(* Get correct type *)
-			let t0 = if (type_name = "SELF_TYPE") then get_value_type (self_object)
-					else type_name 
-			in 
+	 		(* Get correct type (considering SELF_TYPE) *)
+			let t0 = if (type_name = "SELF_TYPE") then get_value_type (self_object) else type_name in 
 			
 			(* Get attributes for that type *)
 			let class_attributes = class_map_get (class_map, t0) in
 
 			(* Add locations for each attribute *)
-			let locations = List.fold_left (fun xs _ -> next_location () :: xs) [] class_attributes in
+			let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] class_attributes in
 
-			(* Get object attributes *)
-			let attribute_identifiers = List.fold_left (fun xs x -> let (aname, tname, rhs) = x in aname :: xs) [] class_attributes in
+			(* Get object attributes / instantiate *)
+			let attribute_identifiers = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in id :: xs) [] class_attributes in
 			let object_attributes = List.combine attribute_identifiers locations in
+			let value1 = Object (t0, object_attributes) in
 
 			(* Initialize new locations in store with default values *)
-			let attribute_types = List.fold_left (fun xs x -> let (aname, tname, rhs) = x in tname :: xs) [] class_attributes in
-			let object_initializers = List.combine attribute_types locations in
-			let store = eval_new_init_store (store, object_initializers) in
+			let attribute_types = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in type_name :: xs) [] class_attributes in
+			let default_initializers = List.combine attribute_types locations in
+			let store2 = eval_new_init_attrs (store, default_initializers) in
 
-			(* Evaluate initializer expressions *)
-			
+			(* Evaluate/assign initializer expressions *)
+			let env2 = EnvMap.empty in
+			let env2 = eval_new_init_env (env2, object_attributes) in (* Create new environment *)
+			let attr_initializers = List.combine class_attributes locations in
+			let (value2, store3) = eval_new_eval_attr_exprs (class_map, imp_map, parent_map, value1, store2, env2, attr_initializers) in
 
-			printf "%d\n" (List.length object_attributes) ;
+			(value1, store3)
 
 		| _ -> failwith "Invalid type identifier passed to eval_new."
 
-	and eval_new_init_store (store, object_initializers) =
+	(* Returns a new store with default values in each of the specified (attribute) locations *)
+	and eval_new_init_attrs (store, object_initializers) =
 		match object_initializers with 
 		| [] -> store
 		| hd :: tl ->
-			let (tname, loc) = hd in
- 			match tname with 
+			let (type_name, loc) = hd in
+ 			match type_name with 
 			| "String" -> 
 				let store = StoreMap.add loc (StringObject ("String", "")) store in
-				eval_new_init_store (store, tl)
+				eval_new_init_attrs (store, tl)
 			| "Integer" -> 
 				let store = StoreMap.add loc (IntegerObject ("Int", Int32.of_int(0))) store in
-				eval_new_init_store (store, tl)
+				eval_new_init_attrs (store, tl)
 			| "Bool" -> 
 				let store = StoreMap.add loc (BooleanObject ("Bool", false)) store in
-				eval_new_init_store (store, tl)
+				eval_new_init_attrs (store, tl)
 			| _ -> 
 				let store = StoreMap.add loc (Void ("")) store in
-				eval_new_init_store (store, tl)
-	in
+				eval_new_init_attrs (store, tl)
 
-(* 	and eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, environment, store, expression) =
-		let (receiver, mname, args) = expression in (* Extract from tuple *)
-		let arg_result_list = eval_expression_list (class_map, imp_map, parent_map, environment, store, args) in 						
-		let arg_result_list = eval_expression (class_map, imp_map, parent_map, environment, store, receiver) :: arg_result_list in 		(* Evaluate receiver object expression *)
-		let (* Evaluate receiver object expression *)
-		let (self_object, envionment, store, expression) = eval_expression_list (args) 
- *)
-(* 	and eval_expression_list (class_map, imp_map, parent_map, self_object, environment, store, expression_list) = 
-		match expression_list in
-		| [] -> []
-		| expression :: tl -> 
-			eval_expression (class_map, imp_map, parent_map, self_object, environment, store, expression) 
-			:: eval_expression_list (class_map, imp_map, parent_map, self_object, environment, store, tl)
- *)	
+	(* Returns a new environment with the desired attributes added to it *)
+	and eval_new_init_env (env, object_attributes) =
+		match object_attributes with
+		| [] -> env
+		| hd :: tl ->
+			let (id, loc) = hd in
+			let env = EnvMap.add id loc env in
+			eval_new_init_env (env, tl)
+
+	(* Returns a new value / store that retains the side effects from evaluating the attribute initializer expressions *)
+	and eval_new_eval_attr_exprs (class_map, imp_map, parent_map, self_object, store, env, attr_initializers) =
+		match attr_initializers with
+		| [] -> (self_object, store)
+		| (class_attribute, location) :: tl ->
+			let (id, type_name, rhs) = class_attribute in
+			match rhs with 
+			| Some (exp) ->
+				let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
+				eval_new_eval_attr_exprs (class_map, imp_map, parent_map, self_object, store, env, tl)
+			| None ->
+				eval_new_eval_attr_exprs (class_map, imp_map, parent_map, self_object, store, env, tl)
+ 	in
 
 	(* Deserialization *)
 	let class_map = read_cool_class_map () in
 	let imp_map = read_cool_imp_map () in
 	let parent_map = read_cool_parent_map () in
-	let ast = read_cool_ast () in
+	let _ = read_cool_ast () in
 
 	(* Evaluation *)
 	let env = EnvMap.empty in
 	let store = StoreMap.empty in
 	let self_object = Object ("", []) in
 	let main_object = ("0", "Main", New ("0", "Main")) in
-	eval_expression (class_map, imp_map, parent_map, self_object, env, store, main_object)
-	(* 	let main_call = DynamicDispatch(main_object, (0, "main"), []) in
+ 	let main_call = ("0", "Object", DynamicDispatch(main_object, ("0", "main"), [])) in
 
-	eval_expression (class_map, imp_map, parent_map, self_object, env, store, main_call) ; *)
-
-(* 	let env = EnvMap.add "123" "456" env in
-	let store = StoreMap.add 123 "321" store in
-	printf "%s\n" (EnvMap.find "123" env) ;
-	printf "%s\n" (StoreMap.find 123 store) ;
- *)
+	eval_expression (class_map, imp_map, parent_map, self_object, store, env, main_call) ;
 
 end ;; 
 
