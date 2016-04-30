@@ -42,7 +42,7 @@ and cool_expression_kind = 																				(* kinds of expressions *)
 	| Identifier of cool_identifier																		(* identifier \n variable:identifier *)
 	| Boolean of bool																					(* true \n OR false \n*)
 	| Let of (cool_let_binding list)																	(* let \n binding-list *)
-	| Case of cool_expression * (cool_case_element list)												(* case \n case_element-list *)
+	| Case of cool_expression * (cool_case_element list)												(* case \n case_exp \n case_element-list *)
 	| Internal of string 																				(* 0 \n type \n internal \n Class.method \n *)
 and cool_let_binding = cool_identifier * cool_identifier * (cool_expression option)						(* let_binding[_no]_init \n variable:identifier type:identifier [value:exp] *)
 and cool_case_element = cool_identifier * cool_identifier * cool_expression								(* variable:identifier type:identifier body:exp *)
@@ -392,11 +392,31 @@ let main () = begin
 	let rec eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) =
 		let (lineno, static_type, exp_kind) = exp in
  		match exp_kind with
- 		| DynamicDispatch (receiver, mident, args) ->	
-			eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| New (type_ident) -> 
-			eval_new (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| x -> failwith ("Expression not yet handled ")
+		| Assign (var, rhs) -> failwith ("Expression not yet handled ")
+	 	| DynamicDispatch (receiver, mident, args) -> eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
+		| StaticDispatch (receiver, stype, mident, args) -> failwith ("Expression not yet handled ")
+		| SelfDispatch (mident, args) -> failwith ("Expression not yet handled ")
+		| If (pred_exp, then_exp, else_exp) -> failwith ("Expression not yet handled ")
+		| While (pred_exp, body_exp) -> failwith ("Expression not yet handled ")
+		| Block (exp_list) -> failwith ("Expression not yet handled ")
+		| New (type_ident) -> eval_new (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
+		| IsVoid (exp) -> failwith ("Expression not yet handled ")
+		| Plus (e1, e2) -> failwith ("Expression not yet handled ")
+		| Minus (e1, e2) -> failwith ("Expression not yet handled ")
+		| Times (e1, e2) -> failwith ("Expression not yet handled ")
+		| Divide (e1, e2) -> failwith ("Expression not yet handled ")
+		| LessThan (e1, e2) -> failwith ("Expression not yet handled ")
+		| LessEqual (e1, e2) -> failwith ("Expression not yet handled ")
+		| Equal (e1, e2) -> failwith ("Expression not yet handled ")
+		| Not (exp) -> failwith ("Expression not yet handled ")
+		| Negate (exp) -> failwith ("Expression not yet handled ")
+		| Integer (constant) -> failwith ("Expression not yet handled ")
+		| String (constant) -> failwith ("Expression not yet handled ")
+		| Identifier (id) -> failwith ("Expression not yet handled ")
+		| Boolean (constant) -> failwith ("Expression not yet handled ")
+		| Let (let_bindings) -> failwith ("Expression not yet handled ")
+		| Case (case_exp, case_elements) -> failwith ("Expression not yet handled ")
+		| Internal (class_method) -> failwith ("Expression not yet handled ")
 
 	and eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, exp_list) =
 		match exp_list with
@@ -435,9 +455,6 @@ let main () = begin
 
 			(self_object, store)
 		| _ -> failwith "Invalid type identifier passed to eval_dynamic_dispatch."
-
-		(* Extend store with arg results at store locations *)
-		(* Evaluate method body with receiver as so, newest store, and new environment with class attributes shadowed by method params *)
 
 	and eval_dynamic_dispatch_init_params (store, param_initializers) = 
 		match param_initializers with
