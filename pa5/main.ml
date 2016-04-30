@@ -372,16 +372,19 @@ let main () = begin
 	(* Helper functions *)
 	let get_value_type (value) = 
 		match value with
-		| Object (type_name, alist) ->
-			type_name
-		| StringObject (type_name, raw_string) ->
-			type_name
-		| IntegerObject (type_name, raw_int32) ->
-			type_name
-		| BooleanObject (type_name, raw_bool) ->
-			type_name
-		| Void (empty) ->
-			""
+		| Object (type_name, alist) -> type_name
+		| StringObject (type_name, raw_string) -> type_name
+		| IntegerObject (type_name, raw_int32) -> type_name
+		| BooleanObject (type_name, raw_bool) -> type_name
+		| Void (empty) -> ""
+
+	and get_value_attributes (value) =
+		match value with
+		| Object (type_name, alist) -> alist
+		| StringObject (type_name, raw_string) -> []
+		| IntegerObject (type_name, raw_int32) -> []
+		| BooleanObject (type_name, raw_bool) -> []
+		| Void (empty) -> failwith "Dispatch on void."
 
 	and new_location () =
 		location_counter := !location_counter + 1 ;
@@ -431,13 +434,16 @@ let main () = begin
 		| DynamicDispatch (receiver, mident, args) ->
 
 			(* Evaluate argument objects expressions *)
-			let (value_list, store) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
+			let (value_list, store1) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
 
  			(* Evaluate receiver object expression *)
-			let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, receiver) in
+			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store1, env, receiver) in
+
+			 (* Extract receiver object type and attribute list *)
+			let receiver_type = get_value_type (value) in
+			let receiver_attributes = get_value_attributes (value) in
 
 			(* Implementation map lookup *)
-			let receiver_type = get_value_type (value) in
 			let (lineno, mname) = mident in 
  			let mmethod = imp_map_get (imp_map, receiver_type, mname) in
  			let (mname, mformals, mdefined_in, mbody) = mmethod in
@@ -447,13 +453,20 @@ let main () = begin
 
  			(* Set new locations to values in store *)
  			let param_initializers = List.combine value_list locations in
- 			let store = eval_dynamic_dispatch_init_params (store, param_initializers) in
+ 			let store3 = eval_dynamic_dispatch_init_params (store2, param_initializers) in
+
+ 			(* Extend attribute list with formal/location list, environment constructed from this list *)
+ 			let env_initializer = List.combine mformals locations in
+ 			let env_initializer = receiver_attributes @ env_initializer in
+
+ 			(* Create new environment out of attribute and formal identifiers / locations *)
+ 			let env2 = EnvMap.empty in
+ 			let env2 = eval_dynamic_dispatch_init_env (env2, env_initializer) in
 
  			(* Evaluate method body with receiver object as self and new environment *)
- 			let env2 = EnvMap.empty in
- 			let env2 = eval_dynamic_dispatch_init_env ()
-
-			(self_object, store)
+ 			let (value1, store4) = eval_expression (class_map, imp_map, parent_map, value, store3, env2, mbody) in
+ 			(value1, store4)
+ 			
 		| _ -> failwith "Invalid type identifier passed to eval_dynamic_dispatch."
 
 	and eval_dynamic_dispatch_init_params (store, param_initializers) = 
@@ -464,7 +477,13 @@ let main () = begin
 			let store = StoreMap.add loc value store in 
 			eval_dynamic_dispatch_init_params (store, tl)
 
-	and eval_dynamic_dispatch_init_env (env, object_attributes, ) =
+	and eval_dynamic_dispatch_init_env (env, env_initializer) =
+		match env_initializer with
+		| [] -> env
+		| hd :: tl ->
+			let (ident, loc) = hd in 
+			let env = EnvMap.add ident loc env in
+			eval_dynamic_dispatch_init_env (env, tl)
 
 	and eval_new (class_map, imp_map, parent_map, self_object, store, env, exp_new) =
  		match exp_new with 
