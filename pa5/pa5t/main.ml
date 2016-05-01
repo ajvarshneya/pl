@@ -626,7 +626,7 @@ let main () = begin
 			(* Get object attributes / instantiate *)
 			let attribute_identifiers = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in id :: xs) [] class_attributes in
 			let object_attributes = List.combine attribute_identifiers locations in
-			let value1 = Object (new_location (), t0, object_attributes) in
+			let value1 = Object (-1, t0, object_attributes) in
 
 			(* Initialize new locations in store with default values *)
 			let attribute_types = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in type_name :: xs) [] class_attributes in
@@ -690,8 +690,8 @@ let main () = begin
 		| IsVoid (exp) -> begin
 			let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
 			match value with 
-			| Void -> (BooleanObject (new_location (), "Bool", true), store)
-			| _ -> (BooleanObject (new_location (), "Bool", false), store)
+			| Void -> (BooleanObject (-1, "Bool", true), store)
+			| _ -> (BooleanObject (-1, "Bool", false), store)
 		end
 		| _ -> failwith "Invalid expression passed to eval_isvoid."
 
@@ -708,7 +708,7 @@ let main () = begin
 			let int_result = Int32.add int1 int2 in
 
 			(* Rebox and return *)
-			let value = IntegerObject (new_location (), "Int", int_result) in
+			let value = IntegerObject (-1, "Int", int_result) in
 			(value, store3)
 
 		| _ -> failwith "Invalid expression passed to eval_plus."
@@ -726,7 +726,7 @@ let main () = begin
 			let int_result = Int32.sub int1 int2 in
 
 			(* Rebox and return *)
-			let value = IntegerObject (new_location (), "Int", int_result) in
+			let value = IntegerObject (-1, "Int", int_result) in
 			(value, store3)
 
 		| _ -> failwith "Invalid expression passed to eval_minus."
@@ -744,7 +744,7 @@ let main () = begin
 			let int_result = Int32.mul int1 int2 in
 
 			(* Rebox and return *)
-			let value = IntegerObject (new_location (), "Int", int_result) in
+			let value = IntegerObject (-1, "Int", int_result) in
 			(value, store3)
 
 		| _ -> failwith "Invalid expression passed to eval_times."
@@ -762,7 +762,7 @@ let main () = begin
 			let int_result = Int32.div int1 int2 in
 
 			(* Rebox and return *)
-			let value = IntegerObject (new_location (), "Int", int_result) in
+			let value = IntegerObject (-1, "Int", int_result) in
 			(value, store3)
 
 		| _ -> failwith "Invalid expression passed to eval_divide."
@@ -778,23 +778,23 @@ let main () = begin
 				match value1 with
 				| IntegerObject (_, _, int1) ->
 					let int2 = eval_unbox_int (value2) in
-					let result = BooleanObject(new_location (), "Bool", int1 = int2) in
+					let result = BooleanObject(-1, "Bool", int1 = int2) in
 					(result, store3)
 				| StringObject (_, _, string1) ->
 					let string2 = eval_unbox_string (value2) in
-					let result = BooleanObject(new_location (), "Bool", string1 = string2) in
+					let result = BooleanObject(-1, "Bool", string1 = string2) in
 					(result, store3)
 				| BooleanObject (_, _, bool1) ->
 					let bool2 = eval_unbox_bool (value2) in
-					let result = BooleanObject(new_location (), "Bool", bool1 = bool2) in
+					let result = BooleanObject(-1, "Bool", bool1 = bool2) in
 					(result, store3)
 				| Object (loc1, _, _) ->
 					let loc2 = get_value_location (value2) in 
-					let result = BooleanObject(new_location (), "Bool", loc1 = loc2) in
+					let result = BooleanObject(-1, "Bool", loc1 = loc2) in
 					(result, store3)
 				| Void -> 
 					let loc2 = get_value_location (value2) in
-					let result = BooleanObject(new_location (), "Bool", 0 = loc2) in
+					let result = BooleanObject(-1, "Bool", 0 = loc2) in
 					(result, store3)
 			end
 
@@ -811,21 +811,21 @@ let main () = begin
 				match value1 with
 				| IntegerObject (_, _, int1) ->
 					let int2 = eval_unbox_int (value2) in
-					let result = BooleanObject(new_location (), "Bool", int1 < int2) in
+					let result = BooleanObject(-1, "Bool", int1 < int2) in
 					(result, store3)
 				| StringObject (_, _, string1) ->
 					let string2 = eval_unbox_string (value2) in
-					let result = BooleanObject(new_location (), "Bool", string1 < string2) in
+					let result = BooleanObject(-1, "Bool", string1 < string2) in
 					(result, store3)
 				| BooleanObject (_, _, bool1) ->
 					let bool2 = eval_unbox_bool (value2) in
-					let result = BooleanObject(new_location (), "Bool", bool1 < bool2) in
+					let result = BooleanObject(-1, "Bool", bool1 < bool2) in
 					(result, store3)
 				| Object (_, _, _) ->
-					let result = BooleanObject(new_location (), "Bool", false) in
+					let result = BooleanObject(-1, "Bool", false) in
 					(result, store3)
 				| Void -> 
-					let result = BooleanObject(new_location (), "Bool", false) in
+					let result = BooleanObject(-1, "Bool", false) in
 					(result, store3)
 			end
  		| _ -> failwith "Invalid expression passed to eval_less_than."
@@ -841,23 +841,23 @@ let main () = begin
 				match value1 with
 				| IntegerObject (_, _, int1) ->
 					let int2 = eval_unbox_int (value2) in
-					let result = BooleanObject(new_location (), "Bool", int1 <= int2) in
+					let result = BooleanObject(-1, "Bool", int1 <= int2) in
 					(result, store3)
 				| StringObject (_, _, string1) ->
 					let string2 = eval_unbox_string (value2) in
-					let result = BooleanObject(new_location (), "Bool", string1 <= string2) in
+					let result = BooleanObject(-1, "Bool", string1 <= string2) in
 					(result, store3)
 				| BooleanObject (_, _, bool1) ->
 					let bool2 = eval_unbox_bool (value2) in
-					let result = BooleanObject(new_location (), "Bool", bool1 <= bool2) in
+					let result = BooleanObject(-1, "Bool", bool1 <= bool2) in
 					(result, store3)
 				| Object (loc1, _, _) ->
 					let loc2 = get_value_location (value2) in 
-					let result = BooleanObject(new_location (), "Bool", loc1 = loc2) in
+					let result = BooleanObject(-1, "Bool", loc1 = loc2) in
 					(result, store3)
 				| Void -> 
 					let loc2 = get_value_location (value2) in
-					let result = BooleanObject(new_location (), "Bool", 0 = loc2) in
+					let result = BooleanObject(-1, "Bool", 0 = loc2) in
 					(result, store3)
 			end
  		| _ -> failwith "Invalid expression passed to eval_less_than."
@@ -868,7 +868,7 @@ let main () = begin
 	 			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
 	 			match value with 
 	 			| BooleanObject (_, _, raw_bool) ->
-	 				let result = BooleanObject (new_location (), "Bool", not raw_bool) in
+	 				let result = BooleanObject (-1, "Bool", not raw_bool) in
 	 				(result, store2)
 	 			| _ -> failwith "Tried to negate a non-boolean object!" 
  			end
@@ -880,7 +880,7 @@ let main () = begin
 	 			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
 	 			match value with 
 	 			| IntegerObject (_, _, raw_int32) ->
-	 				let result = IntegerObject (new_location (), "Int", Int32.neg raw_int32) in
+	 				let result = IntegerObject (-1, "Int", Int32.neg raw_int32) in
 	 				(result, store2)
 	 			| _ -> failwith "Tried to negate a non-boolean object!" 
  			end
@@ -889,14 +889,14 @@ let main () = begin
  	and eval_integer (class_map, imp_map, parent_map, self_object, store, env, exp_integer) = 
  		match exp_integer with
  		| Integer (raw_int32) -> 
- 			let value = IntegerObject (new_location (), "Int", raw_int32) in
+ 			let value = IntegerObject (-1, "Int", raw_int32) in
  			(value, store)
  		| _ -> failwith "Invalid expression passed to eval_integer."
 
   	and eval_string (class_map, imp_map, parent_map, self_object, store, env, exp_string) = 
  		match exp_string with
  		| String (raw_string) -> 
- 			let value = StringObject (new_location (), "String", raw_string) in
+ 			let value = StringObject (-1, "String", raw_string) in
  			(value, store)
  		| _ -> failwith "Invalid expression passed to eval_string."
 
@@ -915,23 +915,9 @@ let main () = begin
  	and eval_bool (class_map, imp_map, parent_map, self_object, store, env, exp_bool) = 
  		match exp_bool with
  		| Boolean (raw_bool) -> 
- 			let value = BooleanObject (new_location (), "Bool", raw_bool) in
+ 			let value = BooleanObject (-1, "Bool", raw_bool) in
  			(value, store)
  		| _ -> failwith "Invalid expression passed to eval_bool."
-
- 	and eval_let (class_map, imp_map, parent_map, self_object, store, env, exp_let) = 
- 		match exp_let with
- 		| Let (binding_list, body) ->
- 			(* Setup bindings *)
- 		| _ -> failwith "Invalid expression passed to eval_let."
-
- 	and eval_let_binding (class_map, imp_map, parent_map, self_object, store, env, binding) =
- 		match binding with
- 		| (var_id, type_id, Some(exp)) ->
- 			let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
- 			let loc = new_location () in
- 			let store = StoreMap.add loc store
- 		| (var_id, type_id, None) ->
 
  	and eval_internal (class_map, imp_map, parent_map, self_object, store, env, exp_internal) =
  		match exp_internal with 
@@ -957,7 +943,7 @@ let main () = begin
 
  	and internal_typename (self_object, store, env) = 
  		let type_name = get_value_type self_object in
- 		(StringObject (new_location (), "String", type_name), store)
+ 		(StringObject (-1, "String", type_name), store)
 
 (*  	and internal_copy ()
  *)
@@ -986,16 +972,16 @@ let main () = begin
 
 	and internal_in_string (self_object, store, env) =
 		let s = (Scanf.scanf "%s" (fun x -> x)) in
-		(StringObject(new_location (), "String", s), store)
+		(StringObject(-1, "String", s), store)
 
 	and internal_in_int (self_object, store, env) = 
 		let i = Int32.of_int (Scanf.scanf "%d" (fun x -> x)) in
-		(IntegerObject(new_location (), "Int", i), store)
+		(IntegerObject(-1, "Int", i), store)
 
 	and internal_length (self_object, store, env) = 
 		match self_object with
 		| StringObject (_, _, raw_string) ->
-			(IntegerObject(new_location (), "Int", Int32.of_int (String.length raw_string)), store)
+			(IntegerObject(-1, "Int", Int32.of_int (String.length raw_string)), store)
 		| _ -> failwith "Tried to call length on non-string object!"
 
 	and internal_concat (self_object, store, env) = 
@@ -1005,7 +991,7 @@ let main () = begin
 				let value = StoreMap.find location store in
 				match value with 
 				| StringObject (_, _, raw_string2) ->
-					(StringObject(new_location (), "String", String.concat "" [raw_string1; raw_string2]), store)
+					(StringObject(-1, "String", String.concat "" [raw_string1; raw_string2]), store)
 				| _ -> failwith "Tried to pass non-string object to concat!"
 			end
 		| _ -> failwith "Tried to call concat on non-string object!"
@@ -1025,7 +1011,7 @@ let main () = begin
 				match value with
 				| IntegerObject (_, _, length_int32) ->
 					let length = Int32.to_int (length_int32) in
-					(StringObject(new_location (), "String", String.sub raw_string start length), store)
+					(StringObject(-1, "String", String.sub raw_string start length), store)
 				| _ -> failwith "Tried to pass non-integer length to substr!"
 			end
 			| _ -> failwith "Tried to pass non-integer start to substr!"
@@ -1081,15 +1067,15 @@ let main () = begin
 	let imp_map = read_cool_imp_map () in
 	let parent_map = read_cool_parent_map () in
 	let _ = read_cool_ast () in
-
+	()
 	(* Evaluation *)
-	let env = EnvMap.empty in
+(* 	let env = EnvMap.empty in
 	let store = StoreMap.empty in
-	let self_object = Object (new_location (), "", []) in
+	let self_object = Object (-1, "", []) in
 	let main_object = ("0", "Main", New ("0", "Main")) in
  	let main_call = ("0", "Object", DynamicDispatch(main_object, ("0", "main"), [])) in
 
-	eval_expression (class_map, imp_map, parent_map, self_object, store, env, main_call) ;
+	eval_expression (class_map, imp_map, parent_map, self_object, store, env, main_call) ; *)
 
 end ;; 
 
