@@ -621,7 +621,7 @@ let main () = begin
 			| "String" -> 
 				let store = StoreMap.add loc (StringObject ("String", "")) store in
 				eval_new_init_attrs (store, tl)
-			| "Integer" -> 
+			| "Int" -> 
 				let store = StoreMap.add loc (IntegerObject ("Int", Int32.of_int(0))) store in
 				eval_new_init_attrs (store, tl)
 			| "Bool" -> 
@@ -645,11 +645,17 @@ let main () = begin
 		match attr_initializers with
 		| [] -> (self_object, store)
 		| (class_attribute, location) :: tl ->
-			let (id, type_name, rhs) = class_attribute in
+			let (var_name, type_name, rhs) = class_attribute in
 			match rhs with 
 			| Some (exp) ->
-				let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
-				eval_new_eval_attr_exprs (class_map, imp_map, parent_map, self_object, store, env, tl)
+				(* Evaluate initializer expression*)
+				let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
+
+				(* Update the store with new value *)
+				let loc = EnvMap.find var_name env in
+				let store3 = StoreMap.add loc value store2 in
+				eval_new_eval_attr_exprs (class_map, imp_map, parent_map, self_object, store3, env, tl)
+
 			| None ->
 				eval_new_eval_attr_exprs (class_map, imp_map, parent_map, self_object, store, env, tl)
 
