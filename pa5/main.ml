@@ -63,10 +63,10 @@ and cool_class_pm = string * string 																	(* child class, parent clas
 
 (* Store maps ints to values *)
 type value = 											(* raw values *)
-| Object of int * string * (attribute list)
-| StringObject of int * string * string
-| IntegerObject of int * string * int32
-| BooleanObject of int * string * bool
+| Object of string * (attribute list)
+| StringObject of string * string
+| IntegerObject of string * int32
+| BooleanObject of string * bool
 | Void
 and attribute = string * int 							(* identifier, store location *)
 
@@ -385,31 +385,31 @@ let main () = begin
 	let rec eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) =
 		let (lineno, static_type, exp_kind) = exp in
  		match exp_kind with
-		| Assign (var, rhs) -> eval_assign (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-	 	| DynamicDispatch (receiver, mident, args) -> eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| StaticDispatch (receiver, stype, mident, args) -> eval_static_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| SelfDispatch (mident, args) -> eval_self_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| If (pred_exp, then_exp, else_exp) -> eval_if (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| While (pred_exp, body_exp) -> eval_while (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Block (exp_list) -> eval_block (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| New (type_ident) -> eval_new (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| IsVoid (exp) -> eval_isvoid (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Plus (e1, e2) -> eval_plus (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Minus (e1, e2) -> eval_minus (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Times (e1, e2) -> eval_times (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Divide (e1, e2) -> eval_divide (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| LessThan (e1, e2) -> eval_less_than (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| LessEqual (e1, e2) -> eval_less_equal (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Equal (e1, e2) -> eval_equal (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Not (exp) -> eval_not (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Negate (exp) -> eval_neg (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Integer (constant) -> eval_integer (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| String (constant) -> eval_string (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Identifier (id) -> eval_identifier (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Boolean (constant) -> eval_bool (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
-		| Let (let_bindings, body) -> failwith ("Expression not yet handled ")
+		| Assign (var, rhs) -> eval_assign (class_map, imp_map, parent_map, self_object, store, env, var, rhs)
+	 	| DynamicDispatch (receiver, mident, args) -> eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, store, env, receiver, mident, args)
+		| StaticDispatch (receiver, stype, mident, args) -> eval_static_dispatch (class_map, imp_map, parent_map, self_object, store, env, receiver, stype, mident, args)
+		| SelfDispatch (mident, args) -> eval_self_dispatch (class_map, imp_map, parent_map, self_object, store, env, mident, args)
+		| If (pred_exp, then_exp, else_exp) -> eval_if (class_map, imp_map, parent_map, self_object, store, env, pred_exp, then_exp, else_exp)
+		| While (pred_exp, body_exp) -> eval_while (class_map, imp_map, parent_map, self_object, store, env, pred_exp, body_exp)
+		| Block (exp_list) -> eval_block (class_map, imp_map, parent_map, self_object, store, env, exp_list)
+		| New (type_ident) -> eval_new (class_map, imp_map, parent_map, self_object, store, env, type_ident)
+		| IsVoid (exp) -> eval_isvoid (class_map, imp_map, parent_map, self_object, store, env, exp)
+		| Plus (e1, e2) -> eval_plus (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
+		| Minus (e1, e2) -> eval_minus (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
+		| Times (e1, e2) -> eval_times (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
+		| Divide (e1, e2) -> eval_divide (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
+		| LessThan (e1, e2) -> eval_less_than (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
+		| LessEqual (e1, e2) -> eval_less_equal (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
+		| Equal (e1, e2) -> eval_equal (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
+		| Not (exp) -> eval_not (class_map, imp_map, parent_map, self_object, store, env, exp)
+		| Negate (exp) -> eval_neg (class_map, imp_map, parent_map, self_object, store, env, exp)
+		| Boolean (constant) -> eval_bool (class_map, imp_map, parent_map, self_object, store, env, constant)
+		| Integer (constant) -> eval_integer (class_map, imp_map, parent_map, self_object, store, env, constant)
+		| String (constant) -> eval_string (class_map, imp_map, parent_map, self_object, store, env, constant)
+		| Identifier (id) -> eval_identifier (class_map, imp_map, parent_map, self_object, store, env, id)
+		| Let (binding_list, body) -> eval_let (class_map, imp_map, parent_map, self_object, store, env, binding_list, body)
 		| Case (case_exp, case_elements) -> failwith ("Expression not yet handled ")
-		| Internal (class_method) -> eval_internal (class_map, imp_map, parent_map, self_object, store, env, exp_kind)
+		| Internal (class_method) -> eval_internal (class_map, imp_map, parent_map, self_object, store, env, class_method)
 
 	and eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, exp_list) =
 		match exp_list with
@@ -419,136 +419,118 @@ let main () = begin
 			let (value_list, store) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, tl) in
 			(value :: value_list, store)
 
-	and eval_assign (class_map, imp_map, parent_map, self_object, store, env, exp_assign) = 
-		match exp_assign with 
-		| Assign (var, rhs) ->
-			(* Evaluate rhs expression *)
-			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, rhs) in
-			let (lineno, identifier) = var in 
-			let loc = EnvMap.find identifier env in
-			let store3 = StoreMap.add loc value store2 in
-			(value, store3)
-		| _ -> failwith "Invalid type identifier passed to eval_assign."
+	and eval_assign (class_map, imp_map, parent_map, self_object, store, env, var, rhs) = 
+		(* Evaluate rhs expression *)
+		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, rhs) in
+		let (lineno, identifier) = var in 
+		let loc = EnvMap.find identifier env in
+		let store3 = StoreMap.add loc value store2 in
+		(value, store3)
 
-	and eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_dynamic_dispatch) =
-		match exp_dynamic_dispatch with
-		| DynamicDispatch (receiver, mident, args) ->
+	and eval_dynamic_dispatch (class_map, imp_map, parent_map, self_object, store, env, receiver, mident, args) =
+		(* Evaluate argument objects expressions *)
+		let (value_list, store1) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
 
-			(* Evaluate argument objects expressions *)
-			let (value_list, store1) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
+		(* Evaluate receiver object expression *)
+		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store1, env, receiver) in
 
- 			(* Evaluate receiver object expression *)
-			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store1, env, receiver) in
+		(* Extract receiver object type and attribute list *)
+		let receiver_type = get_value_type (value) in
+		let receiver_attributes = get_value_attributes (value) in
 
-			 (* Extract receiver object type and attribute list *)
-			let receiver_type = get_value_type (value) in
-			let receiver_attributes = get_value_attributes (value) in
+		(* Implementation map lookup *)
+		let (lineno, mname) = mident in 
+		let mmethod = imp_map_get (imp_map, receiver_type, mname) in
+		let (mname, mformals, mdefined_in, mbody) = mmethod in
 
-			(* Implementation map lookup *)
-			let (lineno, mname) = mident in 
- 			let mmethod = imp_map_get (imp_map, receiver_type, mname) in
- 			let (mname, mformals, mdefined_in, mbody) = mmethod in
+		(* Add locations for each formal *)
+		let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] mformals in
 
- 			(* Add locations for each formal *)
- 			let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] mformals in
+		(* Set new locations to values in store *)
+		let param_initializers = List.combine value_list locations in
+		let store3 = eval_dispatch_init_params (store2, param_initializers) in
 
- 			(* Set new locations to values in store *)
- 			let param_initializers = List.combine value_list locations in
- 			let store3 = eval_dispatch_init_params (store2, param_initializers) in
+		(* Extend attribute list with formal/location list, environment constructed from this list *)
+		let env_initializer = List.combine mformals locations in
+		let env_initializer = receiver_attributes @ env_initializer in
 
- 			(* Extend attribute list with formal/location list, environment constructed from this list *)
- 			let env_initializer = List.combine mformals locations in
- 			let env_initializer = receiver_attributes @ env_initializer in
+		(* Create new environment out of attribute and formal identifiers / locations *)
+		let env2 = EnvMap.empty in
+		let env2 = eval_dispatch_init_env (env2, env_initializer) in
 
- 			(* Create new environment out of attribute and formal identifiers / locations *)
- 			let env2 = EnvMap.empty in
- 			let env2 = eval_dispatch_init_env (env2, env_initializer) in
+		(* Evaluate method body with receiver object as self and new environment *)
+		let (value1, store4) = eval_expression (class_map, imp_map, parent_map, value, store3, env2, mbody) in
+		(value1, store4)
 
- 			(* Evaluate method body with receiver object as self and new environment *)
- 			let (value1, store4) = eval_expression (class_map, imp_map, parent_map, value, store3, env2, mbody) in
- 			(value1, store4)
+	and eval_static_dispatch (class_map, imp_map, parent_map, self_object, store, env, receiver, stype, mident, args) = 
+		(* Evaluate argument objects expressions *)
+		let (value_list, store1) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
 
-		| _ -> failwith "Invalid expression passed to eval_dynamic_dispatch."
+		(* Evaluate receiver object expression *)
+		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store1, env, receiver) in
 
-	and eval_static_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_static_dispatch) = 
-		match exp_static_dispatch with
-		| StaticDispatch (receiver, stype, mident, args) ->
+		 (* Extract receiver attribute list, type_name from identifier *)
+		let receiver_attributes = get_value_attributes (value) in
+		let (lineno, type_name) = stype in 
 
-			(* Evaluate argument objects expressions *)
-			let (value_list, store1) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
+		(* Implementation map lookup *)
+		let (lineno, mname) = mident in 
+		let mmethod = imp_map_get (imp_map, type_name, mname) in (* Use the static type ... *)
+		let (mname, mformals, mdefined_in, mbody) = mmethod in
 
- 			(* Evaluate receiver object expression *)
-			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store1, env, receiver) in
+		(* Add locations for each formal *)
+		let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] mformals in
 
-			 (* Extract receiver attribute list, type_name from identifier *)
-			let receiver_attributes = get_value_attributes (value) in
-			let (lineno, type_name) = stype in 
+		(* Set new locations to values in store *)
+		let param_initializers = List.combine value_list locations in
+		let store3 = eval_dispatch_init_params (store2, param_initializers) in
 
-			(* Implementation map lookup *)
-			let (lineno, mname) = mident in 
- 			let mmethod = imp_map_get (imp_map, type_name, mname) in (* Use the static type ... *)
- 			let (mname, mformals, mdefined_in, mbody) = mmethod in
+		(* Extend attribute list with formal/location list, environment constructed from this list *)
+		let env_initializer = List.combine mformals locations in
+		let env_initializer = receiver_attributes @ env_initializer in
 
- 			(* Add locations for each formal *)
- 			let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] mformals in
+		(* Create new environment out of attribute and formal identifiers / locations *)
+		let env2 = EnvMap.empty in
+		let env2 = eval_dispatch_init_env (env2, env_initializer) in
 
- 			(* Set new locations to values in store *)
- 			let param_initializers = List.combine value_list locations in
- 			let store3 = eval_dispatch_init_params (store2, param_initializers) in
+		(* Evaluate method body with receiver object as self and new environment *)
+		let (value1, store4) = eval_expression (class_map, imp_map, parent_map, value, store3, env2, mbody) in
+		(value1, store4)
 
- 			(* Extend attribute list with formal/location list, environment constructed from this list *)
- 			let env_initializer = List.combine mformals locations in
- 			let env_initializer = receiver_attributes @ env_initializer in
+	and eval_self_dispatch (class_map, imp_map, parent_map, self_object, store, env, mident, args) =
+		(* Evaluate argument objects expressions *)
+		let (value_list, store1) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
 
- 			(* Create new environment out of attribute and formal identifiers / locations *)
- 			let env2 = EnvMap.empty in
- 			let env2 = eval_dispatch_init_env (env2, env_initializer) in
+		(* Set value to be self object *)
+		let (value, store2) = (self_object, store1) in
 
- 			(* Evaluate method body with receiver object as self and new environment *)
- 			let (value1, store4) = eval_expression (class_map, imp_map, parent_map, value, store3, env2, mbody) in
- 			(value1, store4)
+		 (* Extract receiver object type and attribute list *)
+		let receiver_type = get_value_type (value) in
+		let receiver_attributes = get_value_attributes (value) in
 
-		| _ -> failwith "Invalid expression passed to eval_dynamic_dispatch."
+		(* Implementation map lookup *)
+		let (lineno, mname) = mident in 
+		let mmethod = imp_map_get (imp_map, receiver_type, mname) in
+		let (mname, mformals, mdefined_in, mbody) = mmethod in
 
-	and eval_self_dispatch (class_map, imp_map, parent_map, self_object, store, env, exp_self_dispatch) =
-		match exp_self_dispatch with
-		| SelfDispatch (mident, args) ->
+		(* Add locations for each formal *)
+		let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] mformals in
 
-			(* Evaluate argument objects expressions *)
-			let (value_list, store1) = eval_expression_list (class_map, imp_map, parent_map, self_object, store, env, args) in
+		(* Set new locations to values in store *)
+		let param_initializers = List.combine value_list locations in
+		let store3 = eval_dispatch_init_params (store2, param_initializers) in
 
- 			(* Set value to be self object *)
-			let (value, store2) = (self_object, store1) in
+		(* Extend attribute list with formal/location list, environment constructed from this list *)
+		let env_initializer = List.combine mformals locations in
+		let env_initializer = receiver_attributes @ env_initializer in
 
-			 (* Extract receiver object type and attribute list *)
-			let receiver_type = get_value_type (value) in
-			let receiver_attributes = get_value_attributes (value) in
+		(* Create new environment out of attribute and formal identifiers / locations *)
+		let env2 = EnvMap.empty in
+		let env2 = eval_dispatch_init_env (env2, env_initializer) in
 
-			(* Implementation map lookup *)
-			let (lineno, mname) = mident in 
- 			let mmethod = imp_map_get (imp_map, receiver_type, mname) in
- 			let (mname, mformals, mdefined_in, mbody) = mmethod in
-
- 			(* Add locations for each formal *)
- 			let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] mformals in
-
- 			(* Set new locations to values in store *)
- 			let param_initializers = List.combine value_list locations in
- 			let store3 = eval_dispatch_init_params (store2, param_initializers) in
-
- 			(* Extend attribute list with formal/location list, environment constructed from this list *)
- 			let env_initializer = List.combine mformals locations in
- 			let env_initializer = receiver_attributes @ env_initializer in
-
- 			(* Create new environment out of attribute and formal identifiers / locations *)
- 			let env2 = EnvMap.empty in
- 			let env2 = eval_dispatch_init_env (env2, env_initializer) in
-
- 			(* Evaluate method body with receiver object as self and new environment *)
- 			let (value1, store4) = eval_expression (class_map, imp_map, parent_map, value, store3, env2, mbody) in
- 			(value1, store4)
-
-		| _ -> failwith "Invalid expression passed to eval_dynamic_dispatch."
+		(* Evaluate method body with receiver object as self and new environment *)
+		let (value1, store4) = eval_expression (class_map, imp_map, parent_map, value, store3, env2, mbody) in
+		(value1, store4)
 
 	and eval_dispatch_init_params (store, param_initializers) = 
 		match param_initializers with
@@ -566,82 +548,65 @@ let main () = begin
 			let env = EnvMap.add ident loc env in
 			eval_dispatch_init_env (env, tl)
 
-	and eval_if (class_map, imp_map, parent_map, self_object, store, env, exp_if) =
-		match exp_if with
- 		| If (pred_exp, then_exp, else_exp) -> begin
-	 			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, pred_exp) in
-	 			match value with
-	 			| BooleanObject (loc, type_name, raw_bool) ->
-		 			if raw_bool = true then
-		 				eval_expression (class_map, imp_map, parent_map, self_object, store2, env, then_exp)
-		 			else
-		 				eval_expression (class_map, imp_map, parent_map, self_object, store2, env, else_exp)
-	  			| _ -> failwith ("Predicate does not evaluate to a boolean.")
-			end
-		| _ -> failwith "Invalid expression passed to eval_if."
+	and eval_if (class_map, imp_map, parent_map, self_object, store, env, pred_exp, then_exp, else_exp) =
+		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, pred_exp) in
+		match value with
+		| BooleanObject (type_name, raw_bool) ->
+			if raw_bool = true then
+				eval_expression (class_map, imp_map, parent_map, self_object, store2, env, then_exp)
+			else
+				eval_expression (class_map, imp_map, parent_map, self_object, store2, env, else_exp)
+		| _ -> failwith ("Predicate does not evaluate to a boolean.")
 
-	and eval_while (class_map, imp_map, parent_map, self_object, store, env, exp_while) =
-		match exp_while with
-		| While (pred_exp, body_exp) -> begin
-				let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, pred_exp) in
-				match value with 
-				| BooleanObject (loc, type_name, raw_bool) ->
-					if raw_bool = true then
-						let (value2, store3) = 
-						eval_expression (class_map, imp_map, parent_map, self_object, store, env, body_exp) in
-						eval_while (class_map, imp_map, parent_map, self_object, store3, env, exp_while)
-					else
-						(Void, store2)
-	  			| _ -> failwith ("Predicate does not evaluate to a boolean.")
-			end
-		| _ -> failwith "Invalid expression passed to eval_while."
+	and eval_while (class_map, imp_map, parent_map, self_object, store, env, pred_exp, body_exp) =
+		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, pred_exp) in
+		match value with 
+		| BooleanObject (type_name, raw_bool) ->
+			if raw_bool = true then
+				let (value2, store3) = 
+				eval_expression (class_map, imp_map, parent_map, self_object, store, env, body_exp) in
+				eval_while (class_map, imp_map, parent_map, self_object, store3, env, pred_exp, body_exp)
+			else
+				(Void, store2)
+		| _ -> failwith ("Predicate does not evaluate to a boolean.")
 
-	and eval_block (class_map, imp_map, parent_map, self_object, store, env, exp_block) = 
-		match exp_block with
-		| Block (exp_list) -> eval_block_exp_list (class_map, imp_map, parent_map, self_object, store, env, exp_list)
-		| _ -> failwith "Invalid expression passed to eval_while."
-
-	and eval_block_exp_list (class_map, imp_map, parent_map, self_object, store, env, exp_list) =
+	and eval_block (class_map, imp_map, parent_map, self_object, store, env, exp_list) = 
 		match exp_list with
 		| [] -> failwith "Invalid block, parser should have eliminated this."
 		| exp :: [] -> eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp)
 		| exp :: tl ->
 			let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
-			eval_block_exp_list (class_map, imp_map, parent_map, self_object, store, env, tl)
+			eval_block (class_map, imp_map, parent_map, self_object, store, env, tl)
 
-	and eval_new (class_map, imp_map, parent_map, self_object, store, env, exp_new) =
- 		match exp_new with 
- 		| New (type_ident) ->
-	 		let (lineno, type_name) = type_ident in
+	and eval_new (class_map, imp_map, parent_map, self_object, store, env, type_ident) =
+		let (lineno, type_name) = type_ident in
 
-	 		(* Get correct type (considering SELF_TYPE) *)
-			let t0 = if (type_name = "SELF_TYPE") then get_value_type (self_object) else type_name in 
-			
-			(* Get attributes for that type *)
-			let class_attributes = class_map_get (class_map, t0) in
+		(* Get correct type (considering SELF_TYPE) *)
+		let t0 = if (type_name = "SELF_TYPE") then get_value_type (self_object) else type_name in 
 
-			(* Add locations for each attribute *)
-			let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] class_attributes in
+		(* Get attributes for that type *)
+		let class_attributes = class_map_get (class_map, t0) in
 
-			(* Get object attributes / instantiate *)
-			let attribute_identifiers = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in id :: xs) [] class_attributes in
-			let object_attributes = List.combine attribute_identifiers locations in
-			let value1 = Object (new_location (), t0, object_attributes) in
+		(* Add locations for each attribute *)
+		let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] class_attributes in
 
-			(* Initialize new locations in store with default values *)
-			let attribute_types = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in type_name :: xs) [] class_attributes in
-			let default_initializers = List.combine attribute_types locations in
-			let store2 = eval_new_init_attrs (store, default_initializers) in
+		(* Get object attributes / instantiate *)
+		let attribute_identifiers = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in id :: xs) [] class_attributes in
+		let object_attributes = List.combine attribute_identifiers locations in
+		let value1 = Object (t0, object_attributes) in
 
-			(* Evaluate/assign initializer expressions *)
-			let env2 = EnvMap.empty in
-			let env2 = eval_new_init_env (env2, object_attributes) in (* Create new environment *)
-			let attr_initializers = List.combine class_attributes locations in
-			let (value2, store3) = eval_new_eval_attr_exprs (class_map, imp_map, parent_map, value1, store2, env2, attr_initializers) in
+		(* Initialize new locations in store with default values *)
+		let attribute_types = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in type_name :: xs) [] class_attributes in
+		let default_initializers = List.combine attribute_types locations in
+		let store2 = eval_new_init_attrs (store, default_initializers) in
 
-			(value1, store3)
+		(* Evaluate/assign initializer expressions *)
+		let env2 = EnvMap.empty in
+		let env2 = eval_new_init_env (env2, object_attributes) in (* Create new environment *)
+		let attr_initializers = List.combine class_attributes locations in
+		let (value2, store3) = eval_new_eval_attr_exprs (class_map, imp_map, parent_map, value1, store2, env2, attr_initializers) in
 
-		| _ -> failwith "Invalid expression passed to eval_new."
+		(value1, store3)
 
 	(* Returns a new store with default values in each of the specified (attribute) locations *)
 	and eval_new_init_attrs (store, object_initializers) =
@@ -649,15 +614,15 @@ let main () = begin
 		| [] -> store
 		| hd :: tl ->
 			let (type_name, loc) = hd in
- 			match type_name with 
+			match type_name with 
 			| "String" -> 
-				let store = StoreMap.add loc (StringObject (loc, "String", "")) store in
+				let store = StoreMap.add loc (StringObject ("String", "")) store in
 				eval_new_init_attrs (store, tl)
 			| "Integer" -> 
-				let store = StoreMap.add loc (IntegerObject (loc, "Int", Int32.of_int(0))) store in
+				let store = StoreMap.add loc (IntegerObject ("Int", Int32.of_int(0))) store in
 				eval_new_init_attrs (store, tl)
 			| "Bool" -> 
-				let store = StoreMap.add loc (BooleanObject (loc, "Bool", false)) store in
+				let store = StoreMap.add loc (BooleanObject ("Bool", false)) store in
 				eval_new_init_attrs (store, tl)
 			| _ -> 
 				let store = StoreMap.add loc Void store in
@@ -685,271 +650,210 @@ let main () = begin
 			| None ->
 				eval_new_eval_attr_exprs (class_map, imp_map, parent_map, self_object, store, env, tl)
 
-	and eval_isvoid (class_map, imp_map, parent_map, self_object, store, env, exp_isvoid) =
-		match exp_isvoid with
-		| IsVoid (exp) -> begin
-			let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
-			match value with 
-			| Void -> (BooleanObject (new_location (), "Bool", true), store)
-			| _ -> (BooleanObject (new_location (), "Bool", false), store)
-		end
-		| _ -> failwith "Invalid expression passed to eval_isvoid."
+	and eval_isvoid (class_map, imp_map, parent_map, self_object, store, env, exp) =
+		let (value, store) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
+		match value with 
+		| Void -> (BooleanObject ("Bool", true), store)
+		| _ -> (BooleanObject ("Bool", false), store)
 
-	and eval_plus (class_map, imp_map, parent_map, self_object, store, env, exp_plus) =
-		match exp_plus with
-		| Plus (e1, e2) ->
-			(* Evaluate operand expressions *)
-			let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
-			let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e1) in
+	and eval_plus (class_map, imp_map, parent_map, self_object, store, env, e1, e2) =
+		(* Evaluate operand expressions *)
+		let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
+		let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e1) in
 
-			(* Retrieve the int32 values and compute result *)
-			let int1 = eval_unbox_int value1 in
-			let int2 = eval_unbox_int value2 in
-			let int_result = Int32.add int1 int2 in
+		(* Retrieve the int32 values and compute result *)
+		match value1, value2 with
+		| IntegerObject(_, int1), IntegerObject(_, int2) ->
+			let result = Int32.add int1 int2 in
+			(IntegerObject ("Int", result), store3)
+		| x, y -> failwith ("Tried to add with two non-integer objects!")
 
-			(* Rebox and return *)
-			let value = IntegerObject (new_location (), "Int", int_result) in
-			(value, store3)
+	and eval_minus (class_map, imp_map, parent_map, self_object, store, env, e1, e2) =
+		(* Evaluate operand expressions *)
+		let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
+		let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e1) in
 
-		| _ -> failwith "Invalid expression passed to eval_plus."
+		(* Retrieve the int32 values and compute result *)
+		match value1, value2 with
+		| IntegerObject(_, int1), IntegerObject(_, int2) ->
+			let result = Int32.sub int1 int2 in
+			(IntegerObject ("Int", result), store3)
+		| x, y -> failwith ("Tried to subtract with two non-integer objects!")
 
-	and eval_minus (class_map, imp_map, parent_map, self_object, store, env, exp_minus) =
-		match exp_minus with
-		| Minus (e1, e2) ->
-			(* Evaluate operand expressions *)
-			let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
-			let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e1) in
+	and eval_times (class_map, imp_map, parent_map, self_object, store, env, e1, e2) =
+		(* Evaluate operand expressions *)
+		let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
+		let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e1) in
 
-			(* Retrieve the int32 values and compute result *)
-			let int1 = eval_unbox_int value1 in
-			let int2 = eval_unbox_int value2 in
-			let int_result = Int32.sub int1 int2 in
+		(* Retrieve the int32 values and compute result *)
+		match value1, value2 with
+		| IntegerObject(_, int1), IntegerObject(_, int2) ->
+			let result = Int32.mul int1 int2 in
+			(IntegerObject ("Int", result), store3)
+		| x, y -> failwith ("Tried to multiply with two non-integer objects!")
 
-			(* Rebox and return *)
-			let value = IntegerObject (new_location (), "Int", int_result) in
-			(value, store3)
+	and eval_divide (class_map, imp_map, parent_map, self_object, store, env, e1, e2) =
+		(* Evaluate operand expressions *)
+		let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
+		let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e1) in
 
-		| _ -> failwith "Invalid expression passed to eval_minus."
+		(* Retrieve the int32 values and compute result *)
+		match value1, value2 with
+		| IntegerObject(_, int1), IntegerObject(_, int2) ->
+			let result = Int32.div int1 int2 in
+			(IntegerObject ("Int", result), store3)
+		| x, y -> failwith ("Tried to divide with two non-integer objects!")
 
-	and eval_times (class_map, imp_map, parent_map, self_object, store, env, exp_times) =
-		match exp_times with
-		| Minus (e1, e2) ->
-			(* Evaluate operand expressions *)
-			let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
-			let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e1) in
+ 	and eval_equal (class_map, imp_map, parent_map, self_object, store, env, e1, e2) = 
+		(* Evaluate operand expressions *)
+		let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
+		let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e2) in
 
-			(* Retrieve the int32 values and compute result *)
-			let int1 = eval_unbox_int value1 in
-			let int2 = eval_unbox_int value2 in
-			let int_result = Int32.mul int1 int2 in
+		match value1, value2 with
+		| IntegerObject (_, int1), IntegerObject (_, int2) ->
+			(BooleanObject("Bool", int1 = int2), store3)
+		| StringObject (_, string1), StringObject (_, string2) ->
+			(BooleanObject("Bool", string1 = string2), store3)
+		| BooleanObject (_, bool1), BooleanObject (_, bool2) ->
+			(BooleanObject("Bool", bool1 = bool2), store3)
+		| Void, Void -> 
+			(BooleanObject("Bool", true), store3)
+		| value1, value2 -> 
+			(BooleanObject("Bool", value1 == value2), store3)
 
-			(* Rebox and return *)
-			let value = IntegerObject (new_location (), "Int", int_result) in
-			(value, store3)
+	and eval_less_than (class_map, imp_map, parent_map, self_object, store, env, e1, e2) =
+		(* Evaluate operand expressions *)
+		let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
+		let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e2) in
 
-		| _ -> failwith "Invalid expression passed to eval_times."
+		match value1, value2 with
+		| IntegerObject (_, int1), IntegerObject (_, int2) ->
+			(BooleanObject("Bool", int1 < int2), store3)
+		| StringObject (_, string1), StringObject (_, string2) ->
+			(BooleanObject("Bool", string1 < string2), store3)
+		| BooleanObject (_, bool1), BooleanObject (_, bool2) ->
+			(BooleanObject("Bool", bool1 < bool2), store3)
+		| Void, Void -> 
+			(BooleanObject("Bool", false), store3)
+		| value1, value2 -> 
+			(BooleanObject("Bool", false), store3)
 
-	and eval_divide (class_map, imp_map, parent_map, self_object, store, env, exp_divide) =
-		match exp_divide with
-		| Plus (e1, e2) ->
-			(* Evaluate operand expressions *)
-			let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
-			let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e1) in
+	and eval_less_equal (class_map, imp_map, parent_map, self_object, store, env, e1, e2) =
+		(* Evaluate operand expressions *)
+		let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
+		let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e2) in
 
-			(* Retrieve the int32 values and compute result *)
-			let int1 = eval_unbox_int (value1) in
-			let int2 = eval_unbox_int (value2) in
-			let int_result = Int32.div int1 int2 in
+		match value1, value2 with
+		| IntegerObject (_, int1), IntegerObject (_, int2) ->
+			(BooleanObject("Bool", int1 <= int2), store3)
+		| StringObject (_, string1), StringObject (_, string2) ->
+			(BooleanObject("Bool", string1 <= string2), store3)
+		| BooleanObject (_, bool1), BooleanObject (_, bool2) ->
+			(BooleanObject("Bool", bool1 <= bool2), store3)
+		| Void, Void -> 
+			(BooleanObject("Bool", true), store3)
+		| value1, value2 -> 
+			(BooleanObject("Bool", value1 == value2), store3)
 
-			(* Rebox and return *)
-			let value = IntegerObject (new_location (), "Int", int_result) in
-			(value, store3)
+ 	and eval_not (class_map, imp_map, parent_map, self_object, store, env, exp) = 
+		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
+		match value with 
+		| BooleanObject (_, raw_bool) ->
+			let result = BooleanObject ("Bool", not raw_bool) in
+			(result, store2)
+		| _ -> failwith "Tried to negate a non-boolean object!" 
 
-		| _ -> failwith "Invalid expression passed to eval_divide."
+ 	and eval_neg (class_map, imp_map, parent_map, self_object, store, env, exp) = 
+		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
+		match value with 
+		| IntegerObject (_, raw_int32) ->
+			let result = IntegerObject ("Int", Int32.neg raw_int32) in
+			(result, store2)
+		| _ -> failwith "Tried to negate a non-boolean object!" 
 
- 	and eval_equal (class_map, imp_map, parent_map, self_object, store, env, exp_equal) = 
-		match exp_equal with
-		| Equal (e1, e2) -> begin
-				(* Evaluate oeprand expressions *)
-				let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
-				let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e2) in
+ 	and eval_integer (class_map, imp_map, parent_map, self_object, store, env, constant) = 
+		let value = IntegerObject ("Int", constant) in
+		(value, store)
 
-				(* Unbox the values, typechecking makes it so we only have to check one for the type *)
-				match value1 with
-				| IntegerObject (_, _, int1) ->
-					let int2 = eval_unbox_int (value2) in
-					let result = BooleanObject(new_location (), "Bool", int1 = int2) in
-					(result, store3)
-				| StringObject (_, _, string1) ->
-					let string2 = eval_unbox_string (value2) in
-					let result = BooleanObject(new_location (), "Bool", string1 = string2) in
-					(result, store3)
-				| BooleanObject (_, _, bool1) ->
-					let bool2 = eval_unbox_bool (value2) in
-					let result = BooleanObject(new_location (), "Bool", bool1 = bool2) in
-					(result, store3)
-				| Object (loc1, _, _) ->
-					let loc2 = get_value_location (value2) in 
-					let result = BooleanObject(new_location (), "Bool", loc1 = loc2) in
-					(result, store3)
-				| Void -> 
-					let loc2 = get_value_location (value2) in
-					let result = BooleanObject(new_location (), "Bool", 0 = loc2) in
-					(result, store3)
-			end
+  	and eval_string (class_map, imp_map, parent_map, self_object, store, env, constant) = 
+		let value = StringObject ("String", constant) in
+		(value, store)
 
- 		| _ -> failwith "Invalid expression passed to eval_less_than."
+	and eval_identifier (class_map, imp_map, parent_map, self_object, store, env, id) =
+		let (lineno, var_name) = id in
+		if var_name = "self" then
+			(self_object, store)
+		else
+			let location = EnvMap.find var_name env in
+			let value = StoreMap.find location store in
+			(value, store)
 
-  	and eval_less_than (class_map, imp_map, parent_map, self_object, store, env, exp_less_than) = 
-		match exp_less_than with
-		| LessThan (e1, e2) -> begin
-				(* Evaluate oeprand expressions *)
-				let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
-				let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e2) in
+	and eval_bool (class_map, imp_map, parent_map, self_object, store, env, constant) = 
+		let value = BooleanObject ("Bool", constant) in
+		(value, store)
 
-				(* Unbox the values, typechecking makes it so we only have to check one for the type *)
-				match value1 with
-				| IntegerObject (_, _, int1) ->
-					let int2 = eval_unbox_int (value2) in
-					let result = BooleanObject(new_location (), "Bool", int1 < int2) in
-					(result, store3)
-				| StringObject (_, _, string1) ->
-					let string2 = eval_unbox_string (value2) in
-					let result = BooleanObject(new_location (), "Bool", string1 < string2) in
-					(result, store3)
-				| BooleanObject (_, _, bool1) ->
-					let bool2 = eval_unbox_bool (value2) in
-					let result = BooleanObject(new_location (), "Bool", bool1 < bool2) in
-					(result, store3)
-				| Object (_, _, _) ->
-					let result = BooleanObject(new_location (), "Bool", false) in
-					(result, store3)
-				| Void -> 
-					let result = BooleanObject(new_location (), "Bool", false) in
-					(result, store3)
-			end
- 		| _ -> failwith "Invalid expression passed to eval_less_than."
+ 	and eval_let (class_map, imp_map, parent_map, self_object, store, env, binding_list, body) = 
+ 		match binding_list with
+ 		| [] -> (* No more bindings, evaluate body *)
+ 			eval_expression (class_map, imp_map, parent_map, self_object, store, env, body)
+ 		| hd :: tl ->
+ 			match hd with 
+ 			| (var_id, type_id, None) ->
+ 				let (lineno, type_name) = type_id in
+ 				let (lineno, var_name) = var_id in
 
-  	and eval_less_equal (class_map, imp_map, parent_map, self_object, store, env, exp_less_equal) = 
-		match exp_less_equal with
-		| LessEqual (e1, e2) -> begin
-				(* Evaluate oeprand expressions *)
-				let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
-				let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e2) in
+ 				 (* Get a default object to put in the location since there's no expression*)
+ 				let value = (
+ 					match type_name with
+ 					| "String" -> StringObject ("String", "")
+ 					| "Integer" -> IntegerObject ("Int", Int32.of_int(0))
+ 					| "Bool" -> BooleanObject ("Bool", false)
+ 					| _ -> Void
+ 				) in
 
-				(* Unbox the values, typechecking makes it so we only have to check one for the type *)
-				match value1 with
-				| IntegerObject (_, _, int1) ->
-					let int2 = eval_unbox_int (value2) in
-					let result = BooleanObject(new_location (), "Bool", int1 <= int2) in
-					(result, store3)
-				| StringObject (_, _, string1) ->
-					let string2 = eval_unbox_string (value2) in
-					let result = BooleanObject(new_location (), "Bool", string1 <= string2) in
-					(result, store3)
-				| BooleanObject (_, _, bool1) ->
-					let bool2 = eval_unbox_bool (value2) in
-					let result = BooleanObject(new_location (), "Bool", bool1 <= bool2) in
-					(result, store3)
-				| Object (loc1, _, _) ->
-					let loc2 = get_value_location (value2) in 
-					let result = BooleanObject(new_location (), "Bool", loc1 = loc2) in
-					(result, store3)
-				| Void -> 
-					let loc2 = get_value_location (value2) in
-					let result = BooleanObject(new_location (), "Bool", 0 = loc2) in
-					(result, store3)
-			end
- 		| _ -> failwith "Invalid expression passed to eval_less_than."
+ 				(* Create new location *)
+ 				let loc = new_location () in
 
- 	and eval_not (class_map, imp_map, parent_map, self_object, store, env, exp_not) = 
- 		match exp_not with
- 		| Not (exp) -> begin
-	 			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
-	 			match value with 
-	 			| BooleanObject (_, _, raw_bool) ->
-	 				let result = BooleanObject (new_location (), "Bool", not raw_bool) in
-	 				(result, store2)
-	 			| _ -> failwith "Tried to negate a non-boolean object!" 
- 			end
- 		| _ -> failwith "Invalid expression passed to eval_not."
+ 				(* Put default object in the store at that location *)
+ 				let store3 = StoreMap.add loc value store in
 
- 	and eval_neg (class_map, imp_map, parent_map, self_object, store, env, exp_neg) = 
- 		match exp_neg with
- 		| Negate (exp) -> begin
-	 			let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
-	 			match value with 
-	 			| IntegerObject (_, _, raw_int32) ->
-	 				let result = IntegerObject (new_location (), "Int", Int32.neg raw_int32) in
-	 				(result, store2)
-	 			| _ -> failwith "Tried to negate a non-boolean object!" 
- 			end
- 		| _ -> failwith "Invalid expression passed to eval_neg."
+ 				(* Extend environment with variable/location *)
+ 				let env' = EnvMap.add var_name loc env in
 
- 	and eval_integer (class_map, imp_map, parent_map, self_object, store, env, exp_integer) = 
- 		match exp_integer with
- 		| Integer (raw_int32) -> 
- 			let value = IntegerObject (new_location (), "Int", raw_int32) in
- 			(value, store)
- 		| _ -> failwith "Invalid expression passed to eval_integer."
+ 				(* Evaluate next binding ... *)
+ 				eval_let (class_map, imp_map, parent_map, self_object, store3, env', tl, body)
 
-  	and eval_string (class_map, imp_map, parent_map, self_object, store, env, exp_string) = 
- 		match exp_string with
- 		| String (raw_string) -> 
- 			let value = StringObject (new_location (), "String", raw_string) in
- 			(value, store)
- 		| _ -> failwith "Invalid expression passed to eval_string."
+ 			| (var_id, type_id, Some(exp)) ->
+ 				let (lineno, var_name) = var_id in
 
- 	and eval_identifier (class_map, imp_map, parent_map, self_object, store, env, exp_identifier) =
- 		match exp_identifier with 
- 		| Identifier (id) ->
- 			let (lineno, var_name) = id in
- 			if var_name = "self" then
- 				(self_object, store)
- 			else
-	 			let location = EnvMap.find var_name env in
-	 			let value = StoreMap.find location store in
-	 			(value, store)
- 		| _ -> failwith "Invalid expression passed to eval_identifier"
+ 				(* Evaluate the initializer expression *)
+ 				let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
 
- 	and eval_bool (class_map, imp_map, parent_map, self_object, store, env, exp_bool) = 
- 		match exp_bool with
- 		| Boolean (raw_bool) -> 
- 			let value = BooleanObject (new_location (), "Bool", raw_bool) in
- 			(value, store)
- 		| _ -> failwith "Invalid expression passed to eval_bool."
+  				(* Create new location *)
+ 				let loc = new_location () in
 
- 	and eval_let (class_map, imp_map, parent_map, self_object, store, env, exp_let) = 
- 		match exp_let with
- 		| Let (binding_list, body) ->
- 			(* Setup bindings *)
- 		| _ -> failwith "Invalid expression passed to eval_let."
+ 				(* Put default object in the store at that location *)
+ 				let store3 = StoreMap.add loc value store2 in
 
- 	and eval_let_binding (class_map, imp_map, parent_map, self_object, store, env, binding) =
- 		match binding with
- 		| (var_id, type_id, Some(exp)) ->
- 			let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, exp) in
- 			let loc = new_location () in
- 			let store = StoreMap.add loc store
- 		| (var_id, type_id, None) ->
+ 				(* Extend environment with variable/location *)
+ 				let env' = EnvMap.add var_name loc env in
 
- 	and eval_internal (class_map, imp_map, parent_map, self_object, store, env, exp_internal) =
- 		match exp_internal with 
- 		| Internal (class_method) -> begin
- 				match class_method with
-				| "Object.abort" -> internal_abort (self_object, store, env)
-				| "Object.type_name" -> internal_typename (self_object, store, env)
-				| "Object.copy" -> failwith "Object.copy hasn't been implemented."
-				| "IO.out_string" -> internal_out_string (self_object, store, env)
-				| "IO.out_int" -> internal_out_int (self_object, store, env)
-				| "IO.in_string" -> internal_in_string (self_object, store, env)
-				| "IO.in_int" -> internal_in_int (self_object, store, env)
-				| "String.length" -> internal_length (self_object, store, env)
-				| "String.concat" -> internal_concat (self_object, store, env)
-				| "String.substr" -> internal_substr (self_object, store, env)
-				| _ -> failwith "Undefined internal hasn't been implemented."
- 			end
- 		| _ -> failwith "Invalid expression passed to eval_internal."
+ 				(* Evaluate next binding ... *)
+ 				eval_let (class_map, imp_map, parent_map, self_object, store3, env', tl, body)
+
+ 	and eval_internal (class_map, imp_map, parent_map, self_object, store, env, class_method) =
+		match class_method with
+		| "Object.abort" -> internal_abort (self_object, store, env)
+		| "Object.type_name" -> internal_typename (self_object, store, env)
+		| "Object.copy" -> failwith "Object.copy hasn't been implemented."
+		| "IO.out_string" -> internal_out_string (self_object, store, env)
+		| "IO.out_int" -> internal_out_int (self_object, store, env)
+		| "IO.in_string" -> internal_in_string (self_object, store, env)
+		| "IO.in_int" -> internal_in_int (self_object, store, env)
+		| "String.length" -> internal_length (self_object, store, env)
+		| "String.concat" -> internal_concat (self_object, store, env)
+		| "String.substr" -> internal_substr (self_object, store, env)
+		| _ -> failwith "Undefined internal hasn't been implemented."
 
  	and internal_abort (self_object, store, env) =
  		printf "abort\n" ;
@@ -957,16 +861,16 @@ let main () = begin
 
  	and internal_typename (self_object, store, env) = 
  		let type_name = get_value_type self_object in
- 		(StringObject (new_location (), "String", type_name), store)
+ 		(StringObject ("String", type_name), store)
 
-(*  	and internal_copy ()
- *)
+	(*  and internal_copy () *)
+ 
  	and internal_out_string (self_object, store, env) = 
 		(* Retrieve value of 'x' identifier *)
 		let location = EnvMap.find "x" env in
 		let value = StoreMap.find location store in
 		match value with
-		| StringObject (_, _, raw_string) ->
+		| StringObject (_, raw_string) ->
 			let string_to_print = Str.global_replace (Str.regexp "[\\]n") "\n" raw_string in
 			let string_to_print = Str.global_replace (Str.regexp "[\\]t") "\t" string_to_print in
 			let string_to_print = Str.global_replace (Str.regexp "[\\]r") "\r" string_to_print in
@@ -979,96 +883,73 @@ let main () = begin
 		let location = EnvMap.find "x" env in
 		let value = StoreMap.find location store in
 		match value with
-		| IntegerObject (_, _, raw_int32) ->
+		| IntegerObject (_, raw_int32) ->
 			printf "%d" (Int32.to_int (raw_int32)) ;
 			(self_object, store)
 		| _ -> failwith "Invalid object passed to out_int."
 
 	and internal_in_string (self_object, store, env) =
 		let s = (Scanf.scanf "%s" (fun x -> x)) in
-		(StringObject(new_location (), "String", s), store)
+		(StringObject("String", s), store)
 
 	and internal_in_int (self_object, store, env) = 
 		let i = Int32.of_int (Scanf.scanf "%d" (fun x -> x)) in
-		(IntegerObject(new_location (), "Int", i), store)
+		(IntegerObject("Int", i), store)
 
 	and internal_length (self_object, store, env) = 
 		match self_object with
-		| StringObject (_, _, raw_string) ->
-			(IntegerObject(new_location (), "Int", Int32.of_int (String.length raw_string)), store)
+		| StringObject (_, raw_string) ->
+			(IntegerObject("Int", Int32.of_int (String.length raw_string)), store)
 		| _ -> failwith "Tried to call length on non-string object!"
 
 	and internal_concat (self_object, store, env) = 
 		match self_object with
-		| StringObject (_, _, raw_string1) -> begin
+		| StringObject (_, raw_string1) -> begin
 				let location = EnvMap.find "s" env in
 				let value = StoreMap.find location store in
 				match value with 
-				| StringObject (_, _, raw_string2) ->
-					(StringObject(new_location (), "String", String.concat "" [raw_string1; raw_string2]), store)
+				| StringObject (_, raw_string2) ->
+					(StringObject("String", String.concat "" [raw_string1; raw_string2]), store)
 				| _ -> failwith "Tried to pass non-string object to concat!"
 			end
 		| _ -> failwith "Tried to call concat on non-string object!"
 
 	and internal_substr (self_object, store, env) = 
 		match self_object with
-		| StringObject (_, _, raw_string) -> 
+		| StringObject (_, raw_string) -> 
 		begin
 			let location = EnvMap.find "i" env in
 			let value = StoreMap.find location store in
 			match value with 
-			| IntegerObject (_, _, start_int32) ->
+			| IntegerObject (_, start_int32) ->
 			begin
 				let start = Int32.to_int (start_int32) in
 				let location = EnvMap.find "l" env in
 				let value = StoreMap.find location store in 
 				match value with
-				| IntegerObject (_, _, length_int32) ->
+				| IntegerObject (_, length_int32) ->
 					let length = Int32.to_int (length_int32) in
-					(StringObject(new_location (), "String", String.sub raw_string start length), store)
+					(StringObject("String", String.sub raw_string start length), store)
 				| _ -> failwith "Tried to pass non-integer length to substr!"
 			end
 			| _ -> failwith "Tried to pass non-integer start to substr!"
 		end
 		| _ -> failwith "Tried to call substr on non-string object!"
 
-	and eval_unbox_int (value) =
-		match value with 
-		| IntegerObject (_, _, raw_int32) -> raw_int32
-		| _ -> failwith "Tried to unbox a non-integer object!"
-
-	and eval_unbox_string (value) =
-		match value with 
-		| StringObject (_, _, raw_string) -> raw_string
-		| _ -> failwith "Tried to unbox a non-string object!"
-
-	and eval_unbox_bool (value) =
-		match value with 
-		| BooleanObject (_, _, raw_bool) -> raw_bool
-		| _ -> failwith "Tried to unbox a non-boolean object!"
-
-	and get_value_location (value) = 
-		match value with
-		| Object (loc, _, _) -> loc
-		| StringObject (loc, _, _)  -> loc
-		| IntegerObject (loc, _, _)  -> loc
-		| BooleanObject (loc, _, _)  -> loc
-		| Void -> 0
-
 	and get_value_type (value) = 
 		match value with
-		| Object (_, type_name, _)  -> type_name
-		| StringObject (_, type_name, _) -> type_name
-		| IntegerObject (_, type_name, _) -> type_name
-		| BooleanObject (_, type_name, _) -> type_name
+		| Object (type_name, _)  -> type_name
+		| StringObject (type_name, _) -> type_name
+		| IntegerObject (type_name, _) -> type_name
+		| BooleanObject (type_name, _) -> type_name
 		| Void -> failwith "Void has no type."
 
 	and get_value_attributes (value) =
 		match value with
-		| Object (_, _, alist) -> alist
-		| StringObject (_, _, _) -> []
-		| IntegerObject (_, _, _) -> []
-		| BooleanObject (_, _, _) -> []
+		| Object (_, alist) -> alist
+		| StringObject (_, _) -> []
+		| IntegerObject (_, _) -> []
+		| BooleanObject (_, _) -> []
 		| Void -> [] (* Dispatch on void? *)
 
 	and new_location () =
@@ -1085,7 +966,7 @@ let main () = begin
 	(* Evaluation *)
 	let env = EnvMap.empty in
 	let store = StoreMap.empty in
-	let self_object = Object (new_location (), "", []) in
+	let self_object = Object ("", []) in
 	let main_object = ("0", "Main", New ("0", "Main")) in
  	let main_call = ("0", "Object", DynamicDispatch(main_object, ("0", "main"), [])) in
 
