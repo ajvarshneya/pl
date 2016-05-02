@@ -1,0 +1,6 @@
+999c999,1000
+< ERROR: 6: Exception: stack overflow
+\ No newline at end of file
+---
+> 999
+> ERROR: 6: Exception: stack overflow

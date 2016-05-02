@@ -1,0 +1,4 @@
+1c1
+< ERROR: 4: Exception: case without matching branch
+---
+> ERROR: 4: Exception: case without matching branch: Int(1)
