@@ -958,11 +958,20 @@ let main () = begin
 
 	and internal_in_string (self_object, store, env) =
 		let s = (Scanf.scanf "%s" (fun x -> x)) in
-		(StringObject("String", s), store)
+		if String.contains s (Char.chr 0) then
+			(StringObject("String", ""), store)
+		else
+			(StringObject("String", s), store)
 
 	and internal_in_int (self_object, store, env) = 
-		let i = Int32.of_int (Scanf.scanf "%d" (fun x -> x)) in
-		(IntegerObject("Int", i), store)
+		let s = Scanf.scanf "%s" (fun x -> x) in
+		let raw_int = 
+			if String.length s > 12 then 0
+			else (let i = int_of_string (s) in
+				if (i > 2147483647 or i < -2147483648) then 0 else i)
+		in
+		let raw_int32 = Int32.of_int (raw_int) in
+		(IntegerObject("Int", raw_int32), store)
 
 	and internal_length (self_object, store, env) = 
 		match self_object with
