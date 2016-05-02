@@ -5,14 +5,7 @@ class Main inherits IO {
 	char : String;
 	avar : A; 
 	flag : Bool <- true;
-
-	menu() : String {
-		{
-			out_string("hello");
-			in_string();
-		}
-	};
-
+	
 	main() : Object {
 		{
 			avar <- (new A);

@@ -396,7 +396,7 @@ let main () = begin
 		| Plus (e1, e2) -> eval_plus (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
 		| Minus (e1, e2) -> eval_minus (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
 		| Times (e1, e2) -> eval_times (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
-		| Divide (e1, e2) -> eval_divide (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
+		| Divide (e1, e2) -> eval_divide (class_map, imp_map, parent_map, self_object, store, env, e1, e2, lineno)
 		| LessThan (e1, e2) -> eval_less_than (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
 		| LessEqual (e1, e2) -> eval_less_equal (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
 		| Equal (e1, e2) -> eval_equal (class_map, imp_map, parent_map, self_object, store, env, e1, e2)
@@ -436,11 +436,10 @@ let main () = begin
 		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store1, env, receiver) in
 
 		(match value with 
-		| Void -> 
-			let (lineno, static_type, exp_kind) = receiver in (
-				printf "ERROR: %s: Exception: dispatch on void\n" lineno ;
-				exit 0;
-			)
+		| Void -> (
+			printf "ERROR: %s: Exception: dispatch on void\n" lineno ;
+			exit 0;
+		)
 		| _ -> ()) ;
 
 		(* Extract receiver object type and attribute list *)
@@ -484,11 +483,10 @@ let main () = begin
 		let (value, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store1, env, receiver) in
 
 		(match value with 
-		| Void -> 
-			let (lineno, static_type, exp_kind) = receiver in (
-				printf "ERROR: %s: Exception: dispatch on void\n" lineno ;
-				exit 0;
-			)
+		| Void -> (
+			printf "ERROR: %s: Exception: static dispatch on void\n" lineno ;
+			exit 0;
+		)
 		| _ -> ()) ;
 
 		 (* Extract receiver attribute list, type_name from identifier *)
@@ -737,7 +735,7 @@ let main () = begin
 			(IntegerObject ("Int", result), store3)
 		| x, y -> failwith ("Tried to multiply with two non-integer objects!")
 
-	and eval_divide (class_map, imp_map, parent_map, self_object, store, env, e1, e2) =
+	and eval_divide (class_map, imp_map, parent_map, self_object, store, env, e1, e2, lineno) =
 		(* Evaluate operand expressions *)
 		let (value1, store2) = eval_expression (class_map, imp_map, parent_map, self_object, store, env, e1) in
 		let (value2, store3) = eval_expression (class_map, imp_map, parent_map, self_object, store2, env, e2) in
@@ -748,10 +746,9 @@ let main () = begin
 		begin
 			let denom = Int32.to_int int2 in
 			(if denom = 0 then 
-				let (lineno, static_type, exp_kind) = e2 in (
-					printf "ERROR: %s: Exception: division by zero\n" lineno;
-					exit 0;
-			));
+				(printf "ERROR: %s: Exception: division by zero\n" lineno;
+				exit 0;)
+			);
 
 			let result = Int32.div int1 int2 in
 			(IntegerObject ("Int", result), store3)
@@ -902,7 +899,7 @@ let main () = begin
 		(match value with 
 		| Void -> 
 			let (lineno, static_type, exp_kind) = case_exp in (
-				printf "ERROR: %s: Exception: case on void" lineno ;
+				printf "ERROR: %s: Exception: case on void\n" lineno ;
 				exit 0;
 			)
 		| _ -> ()) ;
@@ -953,24 +950,19 @@ let main () = begin
 				eval_case_get_element (case_type, tl)
 
 	and lub (parent_map, exp_type, case_types, lineno) =
-		match case_types with
-		| [] -> (
-				printf "ERROR: %s: Exception: case without matching branch\n" lineno; 
-				exit 0;
-			)
-		| hd :: tl ->
-			if List.mem exp_type case_types then
-				exp_type
-			else 
-				let parent_type = parent_map_get (parent_map, exp_type) in
-				lub (parent_map, parent_type, tl, lineno) 
-
+		if List.mem exp_type case_types then
+			exp_type
+		else (
+			if exp_type = "Object" then (printf "ERROR: %s: Exception: case without matching branch\n" lineno; exit 0) ;
+			let parent_type = parent_map_get (parent_map, exp_type) in
+			lub (parent_map, parent_type, case_types, lineno)
+		)
 
  	and eval_internal (class_map, imp_map, parent_map, self_object, store, env, class_method) =
 		match class_method with
 		| "Object.abort" -> internal_abort (self_object, store, env)
 		| "Object.type_name" -> internal_typename (self_object, store, env)
-		| "Object.copy" -> failwith "Object.copy hasn't been implemented."
+		| "Object.copy" -> internal_copy (self_object, store, env)
 		| "IO.out_string" -> internal_out_string (self_object, store, env)
 		| "IO.out_int" -> internal_out_int (self_object, store, env)
 		| "IO.in_string" -> internal_in_string (self_object, store, env)
@@ -988,8 +980,35 @@ let main () = begin
  		let type_name = get_value_type self_object in
  		(StringObject ("String", type_name), store)
 
-	(*  and internal_copy () *)
- 
+	and internal_copy (self_object, store, env) = 
+		match self_object with
+		| Object (type_name, attribute_list) -> (
+			let (new_attributes, store) = internal_copy_attributes (self_object, store, env, attribute_list) in
+			(Object (type_name, new_attributes), store)
+		)
+		| StringObject (type_name, raw_string) -> (StringObject (type_name, raw_string), store)
+		| IntegerObject (type_name, raw_int32) -> (IntegerObject (type_name, raw_int32), store)
+		| BooleanObject (type_name, raw_bool) -> (BooleanObject (type_name, raw_bool), store)
+		| Void -> failwith "Dispatch on void, should have been caught earlier."
+
+	and internal_copy_attributes (self_object, store, env, attribute_list) =
+		match attribute_list with
+		| [] -> ([], store)
+		| hd :: tl ->
+			let (var_name, loc) = hd in
+			(* Retrieve value of attribute *)
+			let value = StoreMap.find loc store in
+
+			(* Get new location *)
+			let loc = new_location () in
+
+			(* Update store with new loc/value *)
+			let store2 = StoreMap.add loc value store in
+
+			(* Tail recurse over all attributes *)
+			let (attributes, store3) = internal_copy_attributes (self_object, store2, env, tl) in
+			((var_name, loc) :: attributes, store3)
+
  	and internal_out_string (self_object, store, env) = 
 		(* Retrieve value of 'x' identifier *)
 		let location = EnvMap.find "x" env in
@@ -998,8 +1017,7 @@ let main () = begin
 		| StringObject (_, raw_string) ->
 			let string_to_print = Str.global_replace (Str.regexp "[\\]n") "\n" raw_string in
 			let string_to_print = Str.global_replace (Str.regexp "[\\]t") "\t" string_to_print in
-			let string_to_print = Str.global_replace (Str.regexp "[\\]r") "\r" string_to_print in
-			printf "%s" string_to_print ;
+			printf "%s%!" string_to_print ;
 			(self_object, store)
 		| _ -> failwith "Invalid object passed to out_string."
 
@@ -1009,7 +1027,7 @@ let main () = begin
 		let value = StoreMap.find location store in
 		match value with
 		| IntegerObject (_, raw_int32) ->
-			printf "%d" (Int32.to_int (raw_int32)) ;
+			printf "%d%!" (Int32.to_int (raw_int32)) ;
 			(self_object, store)
 		| _ -> failwith "Invalid object passed to out_int."
 
@@ -1022,9 +1040,10 @@ let main () = begin
 
 	and internal_in_int (self_object, store, env) = 
 		let s = input_line stdin in
-		let s = Str.global_replace (Str.regexp "[\\]n") "\n" s in
+		let s = Str.global_replace (Str.regexp "^[ \n\r\t]+") "" s in
+(* 		let s = Str.global_replace (Str.regexp "[\\]n") "\n" s in
 		let s = Str.global_replace (Str.regexp "[\\]t") "\t" s in
-		let s = Str.global_replace (Str.regexp "[\\]r") "\r" s in
+		let s = Str.global_replace (Str.regexp "[\\]r") "\r" s in *)
 		let raw_int = 
 			let is_integer = try ignore (int_of_string s); true with _ -> false in
 			if is_integer then (
@@ -1035,6 +1054,13 @@ let main () = begin
 		in
 		let raw_int32 = Int32.of_int (raw_int) in
 		(IntegerObject("Int", raw_int32), store)
+
+(* 	and internal_in_int_scrub_string s = 
+		let is_num s = (try ignore (int_of_string s.[i]); true with _ -> false) in
+
+		for i = 0 to String.length s - 1 do
+			if is_num
+		done *)
 
 	and internal_length (self_object, store, env) = 
 		match self_object with
@@ -1070,7 +1096,7 @@ let main () = begin
 				| IntegerObject (_, length_int32) ->
 				begin
 					let s_check = Int32.to_int start_int32 in
-					let l_check = Int32.to_int start_int32 in
+					let l_check = Int32.to_int length_int32 in
 
 					let out_of_range = 
 						if s_check < 0 then true else
@@ -1115,7 +1141,7 @@ let main () = begin
 	and stack_inc (lineno) =
 		stack_counter := !stack_counter + 1 ;
 		if !stack_counter >= 1001 then (
-				printf "ERROR: %s: Exception: stack overflow" lineno ;
+				printf "ERROR: %s: Exception: stack overflow\n" lineno ;
 				exit 0;
 		)
 

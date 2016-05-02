@@ -1,0 +1,4 @@
+1c1
+< ERROR: 6: Exception: case without matching branch
+---
+> ERROR: 6: Exception: case without matching branch: String()
