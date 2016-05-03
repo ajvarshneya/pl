@@ -615,35 +615,41 @@ let main () = begin
 		stack_inc (lineno);
 
 		let (lineno, type_name) = type_ident in
+		let (value1, store3) = (
+		match type_name with
+		| "Int" -> (IntegerObject ("Int", Int32.of_int (0)), store)
+		| "String" -> (StringObject ("String", ""), store)
+		| "Bool" -> (BooleanObject ("Bool", false), store)
+		| _ -> begin
+			(* Get correct type (considering SELF_TYPE) *)
+			let t0 = if (type_name = "SELF_TYPE") then get_value_type (self_object) else type_name in 
 
-		(* Get correct type (considering SELF_TYPE) *)
-		let t0 = if (type_name = "SELF_TYPE") then get_value_type (self_object) else type_name in 
+			(* Get attributes for that type *)
+			let class_attributes = class_map_get (class_map, t0) in
 
-		(* Get attributes for that type *)
-		let class_attributes = class_map_get (class_map, t0) in
+			(* Add locations for each attribute *)
+			let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] class_attributes in
 
-		(* Add locations for each attribute *)
-		let locations = List.fold_left (fun xs _ -> new_location () :: xs) [] class_attributes in
+			(* Get object attributes / instantiate *)
+			let attribute_identifiers = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in id :: xs) [] class_attributes in
+			let object_attributes = List.combine attribute_identifiers locations in
+			let value1 = Object (t0, object_attributes) in
 
-		(* Get object attributes / instantiate *)
-		let attribute_identifiers = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in id :: xs) [] class_attributes in
-		let object_attributes = List.combine attribute_identifiers locations in
-		let value1 = Object (t0, object_attributes) in
+			(* Initialize new locations in store with default values *)
+			let attribute_types = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in type_name :: xs) [] class_attributes in
+			let default_initializers = List.combine attribute_types locations in
+			let store2 = eval_new_init_attrs (store, default_initializers) in
 
-		(* Initialize new locations in store with default values *)
-		let attribute_types = List.fold_left (fun xs x -> let (id, type_name, rhs) = x in type_name :: xs) [] class_attributes in
-		let default_initializers = List.combine attribute_types locations in
-		let store2 = eval_new_init_attrs (store, default_initializers) in
-
-		(* Evaluate/assign initializer expressions *)
-		let env2 = EnvMap.empty in
-		let env2 = eval_new_init_env (env2, object_attributes) in (* Create new environment *)
-		let attr_initializers = List.combine class_attributes locations in
-		let (value2, store3) = eval_new_eval_attr_exprs (class_map, imp_map, parent_map, value1, store2, env2, attr_initializers) in
-
+			(* Evaluate/assign initializer expressions *)
+			let env2 = EnvMap.empty in
+			let env2 = eval_new_init_env (env2, object_attributes) in (* Create new environment *)
+			let attr_initializers = List.combine class_attributes locations in
+			let (value2, store3) = eval_new_eval_attr_exprs (class_map, imp_map, parent_map, value1, store2, env2, attr_initializers) in
+			(value1, store3)
+		end) in
 		stack_dec ();
-
 		(value1, store3)
+
 
 	(* Returns a new store with default values in each of the specified (attribute) locations *)
 	and eval_new_init_attrs (store, object_initializers) =
@@ -1040,10 +1046,8 @@ let main () = begin
 
 	and internal_in_int (self_object, store, env) = 
 		let s = input_line stdin in
-		let s = Str.global_replace (Str.regexp "^[ \n\r\t]+") "" s in
-(* 		let s = Str.global_replace (Str.regexp "[\\]n") "\n" s in
-		let s = Str.global_replace (Str.regexp "[\\]t") "\t" s in
-		let s = Str.global_replace (Str.regexp "[\\]r") "\r" s in *)
+		let s = Str.global_replace (Str.regexp "^[ \n\t\r]+") "" s in
+		let s = get_int_from_string (s, false) in
 		let raw_int = 
 			let is_integer = try ignore (int_of_string s); true with _ -> false in
 			if is_integer then (
@@ -1055,12 +1059,27 @@ let main () = begin
 		let raw_int32 = Int32.of_int (raw_int) in
 		(IntegerObject("Int", raw_int32), store)
 
-(* 	and internal_in_int_scrub_string s = 
-		let is_num s = (try ignore (int_of_string s.[i]); true with _ -> false) in
-
-		for i = 0 to String.length s - 1 do
-			if is_num
-		done *)
+	and get_int_from_string (s, b) = 
+		match s, b with
+		| "", _ -> ""
+		| _, true ->
+		begin
+			let c = (String.make 1 s.[0]) in
+			let is_integer = try ignore (int_of_string c); true with _ -> false in
+			let s = Str.string_after s 1 in
+			if is_integer then (String.concat "" [c; get_int_from_string (s, true)]) else ""
+		end
+		| _, false -> 
+		begin
+			let c = (String.make 1 s.[0]) in
+			let is_integer = try ignore (int_of_string c); true with _ -> false in
+			let s = Str.string_after s 1 in
+			if is_integer then (
+				String.concat "" [c; get_int_from_string(s, true)]
+			) else (
+				""
+			)
+		end
 
 	and internal_length (self_object, store, env) = 
 		match self_object with

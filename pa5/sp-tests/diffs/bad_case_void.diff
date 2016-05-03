@@ -1,0 +1,4 @@
+1c1
+< ERROR: 7: Exception: case on void
+---
+> ERROR: 6: Exception: case on void
