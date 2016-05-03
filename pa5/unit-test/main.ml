@@ -907,7 +907,7 @@ let main () = begin
 			let (lineno, static_type, exp_kind) = case_exp in (
 				printf "ERROR: %s: Exception: case on void\n" lineno ;
 				exit 0;
-			)
+			)	
 		| _ -> ()) ;
 
 		(* Extract type names from case elements / evaluated exp *)
@@ -1038,14 +1038,20 @@ let main () = begin
 		| _ -> failwith "Invalid object passed to out_int."
 
 	and internal_in_string (self_object, store, env) =
-		let s = input_line stdin in
+		let s = (
+			try (input_line stdin); with _ -> ""
+		) in
+		
 		if String.contains s (Char.chr 0) then
 			(StringObject("String", ""), store)
 		else
 			(StringObject("String", s), store)
 
 	and internal_in_int (self_object, store, env) = 
-		let s = input_line stdin in
+		let s = (
+			try (input_line stdin); with _ -> ""
+		) in
+
 		let s = Str.global_replace (Str.regexp "^[ \n\t\r]+") "" s in
 		let s = get_int_from_string (s, false) in
 		let raw_int = 
@@ -1058,7 +1064,7 @@ let main () = begin
 		in
 		let raw_int32 = Int32.of_int (raw_int) in
 		(IntegerObject("Int", raw_int32), store)
-
+	
 	and get_int_from_string (s, b) = 
 		match s, b with
 		| "", _ -> ""
@@ -1073,6 +1079,7 @@ let main () = begin
 		begin
 			let c = (String.make 1 s.[0]) in
 			let is_integer = try ignore (int_of_string c); true with _ -> false in
+			let is_integer = is_integer or (c = "-") in
 			let s = Str.string_after s 1 in
 			if is_integer then (
 				String.concat "" [c; get_int_from_string(s, true)]
