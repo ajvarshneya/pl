@@ -178,7 +178,7 @@ out_string
 3
 String
 string
-Hello, world!\n
+Hello, world.\n
 Object
 3
 abort
@@ -283,4 +283,4 @@ out_string
 3
 String
 string
-Hello, world!\n
+Hello, world.\n
