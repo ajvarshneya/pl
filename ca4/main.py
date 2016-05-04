@@ -1,6 +1,6 @@
 import sys
 from ast import *
-from ast_gen import *
+from read_ast import *
 from tacs import *
 from tacs_gen import *
 from basic_blocks import *
@@ -706,39 +706,36 @@ def main():
 	iterator = iter(raw_aast) # Get iterator to traverse raw annotated AST
 
 	# Deserialize input into maps, ast
-	c_map = class_map_gen(iterator) # Generate class map dictionary
-	i_map = implementation_map_gen(iterator) # Generate implementation map dictionary
-	p_map = parent_map_gen(iterator) # Generate parent map dictionary
-	ast = ast_gen(iterator) # Generate AST object
+	c_map = read_class_map(iterator) # Generate class map dictionary
+	i_map = read_imp_map(iterator) # Generate implementation map dictionary
+	p_map = read_parent_map(iterator) # Generate parent map dictionary
+	ast = read_ast(iterator) # Generate AST object
 
-	# Generate a list of type tags
-	get_type_tags(c_map)
+	# # Generate code to emit
+	# vtables = asm_vtables_gen(i_map)
+	# constructors = asm_constructors_gen(c_map, i_map)
+	# method_definitions = asm_method_definitions_gen(c_map, i_map)
 
-	# Generate code to emit
-	vtables = asm_vtables_gen(i_map)
-	constructors = asm_constructors_gen(c_map, i_map)
-	method_definitions = asm_method_definitions_gen(c_map, i_map)
+	# global string_list
+	# type_names = sorted(c_map.keys())
 
-	global string_list
-	type_names = sorted(c_map.keys())
+	# string_constants = asm_string_constants_gen(type_names, string_list)
 
-	string_constants = asm_string_constants_gen(type_names, string_list)
+	# comparison_handlers = asm_comparison_handlers_gen()
+	# start = asm_start()
+	# built_ins = asm_built_ins()
 
-	comparison_handlers = asm_comparison_handlers_gen()
-	start = asm_start()
-	built_ins = asm_built_ins()
+	# # Build output string
+	# output = vtables
+	# output += constructors
+	# output += method_definitions
+	# output += string_constants
+	# output += comparison_handlers
+	# output += start
+	# output += built_ins
 
-	# Build output string
-	output = vtables
-	output += constructors
-	output += method_definitions
-	output += string_constants
-	output += comparison_handlers
-	output += start
-	output += built_ins
-
-	# Write to output
-	write_output(filename, output)
+	# # Write to output
+	# write_output(filename, output)
 
 if __name__ == '__main__':
 	main()

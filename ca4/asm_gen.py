@@ -159,8 +159,8 @@ def asm_static_dispatch(inst, cool_type, i_map, asm):
 	for idx, param in enumerate(inst.params):
 		offset1 = 8 * (2 * len(inst.params) + len(CALLER_SAVED_REGISTERS) - 1 - idx)
 		offset2 = 8 * idx
-		asm += [(movq(str(offset1) + '(%rsp)', '%rax'))]
-		asm += [(movq('%rax', str(offset2) + '(%rsp)'))]
+		asm += [movq(str(offset1) + '(%rsp)', '%rax')]
+		asm += [movq('%rax', str(offset2) + '(%rsp)')]
 
 	# Move recevier object into self and call fxn
 	asm += [comment("Move receiver object into self, call function " + inst.method_name)]

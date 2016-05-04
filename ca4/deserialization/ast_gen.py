@@ -28,6 +28,11 @@ def class_map_gen(iterator):
 			attributes += [attribute]
 
 		class_map[class_name] = attributes
+
+	class_map["Int"] = [ASTFeature("attribute_no_init", "x", "0", [], "raw.Int", "0", "0")]
+	class_map["Bool"] = [ASTFeature("attribute_no_init", "x", "0", [], "raw.Int", "0", "0")]
+	class_map["String"] = [ASTFeature("attribute_no_init", "s", "0", [], "raw.String", "0", "")]
+
 	return class_map
 
 def implementation_map_gen(iterator):
@@ -66,6 +71,7 @@ def implementation_map_gen(iterator):
 			methods += [method]
 
 		implementation_map[class_name] = methods
+
 	return implementation_map
 
 
@@ -136,7 +142,7 @@ def str_parent_map(parent_map):
 	return s
 
 # Deserializes the AST
-def ast_gen(iterator):
+def read_ast(iterator):
 	return ast(iterator)
 
 def ast(iterator):
@@ -310,7 +316,6 @@ def ast_static_dispatch(iterator, lineno, static_type):
 	for i in range(num_args):
 		args += [ast_expression(iterator)]
 	return ASTStaticDispatch(lineno, expr, typ, typ_line, method, method_line, args, static_type)
-
 
 def ast_self_dispatch(iterator, lineno, static_type):
 	# method:identifier

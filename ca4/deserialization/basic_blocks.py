@@ -3,6 +3,8 @@ from tacs import *
 
 # Generates list of basic blocks given list of TAC objects
 def bbs_gen(insts):
+	# for tac in insts:
+	# 	print tac
 	blocks = []
 	block_insts = []
 
@@ -77,6 +79,7 @@ def bbs_gen(insts):
 
 # Percolate live_out set up the block
 def percolate(block):
+	# print str(block)
 
 	change = False
 
@@ -97,6 +100,10 @@ def percolate(block):
 
  		if hasattr(inst, 'op2'):
  			live_set.add(inst.op2)
+
+ 		if hasattr(inst, 'params'):
+ 			for param in inst.params:
+ 				live_set.add(param)
 
 	 	# Add live set to list of live sets
 	 	live_sets.insert(0, copy(live_set))

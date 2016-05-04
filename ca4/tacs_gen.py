@@ -1,6 +1,5 @@
 from tacs import *
 from ast import *
-from ast_gen import *
 
 symbol_counter = 0
 label_counter = 0

@@ -7,6 +7,7 @@ class AST(object):
         s = str(len(self.classes)) + "\n"
         for ast_class in self.classes:
             s += str(ast_class)
+        s = s[0:-1]
         return s
 
 class ASTClass(object):

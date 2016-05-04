@@ -4,7 +4,7 @@ class comment(object):
 		self.comment = comment
 
 	def __str__(self):
-		s = '\t# ' + str(self.comment)
+		s = "\t\t\t# " + str(self.comment) + "\n"
 		return s
 
 # movl
@@ -14,7 +14,7 @@ class movl(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\tmovl\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\tmovl " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # movq
@@ -24,7 +24,7 @@ class movq(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\tmovq\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\tmovq " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # addl
@@ -34,7 +34,7 @@ class addl(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\taddl\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\taddl " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # addq
@@ -44,7 +44,7 @@ class addq(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\taddq\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\taddq " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # subl
@@ -54,7 +54,7 @@ class subl(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\tsubl\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\tsubl " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # subq
@@ -64,7 +64,7 @@ class subq(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\tsubq\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\tsubq " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # imull
@@ -74,7 +74,7 @@ class imull(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\timull\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\timull " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # idivl
@@ -83,7 +83,7 @@ class idivl(object):
 		self.src = src
 
 	def __str__(self):
-		s = "\tidivl\t" + str(self.src)
+		s = "\t\t\tidivl " + str(self.src) + "\n"
 		return s
 
 # jl
@@ -92,7 +92,7 @@ class jl(object):
 		self.label = label
 
 	def __str__(self):
-		s = "\tjl\t" + str(self.label)
+		s = "\t\t\tjl " + str(self.label) + "\n"
 		return s
 
 # jle
@@ -101,7 +101,7 @@ class jle(object):
 		self.label = label
 
 	def __str__(self):
-		s = "\tjle\t" + str(self.label)
+		s = "\t\t\tjle " + str(self.label) + "\n"
 		return s
 
 # je
@@ -110,7 +110,7 @@ class je(object):
 		self.label = label
 
 	def __str__(self):
-		s = "\tje\t" + str(self.label)
+		s = "\t\t\tje " + str(self.label) + "\n"
 		return s
 
 # jnz
@@ -119,16 +119,7 @@ class jnz(object):
 		self.label = label
 
 	def __str__(self):
-		s = "\tjnz\t" + str(self.label)
-		return s
-
-# ret
-class ret(object):
-	def __init__(self):
-		pass
-
-	def __str__(self):
-		s = "\treturn"
+		s = "\t\t\tjnz " + str(self.label) + "\n"
 		return s
 
 # call
@@ -137,7 +128,7 @@ class call(object):
 		self.label = label
 
 	def __str__(self):
-		s = "\tcall\t" + str(self.label)
+		s = "\t\t\tcall " + str(self.label) + "\n"
 		return s
 
 # pushq
@@ -146,7 +137,7 @@ class pushq(object):
 		self.register = register
 
 	def __str__(self):
-		s = "\tpushq\t" + str(self.register)
+		s = "\t\t\tpushq " + str(self.register) + "\n"
 		return s
 
 # popq
@@ -155,7 +146,7 @@ class popq(object):
 		self.register = register
 
 	def __str__(self):
-		s = "\tpopq\t" + str(self.register)
+		s = "\t\t\tpopq " + str(self.register) + "\n"
 		return s
 
 
@@ -166,7 +157,7 @@ class popq(object):
 # 		self.name = name
 
 # 	def __str__(self):
-# 		s = "\tmov\t" + str(self.src) + ", " + str(self.dst)
+# 		s = "\t\t\tmov " + str(self.src) + ", " + str(self.dst)
 # 		return s
 
 # label
@@ -175,7 +166,7 @@ class label(object):
 		self.label = label
 
 	def __str__(self):
-		s = str(self.label) + ":"
+		s = str(self.label) + ":" + "\n"
 		return s
 
 # cmpl
@@ -185,7 +176,16 @@ class cmpl(object):
 		self.op2 = op2
 
 	def __str__(self):
-		s = "\tcmpl\t" + str(self.op2) + ", " + str(self.op1)
+		s = "\t\t\tcmpl " + str(self.op2) + ", " + str(self.op1) + "\n"
+		return s
+
+class cmpq(object):
+	def __init__(self, op1, op2):
+		self.op1 = op1
+		self.op2 = op2
+
+	def __str__(self):
+		s = "\t\t\tcmpq " + str(self.op2) + ", " + str(self.op1) + "\n"
 		return s
 
 # negl
@@ -194,7 +194,7 @@ class negl(object):
 		self.register = register
 
 	def __str__(self):
-		s = "\tnegl\t" + str(self.register)
+		s = "\t\t\tnegl " + str(self.register) + "\n"
 		return s
 
 # xorl
@@ -204,7 +204,7 @@ class xorl(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\txorl\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\txorl " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # xchgl
@@ -214,7 +214,7 @@ class xchgl(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\txchgl\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\txchgl " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # cltd
@@ -223,7 +223,7 @@ class cltd(object):
 		pass
 
 	def __str__(self):
-		s = "\tcltd"
+		s = "\t\t\tcltd" + "\n"
 		return s
 
 # jmp
@@ -232,7 +232,7 @@ class jmp(object):
 		self.label = label
 
 	def __str__(self):
-		s = "\tjmp\t" + str(self.label)
+		s = "\t\t\tjmp " + str(self.label) + "\n"
 		return s
 
 # leaq
@@ -242,7 +242,7 @@ class leaq(object):
 		self.dst = dst
 
 	def __str__(self):
-		s = "\tleaq\t" + str(self.src) + ", " + str(self.dst)
+		s = "\t\t\tleaq " + str(self.src) + ", " + str(self.dst) + "\n"
 		return s
 
 # leave
@@ -251,7 +251,7 @@ class leave(object):
 		pass
 
 	def __str__(self):
-		s = "\tleave"
+		s = "\t\t\tleave" + "\n"
 		return s
 
 # return
@@ -260,5 +260,5 @@ class ret(object):
 		pass
 
 	def __str__(self):
-		s = "\tret"
+		s = "\t\t\tret" + "\n"
 		return s
