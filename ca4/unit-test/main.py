@@ -183,7 +183,7 @@ def make_method_definitions(c_map, i_map):
 						if method.name == "out_string":
 							method_definitions += internal_out_string_definition()
 						if method.name == "in_string":
-							method_definitions += internal_in_string_definition()
+							method_definitions += str(call("exit"))
 						if method.name == "out_int":
 							method_definitions += str(call("exit"))
 						if method.name == "in_int":
