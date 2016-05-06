@@ -8,8 +8,6 @@ from asm import *
 from asm_gen import *
 from allocate_registers import *
 
-type_tags = {}
-
 # Reads in raw input
 def read_input(filename):
     f = open(filename)
@@ -25,7 +23,7 @@ def write_output(filename, output):
 	f.write(output)
 	f.close()
 
-def asm_vtables_gen(i_map):
+def make_vtables(i_map):
 	vtables = "###############################################################################\n"
 	vtables += "#;;;;;;;;;;;;;;;;;;;;;;;;;; VIRTUAL METHOD TABLES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	vtables += "###############################################################################\n"
@@ -47,10 +45,12 @@ def asm_vtables_gen(i_map):
 
 	return vtables
 
-def asm_constructors_gen(c_map, i_map):
+def make_constructors(c_map, i_map):
 	constructors = "\n###############################################################################\n"
 	constructors += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CONSTRUCTORS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	constructors += "###############################################################################\n"
+
+	type_tags = get_type_tags (c_map)
 
 	for cool_type in sorted(c_map):
 		# New scope
@@ -142,7 +142,7 @@ def asm_constructors_gen(c_map, i_map):
 
 	return constructors
 
-def asm_method_definitions_gen(c_map, i_map):
+def make_method_definitions(c_map, i_map):
 	method_definitions = "\n###############################################################################\n"
 	method_definitions += "#;;;;;;;;;;;;;;;;;;;;;;;;;;;; METHOD DEFINITIONS  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;#\n"
 	method_definitions += "###############################################################################\n"	
@@ -689,7 +689,7 @@ def asm_built_ins():
 
 
 def get_type_tags(c_map):
-	global type_tags
+	type_tags = {}
 	tag_idx = 0
 
 	basic_types = ["Bool", "Int", "IO", "Object", "String", "Main"]
@@ -698,6 +698,8 @@ def get_type_tags(c_map):
 	for cool_type in basic_types + custom_types:
 		type_tags[cool_type] = tag_idx
 		tag_idx += 1
+
+	return type_tags
 
 def main():
 	# Deserialize AST
@@ -711,10 +713,10 @@ def main():
 	p_map = read_parent_map(iterator) # Generate parent map dictionary
 	ast = read_ast(iterator) # Generate AST object
 
-	# # Generate code to emit
-	# vtables = asm_vtables_gen(i_map)
-	# constructors = asm_constructors_gen(c_map, i_map)
-	# method_definitions = asm_method_definitions_gen(c_map, i_map)
+	# Generate code to emit
+	vtables = make_vtables(i_map)
+	constructors = make_constructors(c_map, i_map)
+	# method_definitions = make_method_definitions(c_map, i_map)
 
 	# global string_list
 	# type_names = sorted(c_map.keys())
@@ -726,16 +728,16 @@ def main():
 	# built_ins = asm_built_ins()
 
 	# # Build output string
-	# output = vtables
-	# output += constructors
+	output = vtables
+	output += constructors
 	# output += method_definitions
 	# output += string_constants
 	# output += comparison_handlers
 	# output += start
 	# output += built_ins
 
-	# # Write to output
-	# write_output(filename, output)
+	# Write to output
+	write_output(filename, output)
 
 if __name__ == '__main__':
 	main()
